@@ -1,0 +1,22 @@
+Error Codes
+
+1: Row is undefined, but database is true. Player should not have been able to use that command
+2: An error occured while attempting to find/read the row.
+3: Error during the async/await portion of a data fetch. This issue is likely an error from trying to find/read the row
+4: Error during Slothpixel API request of the setup command
+5: Error during timezone verification of the setup command
+6: Error in part 1 of offline time of the setup command
+7: Error in part 2 of offline time of the setup command
+8: Error while writing data in the setup command
+9: JSON Parsing Error or Network Error on API fetch.
+10: Error outside of the promise catch of an API call.
+11: Generic error in simple commands like ping, purge, etc
+12: In whitelist and blacklist, the instuction was somehow neither add or delete
+13: An error occured while retrieving data and comparing the whitelist and blacklist for copies
+14: Error when writing to a JSON
+15: Error while attempting to delete a row
+16: Error while creating a log channel and moving it into the category
+17: Error while trying to read the whole table
+18: Error while trying to use data in the log function
+19: TypeError in log function
+20: Error while trying to send a log of an error message

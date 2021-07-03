@@ -1,0 +1,9 @@
+{
+    "Timezone": "UTC",
+    "BotOwnerID": ["Put Owner ID's Here", ""],
+    "consoleID": "843646684558131220",
+    "prefix": "-",
+    "hypixelAPIkey": "Your Hypixel API Key",
+    "discordAPIkey": "Your Discord API Key Here",
+    "logInterval": "30"
+}
