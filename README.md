@@ -11,7 +11,7 @@ This is where HyGuard comes in. Atleast 10% of all account are AFK at given time
 Another common situation is having your account be compromised while you are offline. For this scenario, let's assume you are taking a nap on the couch. Common games that attract cheaters include SkyWars, UHC, Mega Walls, SkyBlock, and more. If you don't play those games, you can set them as blacklisted. If the account was to be detected playing those games, you would receive a ping on Discord, which could wake you up (especially as the blacklisted ping occurs every 15 seconds*).
 ##### *Subject to change
 ## I have 2FA, why should I care?
-2FA is an incredible piece of technology that is very useful for making an account more secure. However, it along with your password only act as the guard at the gate of a prison, while HyGuard is a warden looking for suspicious activity. If 2FA is the defense, then HyGuard is the offence. Regardless, even if you already have 2FA, more security isn't bad!=
+2FA is an incredible piece of technology that is very useful for making an account more secure. However, it along with your password only act as the guard at the gate of a prison, while HyGuard is a warden looking for suspicious activity. If 2FA is the defense, then HyGuard is the offence. Regardless, even if you already have 2FA, more security isn't bad!
 ## Setup as a user
 The following contains the information for the average individual looking to gain the protection of this project:
 
