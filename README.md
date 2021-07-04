@@ -1,4 +1,4 @@
-# This is HyGuard - An account safeguard for Hypixel
+# HyGuard - An account safeguard for Hypixel
 
 ![enter image description here](https://i.imgur.com/41sPQS8.png)
 
@@ -6,7 +6,7 @@ The HyGuard project was created to be an early warning system to alert users to 
 ## Why should I care?
 Day in and day out, account are compromised and used for "unfair" purposes like cheating. Specifically, no Minecraft server has it worse than Hypixel, the most popular Minecraft server. Even with the best password management and security practices, accounts can be broken into, especially with the recent session ID exploit. The Hypixel forums are notorious for the constant posts of "I got false banned" just for a good Samaritan to show them their previous account activity, where it becomes clear that they were compromised.
 
-This is where HyGuard comes in. Upwards of 10% of all account are AFK at given time on Hypixel, according to data from [HyTrack](https://hytrack.me/). If a player was to be compromised while being AFK, they would have no clue as their account is logged in from another location. With HyGuard, the player would be alerted within an average of 15 seconds*, where they could change their passwords and take back control of their account.
+This is where HyGuard comes in. Atleast 10% of all account are AFK at given time on Hypixel, according to data from [HyTrack](https://hytrack.me/). If a player was to be compromised while being AFK, they would have no clue as their account is logged in from another location. With HyGuard, the player would be alerted within an average of 15 seconds*, where they could change their passwords and take back control of their account.
 
 Another common situation is having your account be compromised while you are offline. For this scenario, let's assume you are taking a nap on the couch. Common games that attract cheaters include SkyWars, UHC, Mega Walls, SkyBlock, and more. If you don't play those games, you can set them as blacklisted. If the account was to be detected playing those games, you would receive a ping on Discord, which could wake you up (especially as the blacklisted ping occurs every 15 seconds*).
 ##### *Subject to change
