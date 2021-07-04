@@ -16,17 +16,17 @@ Another common situation is having your account be compromised while you are off
 The following contains the information for the average individual looking to gain the protection of this project:
 
  - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot) my Discord Bot to a server or join a server with it
-  - Type **,setup**
-   --You can do this in DM's if there is a conflicting bot with the same prefix
-   - Follow the setup instructions
-    -- You must have joined Hypixel before
-    -- Use the 24 hour time system for the login time/logout time questions
-    - Read over the instructions in the channels that are created
-    - Type ,log to have the bot start monitoring your account
-    - Use **,help <command>** to see its usage and description
-   #### Optional
-   - Try out **,whitelist** & **,blacklist** for added protection and safeguards
-   - Try out **,advanced logintime** which turns offline logins into repeated alerts
+ - Type **,setup**
+   - You can do this in DM's if there is a conflicting bot with the same prefix
+ - Follow the setup instructions
+   - You must have joined Hypixel before
+   - Use the 24 hour time system for the login time/logout time questions
+ - Read over the instructions in the channels that are created
+ - Type ,log to have the bot start monitoring your account
+ - Use **,help <command>** to see its usage and description
+ #### Optional
+ - Try out **,whitelist** & **,blacklist** for added protection and safeguards
+ - Try out **,advanced logintime** which turns offline logins into repeated alerts
 
 
 ## Issue(s)
