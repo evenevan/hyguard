@@ -2,7 +2,7 @@
 
 ![enter image description here](https://i.imgur.com/41sPQS8.png)
 
-The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft,  logins while the player should be offline, customizable blacklisted games , and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works silently in the background until needed.
+The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by checking your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft, logins while the player should be offline, customizable blacklisted games, and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works brilliantly and silently in the background until it detects something.
 ## Why should I care?
 Day in and day out, account are compromised and used for "unfair" purposes like cheating. Specifically, no Minecraft server has it worse than Hypixel, the most popular Minecraft server. Even with the best password management and security practices, accounts can be broken into, especially with the recent session ID exploit. The Hypixel forums are notorious for the constant posts of "I got false banned" just for a good Samaritan to show them their previous account activity, where it becomes clear that they were compromised.
 
@@ -17,12 +17,12 @@ The following contains the information for the average individual looking to gai
 
  - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot) my Discord Bot to a server or join a server with it
  - Type **,setup**
-   - You can do this in DM's if there is a conflicting bot with the same prefix
+   - You can do this in DM's if there is a conflicting bot that has the same prefix
  - Follow the setup instructions
    - You must have joined Hypixel before
    - Use the 24 hour time system for the login time/logout time questions
  - Read over the instructions in the channels that are created
- - Type ,log to have the bot start monitoring your account
+ - Type **,log** to have the bot start monitoring your account
  - Use **,help <command>** to see its usage and description
  #### Optional
  - Try out **,whitelist** & **,blacklist** for added protection and safeguards
