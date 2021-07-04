@@ -1,10 +1,10 @@
 const { prefix } = require('../../userConfig.json');
 const databaseImports = require('../../databaseFuncs');
 module.exports = {
-	name: 'log',
-  title: 'Toggles the logging',
-	description: 'Allows you to turn the logging of your player on or off',
-    usage: `\`${prefix}log\``,
+	name: 'monitor',
+  title: 'Toggles the logging and monitoring of your account',
+	description: 'Allows you to turn the logging and monitoring of your player on or off',
+    usage: `\`${prefix}monito\``,
   cooldown: 7.5,
   database: true,
 	execute(message, args, client) {
@@ -17,7 +17,7 @@ module.exports = {
             let logResponse = await databaseImports.getData(message.author.id);
 
             let newLogState = (1 - logResponse.log);
-            return writeLogState(newLogState, `${message.author}, your log is now ${newLogState == 0 ? `off` : `on`}!`);
+            return writeLogState(newLogState, `${message.author}, logging and monitoring is now ${newLogState == 0 ? `off` : `on`}!`);
             
             
           } catch (err) {

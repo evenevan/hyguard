@@ -13,7 +13,7 @@ return promise.finally(() => clearTimeout(timeout));
 module.exports = {
 	name: 'mojang',
   title: 'Shows the status of Mojang\'s services',
-	description: `Checks the status of Mojang services.`,
+	description: `Checks the status of Mojang services`,
   usage: `\`${prefix}mojang\``,
   args: false,
   database: false,

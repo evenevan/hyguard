@@ -8,11 +8,11 @@ module.exports = {
 	name: 'alert',
   aliases: ['a','alerts'],
   title: 'Toggle alert types',
-	description: `Allows you to toggle individual alert types!`,
+	description: `Allows you to toggle individual alert types`,
   usage: `\`${prefix}alert <alert type>\`, \`${prefix}alert current\`\n\nValid Alert Types: ${alertTypes.join(", ")}\n\nBlacklist: Alerts on a blacklisted gametype\nWhitelist: Alerts on a non-whitelisted gametype\nLanguage: Alerts on an unusual language\nSession: Alerts on logins, logouts, relogs, and short sessions\nOffline: Alerts on a login in time mandated as offline time\nVersion: Alerts on an unusual version of Minecraft`,
   args: true,
   database: true,
-  cooldown: 2,
+  cooldown: 2.5,
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);

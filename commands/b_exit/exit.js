@@ -5,8 +5,8 @@ const fetch = require('node-fetch');
 const Discord = require('discord.js');
 module.exports = {
 	name: 'exit',
-  title: 'Leave the LoggerBot program',
-	description: 'Allows users to remove their data and stop the use of LoggerBot',
+  title: 'Allows players to stop using HyGuard',
+	description: 'Allows users to delete their data and stop the use of HyGuard',
 	usage: `\`${prefix}exit <Minecrfat Username> <Your UTC Offset>\` \`Example: ${prefix}exit Attituding -7\``,
   cooldown: 10,
   database: true,

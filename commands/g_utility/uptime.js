@@ -1,10 +1,10 @@
 const { prefix } = require('../../userConfig.json');
 module.exports = {
 	name: 'uptime',
-	description: 'Shows the uptime of the bot!',
+	description: 'Shows the uptime of the bot',
 	title: 'Displays uptime of the bot',
   database: false,
-  cooldown: 10,
+  cooldown: 5,
 	execute(message, args, client) {
 		try {
 			function uptimefunc(uptimeSeconds) {

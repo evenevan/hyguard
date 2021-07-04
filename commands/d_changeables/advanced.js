@@ -6,7 +6,7 @@ const databaseImports = require('../../databaseFuncs');
 module.exports = {
 	name: 'advanced',
   title: 'Allows for advanced options',
-	description: `Allows you to add or change some special advanced options!`,
+	description: `Allows you to add or change some special advanced options`,
   usage: `\`${prefix}advanced <type>\`, \`${prefix}advanced current\``,
   args: true,
   database: true,

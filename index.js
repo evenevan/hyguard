@@ -17,16 +17,17 @@ client.cooldowns = new Discord.Collection();
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
-	let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
-	db.serialize(() => {
-		db.run(`CREATE TABLE IF NOT EXISTS data(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT)`);
-		db.close();
-	  });
 	client.user
 		.setPresence({ activity: { name: `accounts | ${prefix}help | ✔`, type: 'WATCHING' }, status: 'dnd' })
 		.then(console.log)
 		.catch(console.error);
-	setInterval(logImports.logStarter, logInterval * 1000, client);
+
+	let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
+	db.serialize(() => {
+		db.run(`CREATE TABLE IF NOT EXISTS data(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT, expansion TEXT)`);
+		db.close();
+	  })
+	  setTimeout(() => {setInterval(logImports.logStarter, logInterval * 1000, client)}, 2500);
 });
 
 const commandFolders = fs.readdirSync('./commands');

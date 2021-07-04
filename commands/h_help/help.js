@@ -3,11 +3,11 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'help',
 	title: 'Displays helpful information',
-	description: 'List all of the commands or info about a specific command.',
+	description: 'Lists basic info and all commands or detailed info about a specific command',
 	aliases: ['commands'],
 	usage: `\`${prefix}help <command name>\``,
   database: false,
-	cooldown: 5,
+	cooldown: 2.5,
 	execute(message, args, client, row) {
 		if (row !== undefined) {
 			var tzOffset = (row.timezone * 3600000);
@@ -54,7 +54,8 @@ module.exports = {
         .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 		.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity. This bot isn't most user friendly, but used the right way, it works.`)
 		.addField(`Bug Reports and Suggestions`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the Hypixel Discord before you DM me so that you won't get blocked by Clyde.`)
-		.addField('Warning', `I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database.\n\u200B`)
+		.addField('Warning', `I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database.`)
+		.addField(`GitHub`, `This project has a GitHub page, where the code is available under the MIT license! There is also extra documentation there incase you need it. <https://github.com/Attituding/HyGuard> \n\u200B`)
 		.addField('**Available Commands**', `You can send \`${prefix}help <command name>\` to get info on a specific command, along with aliases that can also execute the same command!\n`)
 
 			for (let i = 0; i < commandName.length; i++) {

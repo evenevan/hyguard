@@ -6,7 +6,7 @@ const funcImports = require( __dirname + '../../../functions');
 module.exports = {
 	name: 'offline',
   title: 'Set when logins should not occur',
-	description: 'Allows you to set when logins SHOULD NOT occur, allowing you to recieve an alert on unusual sessions. Set the time using the 24 hour standard.',
+	description: 'Allows you to set when logins SHOULD NOT occur, allowing you to recieve an alert on unusual sessions. Set the time using the 24 hour standard',
   usage: `\`${prefix}offline <0:00> <0:00>\`, \`${prefix}offline current\`\n\nExample argument:\n\`${prefix}offline 1:00 8:00\` - Blacklists logins from 1:00 am to 8:00 am\n\`${prefix}offline 23:30 8:15\` - Blacklists logins from 11:30 pm to 8:15 am`,
   args: true,
   database: true,

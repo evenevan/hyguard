@@ -5,7 +5,7 @@ const funcImports = require( __dirname + '../../../functions');
 module.exports = {
 	name: 'version',
   title: 'Set a whitelisted version of Minecraft',
-	description: `Allows you to whitelist a version of Minecraft for use on Hypixel! Use \`${prefix}version current\` to see your current version, or use \`${prefix}version <version>\` to set a new one.`,
+	description: `Allows you to whitelist a version of Minecraft for use on Hypixel! Use \`${prefix}version current\` to see your current version, or use \`${prefix}version <version>\` to set a new one`,
   usage: `\`${prefix}version <version>\`, \`${prefix}version current\``,
   args: true,
   database: true,

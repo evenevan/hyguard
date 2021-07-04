@@ -59,7 +59,7 @@ function logStarter(client) {
 
         } catch (err) {
           if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while attempting to read the database table. Error 17. \`${err}\``);
-            console.log(`An error occured while attempting to reach the database table. ERROR_17.`);
+            console.log(`An error occured while attempting to reach the database table. ERROR_17. \`${err}\``);
         }
     };
 };

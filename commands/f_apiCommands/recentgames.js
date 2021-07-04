@@ -16,7 +16,7 @@ module.exports = {
 	name: 'recentgames',
   aliases: ['recent'],
   title: 'Shows the recent games of any player',
-	description: `Shows the 10 most recent games of any player. Games beyond 3 days ago cannot be shown. Doing \`${prefix}recentgames\` without arguments will show your own data. As this command uses the Slothpixel API over the Hypixel API, the data is slightly delayed and may not be accurate.`,
+	description: `Shows the most recent games of any player. Games beyond 3 days ago cannot be shown. Doing \`${prefix}recentgames\` without arguments will show your own data. As this command uses the Slothpixel API over the Hypixel API, the data is slightly delayed and may not be accurate.`,
   usage: `\`${prefix}recentgames\`,\`${prefix}recentgames <player>\``,
   args: false,
   database: false,

@@ -13,8 +13,8 @@ return promise.finally(() => clearTimeout(timeout));
 };
 module.exports = {
 	name: 'setup',
-	title: 'Allows new players to join the LoggerBot program',
-	description: 'Allows new users to sign up for use of LoggerBot. When prompted, send your username. Then, when prompted, send your UTC Offset. Learn more about the UTC Offset at <https://en.wikipedia.org/wiki/List_of_UTC_time_offsets>',
+	title: 'Allows players to begin using HyGuard',
+	description: 'Allows players to begin using HyGuard. When prompted, send your username. Then, when prompted, send your UTC Offset. Learn more about the UTC Offset at <https://en.wikipedia.org/wiki/List_of_UTC_time_offsets>',
 	usage: `\`${prefix}setup\``,
   cooldown: 5,
   args: false,
@@ -339,8 +339,8 @@ module.exports = {
                     },
                 ]);
     
-                client.channels.cache.get(alertChannel.id).send(`${message.author}, your alert messages will be sent here. You should keep notifications **on** for this channel. The command \`${prefix}alert <blacklist, whitelist, language, session, offline, or version\` can individually toggle the 6 alert types, should you need to turn any of them off.`).then((msg) => msg.pin());
-                client.channels.cache.get(logChannel.id).send(`${message.author}, your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. Now, execute the command \`${prefix}log\` to start the logging. Additionally, \`${prefix}log\` can turn the logging on or off at your convenience.`).then((msg) => msg.pin());
+                client.channels.cache.get(alertChannel.id).send(`${message.author}, your alert messages will be sent here. You should keep notifications **on** for this channel. The command \`${prefix}alert <blacklist, whitelist, language, session, offline, or version\` can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.`).then((msg) => msg.pin());
+                client.channels.cache.get(logChannel.id).send(`${message.author}, your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`).then((msg) => msg.pin());
 			
 			writeData(player, timezone, offlineTime, offlineLogout, offlineLogin, logChannel.id, alertChannel.id)
 
@@ -366,8 +366,8 @@ module.exports = {
 
 			db.serialize(() => {
 	
-				let insertdata = db.prepare(`INSERT INTO data VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-				insertdata.run(message.author.id, message.author.tag, uuid, language, version, offlineTime, "", "", login, logout, timezone, "0 0 1 1 1 1", message.guild.id, logID, alertID, "0", "");
+				let insertdata = db.prepare(`INSERT INTO data VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+				insertdata.run(message.author.id, message.author.tag, uuid, language, version, offlineTime, "", "", login, logout, timezone, "0 0 1 1 1 1", message.guild.id, logID, alertID, "0", "", "");
 				insertdata.finalize();
 				db.close();
 			  });

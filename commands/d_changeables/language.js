@@ -6,7 +6,7 @@ module.exports = {
 	name: 'language',
   aliases: ['lang'],
   title: 'Set a whitelisted language',
-	description: 'Allows you to whitelist a language for use on Hypixel!',
+	description: 'Allows you to whitelist a language for use on Hypixel',
   usage: `\`${prefix}language <language>\`, \`${prefix}language current\``,
   args: true,
   database: true,
