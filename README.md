@@ -72,14 +72,12 @@ You can and modify my code, as per the MIT license. The code is barely readable.
 ## Warning
 I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database. It doesn't crash the bot, and is just annoying.
 
-## Video
-
-[![](http://img.youtube.com/vi/i7hKGTm19qA/0.jpg)](http://www.youtube.com/watch?v=i7hKGTm19qA)
-
 ## Quick Links
 
 [HyGuard Invite Link](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot)
 
 [HyGuard Discord Server Invite Link](https://discord.gg/yMdZsdbaEN)
+
+[HyGuard Showcase Video Link](https://www.youtube.com/watch?v=joipDXbhnIU)
 
 ## That's all!
