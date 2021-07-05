@@ -2,7 +2,7 @@
 
 ![enter image description here](https://i.imgur.com/41sPQS8.png)
 
-The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by checking your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft, logins while the player should be offline, customizable blacklisted games, and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works brilliantly and silently in the background until it detects something.
+The HyGuard project was created to be a warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by checking your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft, logins while the player should be offline, customizable blacklisted games, and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works brilliantly and silently in the background until it detects something.
 
 ## Why should you care?
 Day in and day out, account are compromised and used for "unfair" purposes like cheating. Specifically, no Minecraft server has it worse than Hypixel, the most popular Minecraft server. Even with the best password management and security practices, accounts can be broken into, especially with the recent session ID exploit. The Hypixel forums are notorious for the constant posts of "I got false banned" just for a good Samaritan to show them their previous account activity, where it becomes clear that they were compromised.
@@ -23,7 +23,7 @@ The following contains the information for the average individual looking to gai
    - You must have joined Hypixel before
    - Use the 24 hour time system for the login time/logout time questions
  - Read over the instructions in the channels that are created
- - Type **,log** to have the bot start monitoring your account
+ - Type **,monitor** to have the bot start monitoring your account
  - Use **,help < command >** to see its usage and description
  #### Optional
  - Try out **,whitelist** & **,blacklist** for added protection and safeguards
@@ -38,7 +38,6 @@ Use **,help < command >** to see deatils and usage of that specific command
 |:-------------:|:----------------------:|:------------------------------------------------------------------------------|:------------------:|
 | ,setup        | 5                      | Allows players to begin using HyGuard                                          | N                  |
 | ,exit         | 10                     | Allows users to delete their data and stop the use of HyGuard                  | Y                  |
-| ,help         | 2.5                    | Lists basic info and all commands or detailed info about a specific command    | N                  |
 | ,blacklist    | 2.5                    | Allows you to set blacklist games on Hypixel                                   | Y                  |
 | ,whitelist    | 2.5                    | Allows you to set whitelisted game to play on Hypixel                          | Y                  |
 | ,advanced     | 5                      | Allows you to add or change some special advanced options                      | Y                  |
@@ -54,6 +53,7 @@ Use **,help < command >** to see deatils and usage of that specific command
 | ,status       | 7.5                    | Shows the status of any player                                                 | N                  |
 | ,ping         | 5                      | Shows the ping of the bot                                                      | N                  |
 | ,uptime       | 5                      | Shows the uptime of the bot                                                    | N                  |
+| ,help         | 2.5                    | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
 ## Issue(s)
 One major issue currently is the API limit. With the complementary limit of 120 requests per minute, I can only host 30 users, as each user uses a status request and a gametype request twice a minute. This means that slots are quite limited. If this project is successful and many people are interested, I will make some changes and also seek a higher API request limit. This may mean that the current interval of two checks per minute may need to change to 1 per minute, but I have some other ideas in mind too.
@@ -76,6 +76,6 @@ I reserve the right to terminate any user who I believe is abusing the system. A
 
 [HyGuard Invite Link](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot)
 
-[HyGuard Discord Server Invite Link](https://discord.gg/NacwrAaWgE)
+[HyGuard Discord Server Invite Link](https://discord.gg/yMdZsdbaEN)
 
 ## That's all!
