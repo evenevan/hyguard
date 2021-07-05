@@ -1,6 +1,6 @@
 # HyGuard - An account safeguard for Hypixel
 
-![enter image description here](https://i.imgur.com/41sPQS8.png)
+![](https://i.imgur.com/41sPQS8.png)
 
 The HyGuard project was created to be a warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by checking your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft, logins while the player should be offline, customizable blacklisted games, and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works brilliantly and silently in the background until it detects something.
 
@@ -71,6 +71,10 @@ You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](ht
 You can and modify my code, as per the MIT license. The code is barely readable. Good luck lol.
 ## Warning
 I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database. It doesn't crash the bot, and is just annoying.
+
+## Video
+
+[![](http://img.youtube.com/vi/i7hKGTm19qA/0.jpg)](http://www.youtube.com/watch?v=i7hKGTm19qA)
 
 ## Quick Links
 
