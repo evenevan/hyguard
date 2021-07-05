@@ -12,7 +12,7 @@ This is where HyGuard comes in. At least 10% of all account are AFK at given tim
 Another common situation is having your account be compromised while you are offline. For this scenario, let's assume you are taking a nap on the couch. Common games that attract cheaters include SkyWars, UHC, Mega Walls, SkyBlock, and more. If you don't play those games, you can set them as blacklisted. If the account was to be detected playing those games, you would receive a ping on Discord, which could wake you up, especially as the blacklisted ping occurs every 30 seconds*.
 ##### *Subject to change
 ## I have 2FA, why should I care?
-2FA is an incredible piece of technology that is very useful for making an account more secure. However, 2FA would not protect your account to an exploit like the session ID exploit, while HyGuard could give you a heads up. If 2FA is the border control into your account, then HyGuard is a patrol guard within the border looking for suspicious activity. HyGuard is another layer of secuirty that helps keep you in control.
+2FA is an incredible piece of technology that is very useful for making an account more secure. However, 2FA would not protect your account to an exploit like the session ID exploit, while HyGuard could give you a heads up. If 2FA is the border control into your account, then HyGuard is a patrol guard within the border looking for suspicious activity. HyGuard is another layer of security that helps keep you in control.
 ## Setup as a user
 The following contains the information for the average individual looking to gain the protection of this project:
 
@@ -32,7 +32,7 @@ The following contains the information for the average individual looking to gai
 
 ### Prefix: ,
 
-Use **,help < command >** to see deatils and usage of that specific command
+Use **,help < command >** to see details and usage of that specific command
 
 |    Commands   | Cooldown<br>in seconds |                                   Description                                  | Requires<br>setup? |
 |:-------------:|:----------------------:|:------------------------------------------------------------------------------|:------------------:|
@@ -58,7 +58,7 @@ Use **,help < command >** to see deatils and usage of that specific command
 ## Issue(s)
 One major issue currently is the API limit. With the complementary limit of 120 requests per minute, I can only host 30 users, as each user uses a status request and a gametype request twice a minute. This means that slots are quite limited. If this project is successful and many people are interested, I will make some changes and also seek a higher API request limit. This may mean that the current interval of two checks per minute may need to change to 1 per minute, but I have some other ideas in mind too.
 
-Given that crowd soucing API keys is 100% not allowed, have the community host multiple version of this bot may be a solution moving forward, assumign that there is enough demand.
+Given that crowd sourcing API keys is 100% not allowed, having the community host multiple instances of this bot may be a solution moving forward, assuming that there is enough demand.
 #### Bug Reports and Suggestions
 You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](https://discord.gg/NacwrAaWgE) the Discord Server for this bot and create a ticket. If you decide to DM bug reports, join the Hypixel Discord first so that you won't get blocked by Clyde.
 
