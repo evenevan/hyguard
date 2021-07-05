@@ -144,7 +144,7 @@ module.exports = {
             .setTitle(`${args[1].toUpperCase()} has been added!`)
             .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
-          if (blacklist.length == 1) blacklistedData.setDescription(`Your blacklisted games alerts is now on! If you want to turn them off, use \`${prefix}alert blacklist\``);
+          if (blacklist.length == 1) blacklistedData.setDescription(`Your blacklisted games alert is now on! If you want to turn them off, use \`${prefix}alert blacklist\``);
           return message.reply(blacklistedData);
 
     } else if (args[0] == 'remove') {
@@ -153,7 +153,7 @@ module.exports = {
             .setTitle(`${args[1].toUpperCase()} has been removed!`)
             .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
-          if (blacklist.length == 0) blacklistedData.setDescription(`Your blacklisted games alerts is now off, as you have no blacklisted games.`);
+          if (blacklist.length == 0) blacklistedData.setDescription(`Your blacklisted games alert is now off, as you have no blacklisted games.`);
           return message.reply(blacklistedData);
     }
   } catch (err) {
