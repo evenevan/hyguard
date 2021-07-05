@@ -372,7 +372,7 @@ function useData() { //shhh dont look too close
   alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
   }
   }
-  if (dbUserData.language !== data[0].player.userLanguage && data[0].playeruserLanguage) {
+  if (dbUserData.language !== data[0].player.userLanguage && data[0].player.userLanguage) {
   var embedColor = ('#AA0000')
   var isAlert = true
   var languageAlert = true;
