@@ -375,7 +375,7 @@ module.exports = {
 			let setupData = new Discord.MessageEmbed()
 			  .setColor('#00AA00')
 			  .setTitle(`Success!`)
-			  .setDescription(`You can change most of these at anytime. Check ${prefix}help to see what's available. Now, execute the command \`${prefix}log\` to start the logging. Additionally, \`${prefix}log\` can turn the logging on or off at your convenience.`)
+			  .setDescription(`You can change most of these at anytime. Check ${prefix}help to see what's available. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`)
 			  .setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
 			setupData.addFields({
 			  name: 'Discord ID',
