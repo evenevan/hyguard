@@ -111,4 +111,11 @@ async function checkPermsOfBot(channel, bot) {
   }
 };
 
-module.exports = { saveConstants, readConstants, pauseToHMS, unitType, saveOwnerSettings, readOwnerSettings, checkPermsOfBot };
+function epochToCleanDate(epoch) {
+  let date = epoch.getDate();
+  let month = new Intl.DateTimeFormat('en-US', {month: 'short'}).format(epoch);
+  let year = epoch.getFullYear();
+  return month + " " + date + ", " + year
+}
+
+module.exports = { saveConstants, readConstants, pauseToHMS, unitType, saveOwnerSettings, readOwnerSettings, checkPermsOfBot, epochToCleanDate };

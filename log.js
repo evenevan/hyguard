@@ -172,7 +172,7 @@ try {
 
     let tzOffset = (dbUserData.timezone * 3600000);
     let timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
-    let dateString = new Date(Date.now() + tzOffset).toLocaleDateString('en-IN', { hour12: true });
+    let dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
 
     let timeSinceLastLogin = `${secondsToDays(new Date() - data[0].player.lastLogin)}${new Date(new Date() - data[0].player.lastLogin).toISOString().substr(11, 8)}`
     let ceilRoundedLastLogin = Math.ceil((new Date() - data[0].player.lastLogin) / 1000)
@@ -180,8 +180,8 @@ try {
     let timeSincefLastLogout = `${secondsToDays(new Date() - data[0].player.lastLogout)}${new Date(new Date() - data[0].player.lastLogout).toISOString().substr(11, 8)}`
     let ceilRoundedLastLogout = Math.ceil((new Date() - data[0].player.lastLogout) / 1000)
 
-    let timestampOfLastLogin = new Date(data[0].player.lastLogin + tzOffset).toLocaleString('en-IN', { hour12: true });
-    let timestampOfLastLogout = new Date(data[0].player.lastLogout + tzOffset).toLocaleString('en-IN', { hour12: true });
+    let timestampOfLastLogin = funcImports.epochToCleanDate(new Date(data[0].player.lastLogin + tzOffset)) + ", " + new Date(data[0].player.lastLogin + tzOffset).toLocaleTimeString('en-IN', { hour12: true });
+    let timestampOfLastLogout = funcImports.epochToCleanDate(new Date(data[0].player.lastLogout + tzOffset)) + ", " + new Date(data[0].player.lastLogout + tzOffset).toLocaleTimeString('en-IN', { hour12: true });
 
     let lastPlaytime = `${secondsToDays(data[0].player.lastLogout - data[0].player.lastLogin)}${new Date(data[0].player.lastLogout - data[0].player.lastLogin).toISOString().substr(11, 8)}`
     let relogEventTime = (data[0].player.lastLogin - data[0].player.lastLogout) / 1000;
@@ -329,7 +329,6 @@ relogEvent();
 
 
 function useData() { //shhh dont look too close
-
   if (!data[1].session.online) {
   var embedColor = ('#555555')
   var isAlert = false;
@@ -363,14 +362,13 @@ function useData() { //shhh dont look too close
   alerts.send(`<@${dbUserData.discordID}>, Unusual Login Time Alert: ${data[0].player.lastLogin ? `${timestampOfLastLogin} | ${timeSinceLastLogin} ago` : `**Unknown..?**` }! You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
         }
   }
-  if (dbUserData.version !== data[0].player.mcVersionRp && data[0].player.mcVersionRp) {
+  if (!dbUserData.version.slice(" ").includes(data[0].player.mcVersionRp) && data[0].player.mcVersionRp) {
   var embedColor = ('#FFAA00')
   var isAlert = true
   var versionAlert = true;
-  
   if (notif[5] == true) {
-  alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
-  }
+    alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+    }
   }
   if (dbUserData.language !== data[0].player.userLanguage && data[0].player.userLanguage) {
   var embedColor = ('#AA0000')

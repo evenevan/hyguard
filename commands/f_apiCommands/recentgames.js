@@ -23,15 +23,15 @@ module.exports = {
   cooldown: 7.5,
 	execute(message, args, client, row) {
   if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
-      var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
-      var dateString = new Date(Date.now() + tzOffset).toLocaleDateString('en-IN', { hour12: true });
-      var isInDatabase = true;
+    var tzOffset = (row.timezone * 3600000);
+	var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
+	var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
+    var isInDatabase = true;
   } else {
-      var tzOffset = 0
-      var timeString = `${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC`
-      var dateString = new Date().toLocaleDateString('en-IN', { hour12: true });
-      var isInDatabase = false;
+    var tzOffset = 0
+	var timeString = `${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC`
+	var dateString = funcImports.epochToCleanDate(new Date());
+    var isInDatabase = false;
   }
 
   const readData = funcImports.readOwnerSettings();
@@ -184,7 +184,7 @@ try {
 							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
 						for (let i = start; i < start + 5; i++) {
 							if (recentData[i]) {
-								recentGamesEmbed.addField(`${recentData[i].gameType} | ${new Date(recentData[i].date).toLocaleDateString('en-IN', { hour12: true })} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData[i].hasOwnProperty("date") && recentData[i].date !== null && recentData[i].date !== "" ? `Game Start: ${new Date(recentData[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Game End: ${new Date(recentData[i].ended).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Play Time: ${new Date(recentData[i].ended - recentData[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData[i].date).toISOString().substr(11, 8)}\n` }${recentData[i].mode !== null && recentData[i].mode !== "" ? `Mode: ${recentData[i].mode}\n` : `` }${recentData[i].map !== null && recentData[i].map !== "" ? `Map: ${recentData[i].map}` : `` }`)
+								recentGamesEmbed.addField(`${recentData[i].gameType} | ${funcImports.epochToCleanDate(new Date(recentData[i].date+ tzOffset))} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData[i].hasOwnProperty("date") && recentData[i].date !== null && recentData[i].date !== "" ? `Game Start: ${new Date(recentData[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Game End: ${new Date(recentData[i].ended + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Play Time: ${new Date(recentData[i].ended - recentData[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData[i].date).toISOString().substr(11, 8)}\n` }${recentData[i].mode !== null && recentData[i].mode !== "" ? `Mode: ${recentData[i].mode}\n` : `` }${recentData[i].map !== null && recentData[i].map !== "" ? `Map: ${recentData[i].map}` : `` }`)
 							}
 						}
 						return recentGamesEmbed;
@@ -203,15 +203,26 @@ try {
 						let currentIndex = 0
 						collector.on('collect', reaction => {
 
-							message.reactions.removeAll().then(async() => {
-								reaction.emoji.name === '⬅️' ? currentIndex -= 5 : currentIndex += 5;
+							if (message.channel.type === 'dm') {
 
-								message.edit(generateEmbed(currentIndex));
-
-								if (currentIndex > 0) await message.react('⬅️');
-								if (currentIndex + 5 < recentData.length) message.react('➡️');
-							})
+								message.channel.send(`This is a work in progress. Recent games in DMs does not current work correctly.`)
+								collector.stop()
+								
+							} else {
+								message.reactions.removeAll().then(async() => {
+									reaction.emoji.name === '⬅️' ? currentIndex -= 5 : currentIndex += 5;
+	
+									message.edit(generateEmbed(currentIndex));
+	
+									if (currentIndex > 0) await message.react('⬅️');
+									if (currentIndex + 5 < recentData.length) message.react('➡️');
+								})
+							}
 						})
+
+						collector.on('end', () => { //my brain is dead
+							message.reactions.removeAll();
+						});
 					})
 				})
 				.catch((err) => {

@@ -12,12 +12,12 @@ module.exports = {
 		if (row !== undefined) {
 			var tzOffset = (row.timezone * 3600000);
 			var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
-			var dateString = new Date(Date.now() + tzOffset).toLocaleDateString('en-IN', { hour12: true });  
-		  } else {
+			var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset))
+		} else {
 			var tzOffset = 0
 			var timeString = `${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC`
-			var dateString = new Date().toLocaleDateString('en-IN', { hour12: true });
-		  }
+			var dateString = funcImports.epochToCleanDate(new Date())
+		}
 
 		const { commands } = message.client;
 		function removeAllUndefined(arr, value) {

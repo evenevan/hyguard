@@ -18,6 +18,7 @@ module.exports = {
 	usage: `\`${prefix}setup\``,
   cooldown: 5,
   args: false,
+  guildOnly: true,
   database: false,
 	execute(message, args, client) {
 		const controller = new AbortController();
@@ -35,7 +36,7 @@ module.exports = {
 				return message.channel.send(`You have been blocked from using this system.`);
 			}
 			let checkUserLimit = await databaseImports.getUserCount()
-			if (checkUserLimit['count(1)'] >= userLimit) return message.channel.send(`${message.author}, the maximum amount of users  of ${userLimit} was reached. Please check back later!`).then(async msg => {
+			if (checkUserLimit['count(1)'] >= userLimit) return message.channel.send(`${message.author}, the maximum amount of users of ${userLimit} was reached. Please check back later!`).then(async msg => {
 				setTimeout(() => {
 				  msg.delete();
 				}, 10000);

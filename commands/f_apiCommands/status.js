@@ -15,20 +15,21 @@ module.exports = {
   title: 'Shows the status of any player',
 	description: 'Displays detailed information about a player\'s status. This includes useful data like their current gamemode, language, version, playtime, etc. As this command uses the Slothpixel API over the Hypixel API, the data is slightly delayed and may not be accurate.',
   usage: `\`${prefix}status <username>\``,
-  args: true,
   database: false,
   cooldown: 7.5,
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);
-      var tz = row.timezone
+      var tz = row.timezone;
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
-      var dateString = new Date(Date.now() + tzOffset).toLocaleDateString('en-IN', { hour12: true });  
+      var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
+      var isInDatabase = true;
     } else {
-      var tzOffset = 0
-      var tz = 0
+      var tzOffset = 0;
+      var tz = 0;
       var timeString = `${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC`
-      var dateString = new Date().toLocaleDateString('en-IN', { hour12: true });
+      var dateString = funcImports.epochToCleanDate(new Date());
+      var isInDatabase = false;
     }
 
     try {
@@ -56,6 +57,15 @@ module.exports = {
           });
         }
 
+        if (!args[0] && row == undefined) {
+          msg.delete();
+          return message.channel.send(`${message.author}, you are not signed up and you did not include a player name!`).then(async msg => {
+            setTimeout(() => {
+              msg.delete();
+            }, 10000);
+          });
+        }
+
         function decimalsToUTC(decimal) {
           if (/\./.test(decimal)) {
                 let decimalArray = decimal.toString().split(".")
@@ -70,10 +80,10 @@ module.exports = {
         };
     
         Promise.all([
-            fetchTimeout(`https://api.slothpixel.me/api/players/${args[0]}/`, 2000, {
+            fetchTimeout(`https://api.slothpixel.me/api/players/${args[0] ? `${args[0]}` : `${row.minecraftUUID}`}/`, 2000, {
               signal: controller.signal
             }).then(player => player.json()),
-            fetchTimeout(`https://api.slothpixel.me/api/players/${args[0]}/status`, 2000, {
+            fetchTimeout(`https://api.slothpixel.me/api/players/${args[0] ? `${args[0]}` : `${row.minecraftUUID}`}/status/`, 2000, {
               signal: controller.signal
             }).then(status => status.json())
           ])
@@ -87,13 +97,15 @@ module.exports = {
               });
             }
 
-            const timeSinceLastLogin = `${secondsToDays(new Date() - player[0].last_login)}${new Date(new Date() - player[0].last_login).toISOString().substr(11, 8)}`;
-            const timeSincefLastLogout = `${secondsToDays(new Date() - player[0].last_logout)}${new Date(new Date() - player[0].last_logout).toISOString().substr(11, 8)}`;
+            console.log(args[0])
+
+            let timeSinceLastLogin = `${secondsToDays(new Date() - player[0].last_login)}${new Date(new Date() - player[0].last_login).toISOString().substr(11, 8)}`;
+            let timeSincefLastLogout = `${secondsToDays(new Date() - player[0].last_logout)}${new Date(new Date() - player[0].last_logout).toISOString().substr(11, 8)}`;
         
-            const timestampOfLastLogin = new Date(player[0].last_login + tzOffset).toLocaleString('en-IN', { hour12: true });
-            const timestampOfLastLogout = new Date(player[0].last_logout + tzOffset).toLocaleString('en-IN', { hour12: true });
+            let timestampOfLastLogin = funcImports.epochToCleanDate(new Date(player[0].last_login + tzOffset)) + ", " + new Date(player[0].last_login + tzOffset).toLocaleTimeString('en-IN', { hour12: true });
+            let timestampOfLastLogout = funcImports.epochToCleanDate(new Date(player[0].last_logout + tzOffset)) + ", " + new Date(player[0].last_logout + tzOffset).toLocaleTimeString('en-IN', { hour12: true });
         
-            const lastPlaytime = `${secondsToDays(player[0].last_logout - player[0].last_login)}${new Date(player[0].last_logout - player[0].last_login).toISOString().substr(11, 8)}`;
+            let lastPlaytime = `${secondsToDays(player[0].last_logout - player[0].last_login)}${new Date(player[0].last_logout - player[0].last_login).toISOString().substr(11, 8)}`;
         
           function secondsToDays(ms) { //calculating days from seconds
               ms = ms / 1000
@@ -121,7 +133,7 @@ module.exports = {
             { name: 'Status', value: `${player[0].username} is online` },
             { name: 'UUID', value: `${player[0].uuid}` },
             { name: 'Session', value: `${player[0].last_login ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${player[1].game.type ? `Game: ${player[1].game.type}\n` : `` }${player[1].game.mode ? `Mode: ${player[1].game.mode}\n` : `` }${player[1].game.map ? `Map: ${player[1].game.map}` : `` }${!player[1].game.type && !player[1].game.mode && !player[1].game.map ? `Data not available: Limited API!` : `` }` },
-            { name: 'Last Login', value: `${player[0].last_login ? `${timestampOfLastLogin} UTC ${decimalsToUTC(tz)}\n${timeSinceLastLogin} ago` : `Last Login: Unknown`}` },
+            { name: 'Last Login', value: `${player[0].last_login ? `${timestampOfLastLogin} UTC ${isInDatabase ? `${decimalsToUTC(tz)}` : `±0`}\n${timeSinceLastLogin} ago` : `Last Login: Unknown`}` },
             { name: 'Last Logout', value: `${player[0].last_logout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(tz)}\n${timeSincefLastLogout} ago` : `Last Logout: Unknown`}` },
             { name: 'Settings', value: `${player[0].language ? `Language: ${player[0].language}` : `Language: Unknown` }\n${player[0].mc_version ? `Version: ${player[0].mc_version}` : `Version: Unknown` }` });
         }

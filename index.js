@@ -54,22 +54,26 @@ client.on('message', message => {
 checkPermsOfBot();
 
 async function checkPermsOfBot() {
+	if (message.channel.type !== 'dm') {
 	try {
-	let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me);
-
-	if (returned) {
-		console.log(`Permissions: ${message.author.id} | ${message.author.tag} is missing ${returned}`);
-		return message.channel.send(`This bot is missing the following permissions(s): ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
+		let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me);
+		
+		if (returned) {
+			console.log(`Permissions: ${message.author.id} | ${message.author.tag} is missing ${returned}`);
+			return message.channel.send(`This bot is missing the following permissions(s): ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
+		}
+		checkDB();
+		} catch (err) {
+			onsole.log(`Someone appears to be attempting to crash the bot. User: ${message.author.tag}: ${message.author.id} GuildID: ${message.guild.id}`);
+		}	
+	} else {
+		checkDB()
 	}
-	checkDB();
-	} catch (err) {
-		console.log(`Someone appears to be attempting to crash the bot. User: ${message.author.tag}: ${message.author.id} GuildID: ${message.guild.id}`);
-	}	
 };
 
 async function checkDB() {
 	var isInDB = await databaseImports.isInDataBase(message.author.id)
-	console.log(`DB ${isInDB[0]}. ${message.author.tag} GuildID: ${message.guild.id} made a request: ${message.content}`)
+	console.log(`DB ${isInDB[0]}. ${message.author.tag} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
 	if (isInDB[0] == false && command.database == true) return message.channel.send(`${message.author}, you must use \`${prefix}setup\` first before using this command!`).then(async msg => {
 		setTimeout(() => {msg.delete();}, 10000);});	
 	dm(isInDB[1]);
