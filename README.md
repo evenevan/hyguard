@@ -53,7 +53,7 @@ Use **,help < command >** to see details and usage of that specific command
 | ,status       | 7.5                    | Shows the status of any player                                                 | N                  |
 | ,ping         | 5                      | Shows the ping of the bot                                                      | N                  |
 | ,uptime       | 5                      | Shows the uptime of the bot                                                    | N                  |
-| ,help         | 2.5                    | Shows basic info and all commands or detailed info about a specific command    | N                  |
+| ,help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
 ## Issue(s)
 One major issue currently is the API limit. With the complementary limit of 120 requests per minute, I can only host 30 users, as each user uses a status request and a gametype request twice a minute. This means that slots are quite limited. If this project is successful and many people are interested, I will make some changes and also seek a higher API request limit. This may mean that the current interval of two checks per minute may need to change to 1 per minute, but I have some other ideas in mind too.
