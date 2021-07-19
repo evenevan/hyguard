@@ -18,7 +18,6 @@ The following contains the information for the average individual looking to gai
 
  - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot) my Discord Bot to a server or join a server with it
  - Type **,setup**
-   - You can DM HyGuard if there is a conflicting bot that has the same prefix
  - Follow the setup instructions
    - You must have joined Hypixel before
    - Use the 24 hour time system for the login time/logout time questions
