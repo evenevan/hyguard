@@ -5,6 +5,7 @@ module.exports = {
 	title: 'Displays uptime of the bot',
   database: false,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
 		try {
 			function uptimeFunc() {

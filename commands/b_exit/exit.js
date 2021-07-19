@@ -10,6 +10,7 @@ module.exports = {
 	usage: `\`${prefix}exit <Minecrfat Username> <Your UTC Offset>\` \`Example: ${prefix}exit Attituding -7\``,
   cooldown: 10,
   database: true,
+  permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
         try {
 message.channel.send('Deleting..').then(async loadingmsg => {

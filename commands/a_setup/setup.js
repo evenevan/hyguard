@@ -20,6 +20,7 @@ module.exports = {
   args: false,
   guildOnly: true,
   database: false,
+  permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","MANAGE_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY","MANAGE_ROLES"],
 	execute(message, args, client) {
 		const controller = new AbortController();
 
@@ -69,7 +70,7 @@ module.exports = {
 		};
 	
 		function checkMCAccount() {
-		  message.channel.send(`${message.author}, welcome! To sign up for LoggerBot, there are 4 steps. First, please send your Minecraft username in this chat.`)
+		  message.channel.send(`${message.author}, welcome! To begin, there are 5 steps. First, please send your Minecraft username in this chat.`)
 		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
 			max: 1,
 			time: 60000
@@ -100,7 +101,7 @@ module.exports = {
 					  let linkError = new Discord.MessageEmbed()
 						.setColor('#FF5555')
 						.setTitle(`Link your Discord on Hypixel!`)
-						.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 						.setDescription('You have not linked your Discord account to Minecraft account on Hypixel! Follow the guide below:')
 						.setImage('https://i.imgur.com/gGKd2s8.gif');
 					  return message.reply(linkError).then(async msg => {
@@ -114,7 +115,7 @@ module.exports = {
 					  let linkError = new Discord.MessageEmbed()
 						.setColor('#FF5555')
 						.setTitle(`That isn't your account!`)
-						.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 						.setDescription('If that is your account, follow the guide below to relink it:')
 						.setImage('https://i.imgur.com/gGKd2s8.gif');
 					  return message.reply(linkError).then(async msg => {
@@ -148,7 +149,7 @@ module.exports = {
 	
 	
 		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, you did not send your username. Setup canceled.`).then(async msg => {
+			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`).then(async msg => {
 			  setTimeout(() => {
 				msg.delete();
 			  }, 60000);
@@ -162,7 +163,7 @@ module.exports = {
 		  let tzExample = new Discord.MessageEmbed()
 				.setColor('#7289DA')
 				.setTitle('Quick Reference')
-				.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 				.setDescription(`Username verified. ${message.author}, please enter your UTC offset in this format: \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have two minutes, so take your time to find it.\n\n**+0** Greenwich Mean Time (GMT)\n**+1** Central European Time (CET)\n**+2** Eastern European Time (EET)\n**+3** Moscow Time (MSK)\n**+4** Armenia Time (AMT)\n**+5** Pakistan Standard Time (PKT)\n**+6** Omsk Time (OMSK)\n**+7** Kranoyask Time (KRAT)\n**+8** China Standard Time (CST)\n**+9** Japan Standard Time (JST)\n**+10** Eastern Australia Standard Time (AEST)\n**+11** Sakhalin Time (SAKT)\n**+12** New Zealand Standard Time (NZST)\n\n**-0** Greenwich Mean Time (GMT)\n**-1**	West Africa Time (WAT)\n**-2** Azores Time (AT)\n**-3**	Argentina Time (ART)\n**-4** Atlantic Standard Time (AST)\n**-5** Eastern Standard Time (EST)\n**-6** Central Standard Time (CST)\n**-7** Mountain Standard Time (MST)\n**-8** Pacific Standard Time (PST)\n**-9** Alaska Standard Time (AKST)\n**-10** Hawaii Standard Time (HST)\n**-11** Nome Time (NT)\n**-12** International Date Line West (IDLW)`)
 				message.channel.send(tzExample)
 		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
@@ -174,7 +175,7 @@ module.exports = {
 			  let formatExample = new Discord.MessageEmbed()
 				.setColor('#FF5555')
 				.setTitle('Invalid Format Or Offset!')
-				.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 				.setDescription(`That isn't valid! It must be between -23:59 and +23:59. Please use the format \`-/+0\` or \`-/+0:00\`\n\n**Examples:**`)
 				.addField('-07:00', '7 hours behind UTC')
 				.addField(`-7`, `7 hours behind UTC`)
@@ -202,11 +203,11 @@ module.exports = {
 				return result;
 			  };
 	
-			offlineTime1(player, UTCOffsetToDecimals(timezone))
+			verifyCorrectTimezone(player, UTCOffsetToDecimals(timezone))
 	
 		  }).catch((err) => {
 			  console.log(`type error? ${err}`)
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, you did not send a UTC offset. Setup canceled.`).then(async msg => {
+			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 2 minutes. Setup canceled.`).then(async msg => {
 			  setTimeout(() => {
 				msg.delete();
 			  }, 30000);
@@ -215,6 +216,27 @@ module.exports = {
 			return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_5: \`${err}\``);
 		  });
 		};
+
+		function verifyCorrectTimezone(player, timezone) {
+			message.channel.send(`${message.author}, is your current local time ${new Date(Date.now() + timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}?`).then(msg => {
+				msg.react('👍')
+				msg.react('👎');
+				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
+				  max: 1,
+				  time: 60000
+				}).then(collected => {
+				  if (collected.first().emoji.name == '👍') {
+					offlineTime1(player, timezone)
+				  } else if (collected.first().emoji.name == '👎') {
+					verifyTimezone(player);
+				  }
+				}).catch(() => {
+				  msg.delete();
+				  message.channel.send(`${message.author}, no reaction after 60 seconds, setup canceled`).then(async msg => {
+					setTimeout(() => {msg.delete()}, 30000)});
+				});
+			  });
+		}
 	
 		function offlineTime1(player, timezone) {
 		  message.channel.send(`Timezone verified. ${message.author}, please enter when you usually **get off** Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. Logins after this time will be alerts, so you may want to add an hour or two.`)
@@ -227,9 +249,9 @@ module.exports = {
 			  let formatExample = new Discord.MessageEmbed()
 				.setColor('#FF5555')
 				.setTitle('Invalid Format Or Numbers!')
-				.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 				.setDescription(`That isn't valid! It must be between 0:00 and 23:59. 0:00 is 12:00 am. Please use the format \`-/+00:00\` and enter it in your timezone\n\n**Examples:**`)
-				.addField('23:00', 'Alerts occur if a login is detected after 11 pm')
+				.addField('23:00', 'Alerts occur if a login is detected after 11:00 pm')
 				.addField('3:00', 'Alerts occur if a login is detected after 3:00 am')
 			  return message.channel.send(formatExample).then(async msg => {
 				setTimeout(() => {
@@ -241,7 +263,7 @@ module.exports = {
 			offlineTime2(player, timezone, TimeToDecimals(offlineLogout), offlineLogout)
 	
 		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, you did not send a logout time. Setup canceled.`).then(async msg => {
+			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`).then(async msg => {
 			  setTimeout(() => {
 				msg.delete();
 			  }, 30000);
@@ -262,10 +284,10 @@ module.exports = {
 			  let formatExample = new Discord.MessageEmbed()
 				.setColor('#FF5555')
 				.setTitle('Invalid Format Or Numbers!')
-				.setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
 				.setDescription(`That isn't valid! It must be between 0:00 and 23:59. 0:00 is 12 am. Please use the format \`-/+00:00\` and enter it in your timezone\n\n**Examples:**`)
-				.addField('23:00', 'Alerts occur if a login is detected after 11 pm')
-				.addField('3:00', 'Alerts occur if a login is detected after 3:00 am')
+				.addField('9:00', 'Alerts will not occur if a login is detected after 9:00 am')
+				.addField('6:00', 'Alerts will not occur if a login is detected after 6:00 am')
 			  return message.channel.send(formatExample).then(async msg => {
 				setTimeout(() => {
 				  msg.delete();
@@ -280,7 +302,7 @@ module.exports = {
 			createChannel(player, timezone, offlineTime, offlineLogout, offlineLogin);
 	
 		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, you did not send a login time. Setup canceled.`).then(async msg => {
+			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`).then(async msg => {
 			  setTimeout(() => {
 				msg.delete();
 			  }, 60000);
@@ -377,7 +399,7 @@ module.exports = {
 			  .setColor('#00AA00')
 			  .setTitle(`Success!`)
 			  .setDescription(`You can change most of these at anytime. Check ${prefix}help to see what's available. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`)
-			  .setFooter(`Executed at ${new Date().toLocaleDateString()} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+			  .setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
 			setupData.addFields({
 			  name: 'Discord ID',
 			  value: `${message.author.id}`

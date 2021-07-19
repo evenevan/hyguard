@@ -2,11 +2,12 @@ const { prefix } = require('../../userConfig.json');
 const databaseImports = require('../../databaseFuncs');
 module.exports = {
 	name: 'monitor',
-  title: 'Toggles the logging and monitoring of your account',
+  title: `Toggles the logging and monitoring of your account`,
 	description: 'Allows you to turn the logging and monitoring of your player on or off',
-    usage: `\`${prefix}monito\``,
+    usage: `\`${prefix}monitor\``,
   cooldown: 7.5,
   database: true,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
       
           getAlerts();

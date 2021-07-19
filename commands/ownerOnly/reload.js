@@ -10,6 +10,7 @@ module.exports = {
 	args: true,
   database: false,
   ownerReq: true,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args) {
 		const commandName = args[0].toLowerCase();
 		const command = message.client.commands.get(commandName)

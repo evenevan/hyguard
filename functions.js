@@ -81,34 +81,14 @@ function unitType(unit) { // old thing for pause command
     return {multiple, type};
 };
 
-async function checkPermsOfBot(channel, bot) {
+async function checkPermsOfBot(channel, bot, requiredPermissions) {
 	let perm = await channel.permissionsFor(bot).toArray()
-  let perm1 = perm.includes("MANAGE_CHANNELS");
-  let perm2 = perm.includes("ADD_REACTIONS");
-  let perm3 = perm.includes("VIEW_CHANNEL");
-  let perm4 = perm.includes("SEND_MESSAGES");
-  let perm5 = perm.includes("MANAGE_MESSAGES");
-  let perm6 = perm.includes("EMBED_LINKS");
-  let perm7 = perm.includes("READ_MESSAGE_HISTORY");
-  let perm8 = perm.includes("MANAGE_ROLES");
+  let missingPermissions = []
+  requiredPermissions.forEach(permission => {if (!perm.includes(permission)) missingPermissions.push(permission)})
 
-	if (!perm1 || !perm2 || !perm3 || !perm4 || !perm5 || !perm6 || !perm7 || !perm8) {
-		let permArray = [];
-		if (!perm1) permArray.push("Manage Channels");
-    if (!perm2) permArray.push("Add Reactions");
-    if (!perm3) permArray.push("View Channel");
-    if (!perm4) permArray.push("Send Messages");
-    if (!perm5) permArray.push("Manage Messages");
-    if (!perm6) permArray.push("Embed Links");
-    if (!perm7) permArray.push("Read Message History");
-    if (!perm8) permArray.push("Manage Roles");
-
-		let errors = (`${permArray.join(', ')}`);
-    if (!perm3 || !perm4) throw errors;
-    return errors;
-	} else {
-    return;
-  }
+  if (missingPermissions == []) return;
+  else if (missingPermissions.includes("SEND_MESSAGES")) {throw missingPermissions}
+  else return missingPermissions.join(", ")
 };
 
 function epochToCleanDate(epoch) {

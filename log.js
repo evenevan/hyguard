@@ -130,11 +130,11 @@ async function checkAlertPermissions(data, dbUserData, client, userNumber) {
 
   if (!alerts) return console.log(`User's alert channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
 
-	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me)
+	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
 
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
-		return alerts.send(`This bot is missing the following permissions(s): ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
+		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
 	}
 	checkLogPermissions(data, dbUserData, client, userNumber, alerts);
 	} catch (err) {
@@ -150,17 +150,17 @@ async function checkLogPermissions(data, dbUserData, client, userNumber, alerts)
 
   if (!log) return console.log(`User's log channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
 
-	let returned = await funcImports.checkPermsOfBot(log, log.guild.me)
+	let returned = await funcImports.checkPermsOfBot(log, log.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
 
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
-		return alerts.send(`This bot is missing the following permissions(s): ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
+		return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
 	}
 	useAPIData(data, dbUserData, client, userNumber, alerts, log);
 	} catch (err) {
 		console.log(`Someone appears to be attempting to crash the bot. Log Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`)
-    alerts.send(`This bot is missing the following permissions(s): ${err}. The bot cannot log. Turn these messages off temporarily with \`${prefix}log\``)
+    alerts.send(`This bot is missing the following permissions(s) in the log channel: ${err}. The bot cannot log. Turn these messages off temporarily with \`${prefix}log\``)
 	}	
 };
 
@@ -243,6 +243,8 @@ try {
       } else if (loginTimep1 > loginTimep2) {
         if (timeLastLogin >= loginTimep1 || timeLastLogin <= loginTimep2) return true;
         return false;
+      } else {
+        return false;
       }
     };
 
@@ -262,9 +264,9 @@ try {
           await databaseImports.changeData(dbUserData.discordID, data[0].player.lastLogout, `UPDATE data SET logoutMS = ? WHERE discordID = ?`);
         
       if (notif[4] == true && loginTimeState == true) {
-        return alerts.send(`<@${dbUserData.discordID}>, Unusual Relog/Login Time Alert: Relog at ${timeString} that was ${roundedRelogTime} seconds long. You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+        return alerts.send(`<@${dbUserData.discordID}>, Unusual Relog/Login Time Alert: Relog at ${timeString} that was ${roundedRelogTime} seconds long. You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
       } else if (notif[3] == true) {
-        return alerts.send(`<@${dbUserData.discordID}>, Session Alert: Relog at ${timeString} that was ${roundedRelogTime} seconds long. You can turn off session alerts with \`${prefix}alert session\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+        return alerts.send(`<@${dbUserData.discordID}>, Session Alert: Relog at ${timeString} that was ${roundedRelogTime} seconds long. You can turn off session alerts with \`${prefix}alert session\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
       } else return;
         } catch (err) {
           console.log(`ERROR_3: ${err}`);
@@ -313,7 +315,7 @@ try {
           await databaseImports.changeData(dbUserData.discordID, data[0].player.lastLogin, `UPDATE data SET loginMS = ? WHERE discordID = ?`);
 
       if (notif[4] == true && loginTimeState == true) {
-        return alerts.send(`<@${dbUserData.discordID}>, Unusual Login Time Alert: ${data[0].player.lastLogin ? `${timestampOfLastLogin} | ${timeSinceLastLogin} ago` : `**Unknown..?**` }! You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+        return alerts.send(`<@${dbUserData.discordID}>, Unusual Login Time Alert: ${data[0].player.lastLogin ? `${timestampOfLastLogin} | ${timeSinceLastLogin} ago` : `**Unknown..?**` }! You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
       } else if (notif[3] == true) {
         return alerts.send(`<@${dbUserData.discordID}>, Session Alert: Login at ${timestampOfLastLogin}. You can turn off session alerts with \`${prefix}alert session\``);
       } else return;
@@ -351,7 +353,7 @@ function useData() { //shhh dont look too close
   var isAlert = true
   var gametypeAlert = true;
   if (notif[1] == true) {
-  alerts.send(`<@${dbUserData.discordID}>, Non-Whitelisted Game Alert: ${data[1].session.gameType ? `**${data[1].session.gameType}**` : `**Unknown..?**` }! You can add this game to your whitelist with \`${prefix}whitelist add ${data[1].session.gameType}\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+  alerts.send(`<@${dbUserData.discordID}>, Non-Whitelisted Game Alert: ${data[1].session.gameType ? `**${data[1].session.gameType}**` : `**Unknown..?**` }! You can add this game to your whitelist with \`${prefix}whitelist add ${data[1].session.gameType}\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
       }
   }
   if (loginTimeFunc() == true && data[1].session.online) {
@@ -359,7 +361,7 @@ function useData() { //shhh dont look too close
   var isAlert = true
   var loginTimeAlert = true;
   if (notif[3] == true && advancedSettings.includes("LOGINTIME") && dbUserData.loginMS == data[0].player.lastLogin) {
-  alerts.send(`<@${dbUserData.discordID}>, Unusual Login Time Alert: ${data[0].player.lastLogin ? `${timestampOfLastLogin} | ${timeSinceLastLogin} ago` : `**Unknown..?**` }! You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+  alerts.send(`<@${dbUserData.discordID}>, Unusual Login Time Alert: ${data[0].player.lastLogin ? `${timestampOfLastLogin} | ${timeSinceLastLogin} ago` : `**Unknown..?**` }! You can change your offline time with \`${prefix}offline <0:00> <0:00>\`, or turning the alert off with \`${prefix}alert offline\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
         }
   }
   if (!dbUserData.version.slice(" ").includes(data[0].player.mcVersionRp) && data[0].player.mcVersionRp) {
@@ -367,7 +369,7 @@ function useData() { //shhh dont look too close
   var isAlert = true
   var versionAlert = true;
   if (notif[5] == true) {
-    alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+    alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
     }
   }
   if (dbUserData.language !== data[0].player.userLanguage && data[0].player.userLanguage) {
@@ -376,7 +378,7 @@ function useData() { //shhh dont look too close
   var languageAlert = true;
   
   if (notif[2] == true) {
-  alerts.send(`<@${dbUserData.discordID}>, Unusual Language Alert: ${data[0].player.userLanguage ? `**${data[0].player.userLanguage}**` : `**Unknown..?**` }! Please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+  alerts.send(`<@${dbUserData.discordID}>, Unusual Language Alert: ${data[0].player.userLanguage ? `**${data[0].player.userLanguage}**` : `**Unknown..?**` }! Please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
   }
   }
   if (blacklistCheck !== -1 && data[1].session.online) {
@@ -385,7 +387,7 @@ function useData() { //shhh dont look too close
   var gametypeAlert = true;
   if (blacklistCheck !== -1 && data[1].session.online) {
   if (notif[0] == true) {
-  alerts.send(`<@${dbUserData.discordID}>, Blacklisted Game Alert: ${data[1].session.gameType ? `**${data[1].session.gameType}**` : `**Unknown..?**` }! Please ensure your account is secure. Mojang Accounts: <https://bit.ly/3f7gdBf> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+  alerts.send(`<@${dbUserData.discordID}>, Blacklisted Game Alert: ${data[1].session.gameType ? `**${data[1].session.gameType}**` : `**Unknown..?**` }! Please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
   }
     }
   }
@@ -432,8 +434,8 @@ log.send(embed);
 
 } catch (error) {
   if (error instanceof TypeError) {
-    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`TypeError, someone may have left the server while a log while executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
-    return console.log(`TypeError, someone may have left the server while a log while executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
+    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`TypeError, someone may have left the server while a log was executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
+    return console.log(`TypeError, someone may have left the server while a log was executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
   }
   try {
     const otherError = new Discord.MessageEmbed()

@@ -6,13 +6,14 @@ const funcImports = require( __dirname + '../../../functions');
 const Discord = require('discord.js');
 module.exports = {
 	name: 'timezone',
-  title: 'Set a new timezone for the bot\'s time services',
+  title: `Set a new timezone for the bot\'s time services`,
 	description: `Allows you to set a new timezone/UTC offset! Quick Reference:\n\n**+0** Greenwich Mean Time (GMT)\n**+1** Central European Time (CET)\n**+2** Eastern European Time (EET)\n**+3** Moscow Time (MSK)\n**+4** Armenia Time (AMT)\n**+5** Pakistan Standard Time (PKT)\n**+6** Omsk Time (OMSK)\n**+7** Kranoyask Time (KRAT)\n**+8** China Standard Time (CST)\n**+9** Japan Standard Time (JST)\n**+10** Eastern Australia Standard Time (AEST)\n**+11** Sakhalin Time (SAKT)\n**+12** New Zealand Standard Time (NZST)\n\n**-0** Greenwich Mean Time (GMT)\n**-1**	West Africa Time (WAT)\n**-2** Azores Time (AT)\n**-3**	Argentina Time (ART)\n**-4** Atlantic Standard Time (AST)\n**-5** Eastern Standard Time (EST)\n**-6** Central Standard Time (CST)\n**-7** Mountain Standard Time (MST)\n**-8** Pacific Standard Time (PST)\n**-9** Alaska Standard Time (AKST)\n**-10** Hawaii Standard Time (HST)\n**-11** Nome Time (NT)\n**-12** International Date Line West (IDLW)`,
   usage: `\`${prefix}timezone <UTC Offset>\`, \`${prefix}timezone current\``,
   aliases: ['tz'],
   args: true,
   database: true,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);
@@ -26,7 +27,7 @@ module.exports = {
     
     
     if (args[0].toLowerCase() == 'current') {
-      return currentVersion();
+      return currentTimezone();
     } else if (!/^([+-](?:2[0-3]|1[0-9]|[0-9]|0[0-9])(:?[0-5]\d)?)$/g.test(args[0])) {
       let formatExample = new Discord.MessageEmbed()
       .setColor('#FF5555')
@@ -65,13 +66,13 @@ module.exports = {
           return result;
           };
     
-        if (UTCOffsetToDecimals(args[0]) == response.timezone) return message.channel.send(`${message.author}, your timezone/UTC Offset was already set to ${args[0]}!`).then(async msg => {
+        if (UTCOffsetToDecimals(args[0]) == response.timezone) return message.channel.send(`${message.author}, your timezone/UTC Offset was already set to ${args[0]}! Your local time should be ${new Date(Date.now() + UTCOffsetToDecimals(args[0]) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`).then(async msg => {
           setTimeout(() => {
             msg.delete();
           }, 10000);
         });
     
-        writeNewVersion(UTCOffsetToDecimals(args[0]));
+        writeNewTimezone(UTCOffsetToDecimals(args[0]));
     
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
@@ -79,10 +80,10 @@ module.exports = {
       }
     };
     
-    async function writeNewVersion(timezone) {
+    async function writeNewTimezone(timezone) {
       try {
         await databaseImports.changeData(message.author.id, timezone, `UPDATE data SET timezone = ? WHERE discordID = ?`);
-        return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}.`);
+        return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}. Your local time should be ${new Date(Date.now() + timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
         message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
@@ -90,7 +91,7 @@ module.exports = {
     
     };
     
-    async function currentVersion() {
+    async function currentTimezone() {
       try {
         let response = await databaseImports.getData(message.author.id)
 
@@ -106,7 +107,7 @@ module.exports = {
               return "+" + decimal;
           }    
         };
-        return message.channel.send(`${message.author}, your timezone/UTC offset is set to ${decimalsToUTC(response.timezone)}.`);
+        return message.channel.send(`${message.author}, your timezone/UTC offset is set to ${decimalsToUTC(response.timezone)}. Your local time should be ${new Date(Date.now() + response.timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
         message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);

@@ -5,11 +5,12 @@ const databaseImports = require('../../databaseFuncs');
 module.exports = {
 	name: 'pleaseshutup',
   aliases: ['psu', 'pleaseshut'],
-  title: 'Toggles all alerts',
+  title: `Toggles all alerts`,
 	description: 'Toggles all alerts!!',
   usage: `\`${prefix}orange\``,
   database: true,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
     getAlerts();
     

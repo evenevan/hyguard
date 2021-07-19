@@ -1,4 +1,5 @@
 const { prefix } = require('../../userConfig.json');
+const funcImports = require( __dirname + '../../../functions');
 const Discord = require('discord.js');
 module.exports = {
 	name: 'help',
@@ -7,7 +8,8 @@ module.exports = {
 	aliases: ['commands'],
 	usage: `\`${prefix}help <command name>\``,
   database: false,
-	cooldown: 2.5,
+	cooldown: 1,
+	permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
 		if (row !== undefined) {
 			var tzOffset = (row.timezone * 3600000);
@@ -35,6 +37,7 @@ module.exports = {
 		if (!args.length) {
 			let commandName = commands.map(command => prefix + command.name);
 			let commandTitle = commands.map(command => command.title);
+			let commandSetupReq = commands.map(command => command.database);
 			let commandOwner = commands.map(command => command.ownerReq);
 
 			for (let o = 0; o < commandOwner.length; o++) {
@@ -42,24 +45,26 @@ module.exports = {
 				if (index) {
 					commandName[o] = undefined;
 					commandTitle[o] = undefined;
+					commandSetupReq[o] = undefined;
 				}
 			}
 				
 		commandTitle = removeAllUndefined(commandTitle, undefined);
 		commandName = removeAllUndefined(commandName, undefined);
+		commandSetupReq = removeAllUndefined(commandSetupReq, undefined);
 	
       const commandHelp = new Discord.MessageEmbed()
         .setColor('#7289DA')
         .setTitle(`**Information**`)
-        .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
-		.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity. This bot isn't most user friendly, but used the right way, it works.`)
-		.addField(`Bug Reports and Suggestions`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the Hypixel Discord before you DM me so that you won't get blocked by Clyde.`)
-		.addField('Warning', `I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database.`)
-		.addField(`GitHub`, `This project has a GitHub page, where the code is available under the MIT license! There is also extra documentation there incase you need it. <https://github.com/Attituding/HyGuard> \n\u200B`)
-		.addField('**Available Commands**', `You can send \`${prefix}help <command name>\` to get info on a specific command, along with aliases that can also execute the same command!\n`)
+        .setFooter(`Programmed by Attituding#6517 with help from the internet`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+		.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity. This bot isn't most user-friendly, but used the right way, it works.`)
+		.addField(`Data Collection`, `${prefix}setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference.`)
+		.addField(`Bug Reports and Suggestions`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the [Hypixel Discord](https://discord.com/invite/hypixel) before you DM me so that you won't get blocked by Clyde.`)
+		.addField(`GitHub`, `This project has a [Github page](<https://github.com/Attituding/HyGuard>), where the code is available under the MIT license. There is also extra documentation there incase you need it.`)
+		.addField('**Available Commands**', `You can send \`${prefix}help <command name>\` to get info on a specific command, along with aliases that can also execute the same command! Commands with a :white_check_mark: work without ${prefix}setup, while commands with :no_entry_sign: require ${prefix}setup\n\u200B`)
 
 			for (let i = 0; i < commandName.length; i++) {
-				commandHelp.addField(`${commandName[i]}`, `${commandTitle[i]}`, true)
+				commandHelp.addField(`**${commandName[i]}** | ${commandSetupReq[i] == true ? `:no_entry_sign:` : `:white_check_mark:`}`, `${commandTitle[i]}`, true)
 			  }
 
 			return message.author.send(commandHelp)

@@ -5,12 +5,13 @@ const Discord = require('discord.js');
 const databaseImports = require('../../databaseFuncs');
 module.exports = {
 	name: 'advanced',
-  title: 'Allows for advanced options',
-	description: `Allows you to add or change some special advanced options`,
+  title: `Allows for advanced options`,
+	description: `Allows you to add or change some special advanced option(s)`,
   usage: `\`${prefix}advanced <type>\`, \`${prefix}advanced current\``,
   args: true,
   database: true,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);

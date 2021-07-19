@@ -5,12 +5,13 @@ const funcImports = require( __dirname + '../../../functions');
 const Discord = require('discord.js');
 module.exports = {
 	name: 'version',
-  title: 'Set a whitelisted version of Minecraft',
+  title: `Set a whitelisted version of Minecraft`,
 	description: `Allows you to whitelist version(s) of Minecraft for use on Hypixel! Use \`${prefix}version current\` to see your current version, or use \`${prefix}version <version>\` to add/remove one`,
   usage: `\`${prefix}version <version>\`, \`${prefix}version current\``,
   args: true,
   database: true,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);

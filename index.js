@@ -54,26 +54,30 @@ client.on('message', message => {
 checkPermsOfBot();
 
 async function checkPermsOfBot() {
-	if (message.channel.type !== 'dm') {
+  if (message.channel.type !== 'dm') {
 	try {
-		let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me);
-		
+		if (command.permissions) {
+		const requiredPermissions = command.permissions;
+		let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me, requiredPermissions);
 		if (returned) {
-			console.log(`Permissions: ${message.author.id} | ${message.author.tag} is missing ${returned}`);
-			return message.channel.send(`This bot is missing the following permissions(s): ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
+			console.log(`Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
+			return message.channel.send(`This bot is missing the following permissions(s) for that command: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
 		}
 		checkDB();
-		} catch (err) {
-			onsole.log(`Someone appears to be attempting to crash the bot. User: ${message.author.tag}: ${message.author.id} GuildID: ${message.guild.id}`);
-		}	
-	} else {
+		} else {
+			return message.channel.send(`This command was not set up correctly by the owner. Please notify them. It is missing a permission configuration.`);
+		}
+	} catch (err) {
+			console.log(`Someone appears to be attempting to crash the bot. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id} Content: ${message.content}`);
+	}	
+  } else {
 		checkDB()
-	}
+  }
 };
 
 async function checkDB() {
 	var isInDB = await databaseImports.isInDataBase(message.author.id)
-	console.log(`DB ${isInDB[0]}. ${message.author.tag} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
+	console.log(`DB ${isInDB[0]}. ${message.author.tag} | ${message.author.id} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
 	if (isInDB[0] == false && command.database == true) return message.channel.send(`${message.author}, you must use \`${prefix}setup\` first before using this command!`).then(async msg => {
 		setTimeout(() => {msg.delete();}, 10000);});	
 	dm(isInDB[1]);
@@ -83,17 +87,6 @@ function dm(rowData) {
 	if (command.guildOnly && message.channel.type === 'dm') {
 		return message.channel.send(`${message.author}, you can\'t execute that command inside DMs!`).then(async msg => {
 		setTimeout(() => {msg.delete();}, 10000);});
-	}
-	permissions(rowData);
-};
-
-function permissions(rowData) {
-	if (command.permissions) {
-		const authorPerms = message.channel.permissionsFor(message.author);
-		if (!authorPerms || !authorPerms.has(command.permissions)) {
-			return message.channel.send(`${message.author}, you can not do this!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
-		}
 	}
 	owner(rowData);
 };
@@ -154,8 +147,7 @@ function tryToExecute(rowData) {
 		command.execute(message, args, client, rowData);
 	} catch (error) {
 		console.error(error);
-		return message.channel.send(`${message.author}, there was an error trying to execute that command! Error: ${error}`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+		return message.channel.send(`${message.author}, there was an error trying to execute that command! Please report this. Error: ${error}`);
 	}
 };
 

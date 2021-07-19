@@ -11,6 +11,7 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 2.5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);

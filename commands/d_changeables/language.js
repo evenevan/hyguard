@@ -5,12 +5,13 @@ const funcImports = require( __dirname + '../../../functions');
 module.exports = {
 	name: 'language',
   aliases: ['lang'],
-  title: 'Set a whitelisted language',
+  title: `Set a whitelisted language`,
 	description: 'Allows you to whitelist a language for use on Hypixel',
   usage: `\`${prefix}language <language>\`, \`${prefix}language current\``,
   args: true,
   database: true,
   cooldown: 5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
 
     const readData = funcImports.readConstants();

@@ -5,12 +5,13 @@ const funcImports = require( __dirname + '../../../functions');
 const databaseImports = require('../../databaseFuncs');
 module.exports = {
 	name: 'whitelist',
-  title: 'Set whitelisted game types for Hypixel',
+  title: `Set whitelisted game types for Hypixel`,
 	description: 'Allows you to set whitelisted game to play on Hypixel. Games detected that are not whitelisted will set off an orange alert. Use <https://api.hypixel.net/#section/Introduction/GameTypes> to find the database name of the game.',
   usage: `\`${prefix}whitelist add/remove <game>\`, \`${prefix}whitelist current\``,
   args: true,
   database: true,
   cooldown: 2.5,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
 	if (row !== undefined) {
       var tzOffset = (row.timezone * 3600000);

@@ -12,6 +12,7 @@ module.exports = {
   cooldown: 0,
   ownerReq: true,
   database: false,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
     if (!args[0]) return message.channel.send(`hey ${message.author}, you didn't provide any arguments. smh.`).then(async msg => {
         setTimeout(() => {

@@ -12,6 +12,7 @@ module.exports = {
   cooldown: 5,
   ownerReq: true,
   database: false,
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
         try {
     let readData = funcImports.readOwnerSettings();
