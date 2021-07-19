@@ -74,19 +74,11 @@ message.channel.send('Deleting..').then(async loadingmsg => {
 
             } else if (collected.first().emoji.name !== '👍') {
               msg.delete();
-              message.channel.send(`${message.author}, Operation canceled.`).then(async msg => {
-              setTimeout(() => {
-                msg.delete();
-              }, 10000);
-            });
+              message.channel.send(`${message.author}, Operation canceled.`);
             }
           }).catch(() => {
             msg.delete();
-            message.channel.send(`${message.author}, no reaction after 30 seconds, operation canceled`).then(async msg => {
-              setTimeout(() => {
-                msg.delete();
-              }, 30000);
-            });
+            message.channel.send(`${message.author}, no reaction after 30 seconds, operation canceled`);
           });
         });
     } catch (err) {

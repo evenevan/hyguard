@@ -71,31 +71,26 @@ function apiCall(dbUserData, client, userNumber) {
           Promise.all([
               fetchTimeout(`https://api.hypixel.net/player?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 1500, {
                 signal: controller.signal
-              }).then(player => player.json()),
+              }).then(function(response) {
+                if (!response.ok) {throw new Error("HTTP status " + response.status);}
+                return response.json();
+              }),
               fetchTimeout(`https://api.hypixel.net/status?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 1500, {
                 signal: controller.signal
-              }).then(status => status.json())
+              }).then(function(response) {
+                if (!response.ok) {throw new Error("HTTP status " + response.status);}
+                return response.json();
+              })
             ])
             .then((apiData) => {
-              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber);
-
-              if (apiData[0].success == false || apiData[1].success == false)  {
-                let error = new Error(`Possible API Rate Limit; API Limit may have been exceeded.`);
-
-                error.name = `API Limit Error`;
-  
-                throw error;
-              }
-
+              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber); //backup checkto ensure success
             })
             .catch((err) => {
               if (err.name === "AbortError") {
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}. Unix Epoch Time: ${Date.now()}`);
-              } else if (err.name === "API Limit Error") {
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${err} Unix Epoch Time: ${Date.now()}`);
-              } else{
-                console.log(`API Error 9: ${err}`);
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${message.author}, an error occured while executing this command. This error is likely an invalid JSON`);
+                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`APi Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}. Unix Epoch Time: ${Date.now()}`);
+              } else {
+                console.log(`Hypixel API Error: ${err}. User ID: ${userNumber}`);
+                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Hypixel API Error: An error occured while executing the monitoring. ${err}. User ID: ${userNumber}`);
               }
             });
         
@@ -407,7 +402,7 @@ gametypeAlert = embedData.gametypeAlert;
 let embed = new Discord.MessageEmbed()
 .setColor(embedColor)
 .setTitle(`${!data[1].session.online ? `**Offline!**` : `${isAlert ? `**Unusual activity detected!**` : `**Nothing abnormal detected!**` }` }`)
-.setFooter(`${isAlert == true ? `Alert at ${dateString} | ${timeString}` : `Log at ${dateString} | ${timeString}` }`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+.setFooter(`${isAlert == true ? `Alert at ${dateString} | ${timeString}` : `Log at ${dateString} | ${timeString}` }`, 'https://i.imgur.com/MTClkTu.png')
 if (!data[1].session.online) {
     embed.addFields(
     { name: 'Status', value: `${data[0].player.displayname} is offline` },

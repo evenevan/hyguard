@@ -2,7 +2,7 @@ const { prefix } = require('../../userConfig.json');
 module.exports = {
 	name: 'uptime',
 	description: 'Shows the uptime of the bot',
-	title: 'Displays uptime of the bot',
+	title: 'Displays the uptime of the bot',
   database: false,
   cooldown: 5,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],

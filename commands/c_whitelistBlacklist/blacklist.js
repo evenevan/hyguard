@@ -33,26 +33,16 @@ module.exports = {
       return currentBlacklist();
     } else if (!/^[a-zA-Z_]+$/.test(args[0])) {
 
-      return message.channel.send(`${message.author}, you cannot use any characters that are not letters or underscores! `).then(async msg => {
-      setTimeout(() => {msg.delete();}, 10000);});
+      return message.channel.send(`${message.author}, you cannot use any characters that are not letters or underscores! `);
     } else if (args[0].toLowerCase() !== "add" && args[0].toLowerCase() !== "remove") {
 
-      return message.channel.send(`${message.author}, that isn't a valid instruction! Use \`${prefix}help blacklist\` to find valid arguments!`).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 10000);
-      });
+      return message.channel.send(`${message.author}, that isn't a valid instruction! Use \`${prefix}help blacklist\` to find valid arguments!`);
     } else if (!args[1]) {
 
-      return message.channel.send(`${message.author}, you didn't specify any game type! Use this link <https://api.hypixel.net/#section/Introduction/GameTypes> to find the clean name of your game: ${games.join(`, `)}`).then(async msg => {
-      setTimeout(() => {msg.delete();}, 30000);});
+      return message.channel.send(`${message.author}, you didn't specify any game type! Use this link <https://api.hypixel.net/#section/Introduction/GameTypes> to find the clean name of your game: ${games.join(`, `)}`);
     } else if (!games.includes(args[1].toUpperCase())) {
 
-      return message.channel.send(`${message.author}, that doesn't seem to be a valid game type! Use this link <https://api.hypixel.net/#section/Introduction/GameTypes> to find the clean name of your game. Valid gametypes: ${games.join(`, `)}`).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 30000);
-      });
+      return message.channel.send(`${message.author}, that doesn't seem to be a valid game type! Use this link <https://api.hypixel.net/#section/Introduction/GameTypes> to find the clean name of your game. Valid gametypes: ${games.join(`, `)}`);
     } else {
       checkBlacklist();
     }
@@ -75,22 +65,14 @@ module.exports = {
 
     if (args[0] == 'add') {
       
-        if (blacklistResponse.includes(args[1].toUpperCase())) return message.channel.send(`${message.author}, that game type was already added!`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 10000);
-        });
+        if (blacklistResponse.includes(args[1].toUpperCase())) return message.channel.send(`${message.author}, that game type was already added!`);
 
         blacklistResponse.push(`${args[1].toUpperCase()}`)
  
         let combinedArrays = whitelist.concat(blacklistResponse);
         let hasDuplicates = new Set(combinedArrays).size < combinedArrays.length;
 
-        if (hasDuplicates) return message.channel.send(`${message.author}, that game was added to your whitelist. You cannot add a game to both.`).then(async msg => {
-            setTimeout(() => {
-              msg.delete();
-            }, 10000);
-          });
+        if (hasDuplicates) return message.channel.send(`${message.author}, that game was added to your whitelist. You cannot add a game to both.`);
 
         if (blacklistResponse.length == 1) changeAlertState(response);
         writeNewBlacklist(blacklistResponse);
@@ -99,11 +81,7 @@ module.exports = {
 
         let findAndRemove = blacklistResponse.indexOf(args[1].toUpperCase());
 
-        if (findAndRemove == -1) return message.channel.send(`${message.author}, you cannot unblacklist a game that wasn\'t already added!`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 10000);
-        });
+        if (findAndRemove == -1) return message.channel.send(`${message.author}, you cannot unblacklist a game that wasn\'t already added!`);
 
         blacklistResponse.splice(findAndRemove, 1);
 
@@ -143,7 +121,7 @@ module.exports = {
           let blacklistedData = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${args[1].toUpperCase()} has been added!`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
           if (blacklist.length == 1) blacklistedData.setDescription(`Your blacklisted games alert is now on! If you want to turn them off, use \`${prefix}alert blacklist\``);
           return message.reply(blacklistedData);
@@ -152,7 +130,7 @@ module.exports = {
           let blacklistedData = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${args[1].toUpperCase()} has been removed!`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
           if (blacklist.length == 0) blacklistedData.setDescription(`Your blacklisted games alert is now off, as you have no blacklisted games.`);
           return message.reply(blacklistedData);
@@ -177,7 +155,7 @@ module.exports = {
         let blacklistedData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s Blacklisted Games`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
           .addField(`Your blacklisted game(s)`, `${!blacklistResponse || blacklistResponse == 0 ? `No blacklisted games found!` : `${blacklistResponse.join(`, `).toUpperCase()}`}`);
         return message.reply(blacklistedData);
       } catch (err) {

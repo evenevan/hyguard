@@ -28,11 +28,7 @@ module.exports = {
     if (args[0].toLowerCase() == 'current') {
         return currentData();
     } else if (!validAdvancedSettings.includes(args[0].toUpperCase())) {
-        return message.channel.send(`${message.author}, that isn't a valid advanced option! Valid Advanced Options(s): ${validAdvancedSettings.join(", ")}`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 30000);
-        });
+        return message.channel.send(`${message.author}, that isn't a valid advanced option! Valid Advanced Options(s): ${validAdvancedSettings.join(", ")}`);
     } else {
         return getData();
     }
@@ -88,7 +84,7 @@ module.exports = {
           let advancedEmbed = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${message.author.tag}'s Advanced Settings`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 
           for (let i = 0; i < validAdvancedSettings.length; i++) {
             if (validAdvancedSettings[i].includes(advancedSettings[i])) {

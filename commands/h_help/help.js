@@ -56,7 +56,7 @@ module.exports = {
       const commandHelp = new Discord.MessageEmbed()
         .setColor('#7289DA')
         .setTitle(`**Information**`)
-        .setFooter(`Programmed by Attituding#6517 with help from the internet`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+        .setFooter(`Programmed by Attituding#6517 with help from the internet`, 'https://i.imgur.com/MTClkTu.png')
 		.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity. This bot isn't most user-friendly, but used the right way, it works.`)
 		.addField(`Data Collection`, `${prefix}setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference.`)
 		.addField(`Bug Reports and Suggestions`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the [Hypixel Discord](https://discord.com/invite/hypixel) before you DM me so that you won't get blocked by Clyde.`)
@@ -74,8 +74,7 @@ module.exports = {
 				})
 				.catch(error => {
 					console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
-					message.channel.send(`${message.author}, it seems like this bot cannot DM you! Turn on \`Allow direct messages from server members\` in the privacys settings of this server!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+					message.channel.send(`${message.author}, it seems like this bot cannot DM you! Turn on \`Allow direct messages from server members\` in the privacys settings of this server!`);
 				});
 		}
 
@@ -83,14 +82,13 @@ module.exports = {
 		const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
 
 		if (!command) {
-			return message.channel.send(`${message.author}, that\'s not a valid command!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+			return message.channel.send(`${message.author}, that\'s not a valid command!`);
 		}
 
     const commandHelp = new Discord.MessageEmbed()
         .setColor('#7289DA')
         .setTitle(`${prefix}${command.name}`)
-        .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+        .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 		if (command.description) commandHelp.setDescription(`${command.description}`);
         if (command.aliases) commandHelp.addField(`Aliases`, `${prefix + command.aliases.join(`, ${prefix}`)}`);
         if (command.usage) commandHelp.addField(`Usage`, `${command.usage}`);

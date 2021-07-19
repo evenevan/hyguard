@@ -22,7 +22,7 @@ module.exports = {
   args: false,
   database: false,
   cooldown: 7.5,
-  permissions: ["ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","MANAGE_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
   if (row !== undefined) {
     var tzOffset = (row.timezone * 3600000);
@@ -46,30 +46,18 @@ try {
 
 		if (api == false) {
 			msg.delete();
-			return message.channel.send(`${message.author}, this command is temporarily disabled as the API is down!`).then(async msg => {
-				setTimeout(() => {
-					msg.delete()
-				}, 10000)
-			});
+			return message.channel.send(`${message.author}, this command is temporarily disabled as the API is down!`);
 		}
 
 
 		if (!/^[\w+]{1,16}$/gm.test(args[0]) && args[0]) {
 			msg.delete();
-			return message.channel.send(`${message.author}, that doesn't seem to be a valid Minecraft username!`).then(async msg => {
-				setTimeout(() => {
-					msg.delete();
-				}, 10000);
-			});
+			return message.channel.send(`${message.author}, that doesn't seem to be a valid Minecraft username!`);
 		}
 
 		if (!args[0] && row == undefined) {
 			msg.delete();
-			return message.channel.send(`${message.author}, you are not signed up and you did not include a player name!`).then(async msg => {
-				setTimeout(() => {
-					msg.delete();
-				}, 10000);
-			});
+			return message.channel.send(`${message.author}, you are not signed up and you did not include a player name!`);
 		}
 
 		if (row !== undefined && !args[0]) {
@@ -83,26 +71,28 @@ try {
 			fetchTimeout(`https://api.mojang.com/user/profiles/${row.minecraftUUID}/names`, 2000, {
 					signal: controller.signal
 				})
-				.then(res => res.json())
+				.then(function(response) {
+					if (response.status == 204) {
+						return 204
+					}
+					if (!response.ok) {throw new Error("HTTP status " + response.status);}
+					return response.json();
+				  })
 				.then((response) => {
-					if (response.hasOwnProperty('error')) {
+					if (response == 204) {
 						msg.delete();
-						return message.channel.send(`${message.author}, that username doesn\'t seem to be valid.`).then(async msg => {
-							setTimeout(() => {
-								msg.delete();
-							}, 10000);
-						});
+						return message.channel.send(`${message.author}, your UUID doesn\'t seem to be valid.`);
 					}
 					recentGameAPI(row.minecraftUUID, response[response.length - 1].name)
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") {
 						msg.delete();
-						message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond, and may be down. Try again later.`);
+						message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond and may be down. Try again later.`);
 					} else {
 						msg.delete();
-						console.log(`API Error 9: ${err}`);
-						message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
+						console.log(`Mojang API Error 9: ${err}`);
+						message.channel.send(`${message.author}, Mojang API Error: An error occured while executing this command. \`${err}\``);
 					}
 				});
 		};
@@ -112,18 +102,28 @@ try {
 			fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${args[0]}`, 2000, {
 					signal: controller.signal
 				})
-				.then(res => res.json())
+				.then(function(response) {
+					if (response.status == 204) {
+						return 204
+					}
+					if (!response.ok) {throw new Error("HTTP status " + response.status);}
+					return response.json();
+				  })
 				.then((response) => {
+					if (response == 204) {
+						msg.delete();
+						return message.channel.send(`${message.author}, that username doesn\'t seem to be valid.`);
+					}
 					recentGameAPI(response.id, response.name);
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") {
 						msg.delete();
-						message.channel.send(`${message.author}, an error occured while executing this command. The Mojang API failed to respond after the Slothpixel API also failed, and may be down. Try again later.`);
+						message.channel.send(`${message.author}, an error occured while executing this command. The Mojang API failed to respond and may be down. Try again later.`);
 					} else {
 						msg.delete();
-						console.log(`API Error 9: ${err}`);
-						message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
+						console.log(`Mojang API Error 9: ${err}`);
+						message.channel.send(`${message.author}, Mojang API Error: An error occured while executing this command. \`${err}\``);
 					}
 				});
 		};
@@ -133,16 +133,12 @@ try {
 			fetchTimeout(`https://api.slothpixel.me/api/players/${playerUUID}/recentGames`, 2000, {
 					signal: controller.signal
 				})
-				.then(recentData => recentData.json())
+				.then(function(response) {
+					if (response.status == 204) return message.channel.send(`${message.author}, that username doesn\'t seem to be valid.`);
+					if (!response.ok) {throw new Error("HTTP status " + response.status);}
+					return response.json();
+				  })
 				.then((recentData) => {
-
-					if (recentData.hasOwnProperty('error')) {
-						return message.channel.send(`${message.author}, there was an error while trying to retrieve your requested information. Error: ${json.cause.toUpperCase()}`).then(async msg => {
-							setTimeout(() => {
-								msg.delete()
-							}, 10000)
-						});
-					}
 
 					function decimalsToUTC(decimal) {
 						if (/\./.test(decimal)) {
@@ -162,7 +158,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Most Recent Games - ${playerUsername}**`)
 							.addField(`No Recent Games Detected!`, `There are no recent games to show. Games played more than 3 days ago cannot be shown. Some players also have the recent games API option disabled.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 						return message.channel.send(noDataEmbed);
 					}
 
@@ -174,7 +170,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Recent Games - ${playerUsername} | Showing ${start + 1}-${start + current.length} out of ${recentData.length}**`)
 							.setDescription(`Some gametypes like Skyblock will not show up due to limitations with Hypixel's API. Games may take a while to appear here due to use of the Slothpixel API.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 						for (let i = start; i < start + 5; i++) {
 							if (recentData[i]) {
 								recentGamesEmbed.addField(`${recentData[i].gameType} | ${funcImports.epochToCleanDate(new Date(recentData[i].date+ tzOffset))} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData[i].hasOwnProperty("date") && recentData[i].date !== null && recentData[i].date !== "" ? `Game Start: ${new Date(recentData[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Game End: ${new Date(recentData[i].ended + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Play Time: ${new Date(recentData[i].ended - recentData[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData[i].date).toISOString().substr(11, 8)}\n` }${recentData[i].mode !== null && recentData[i].mode !== "" ? `Mode: ${recentData[i].mode}\n` : `` }${recentData[i].map !== null && recentData[i].map !== "" ? `Map: ${recentData[i].map}` : `` }`)
@@ -185,6 +181,7 @@ try {
 
 					msg.delete();
 					message.channel.send(generateEmbed(0)).then(message => {
+						if (message.channel.type === 'dm') return message.channel.send(`This is a work in progress. Recent games in DMs does not currently work correctly. Please use a channel.`);
 						if (recentData.length <= 5) return
 						message.react('➡️');
 						const collector = message.createReactionCollector(
@@ -196,12 +193,6 @@ try {
 						let currentIndex = 0
 						collector.on('collect', reaction => {
 
-							if (message.channel.type === 'dm') {
-
-								message.channel.send(`This is a work in progress. Recent games in DMs does not current work correctly.`)
-								collector.stop()
-								
-							} else {
 								message.reactions.removeAll().then(async() => {
 									reaction.emoji.name === '⬅️' ? currentIndex -= 5 : currentIndex += 5;
 	
@@ -210,7 +201,7 @@ try {
 									if (currentIndex > 0) await message.react('⬅️');
 									if (currentIndex + 5 < recentData.length) message.react('➡️');
 								})
-							}
+							
 						})
 
 						collector.on('end', () => { //my brain is dead
@@ -219,33 +210,28 @@ try {
 					})
 				})
 				.catch((err) => {
-					if (err.name === "AbortError") {
-						message.channel.send(`Slothpixel API failed, changing to backup API.`);
-						hypixelRecentGamesCall(playerUUID, playerUsername);
-					} else {
-						msg.delete();
-						console.log(`API Error 9: ${err}`);
-						message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
-					}
-				});
+                  if (err.name === "AbortError") {
+                      message.channel.send(`Slothpixel API failed, changing to Hypixel API.`);
+                      hypixelRecentGamesCall(playerUUID, playerUsername);
+                  } else {
+                      msg.delete();
+                      console.log(`Slothpixel API Error 9: ${err}`);
+                      message.channel.send(`${message.author}, Slothpixel API Error: An error occured while executing this command. \`${err}\``);
+                  }
+              	});
 
 		};
 
-		function hypixelRecentGamesCall(playerUUID, playerUsername) {
+		function hypixelRecentGamesCall(playerUUID, playerUsername) { //duplicating it just makes it easier to manage
 
 			fetchTimeout(`https://api.hypixel.net/recentgames?uuid=${playerUUID}&key=${hypixelAPIkey}`, 2000, {
 					signal: controller.signal
 				})
-				.then(recentData => recentData.json())
+				.then(function(response) {
+					if (!response.ok) {throw new Error("HTTP status " + response.status);}
+					return response.json();
+				  })
 				.then((recentData) => {
-
-					if (recentData.hasOwnProperty('error')) {
-						return message.channel.send(`${message.author}, there was an error while trying to retrieve your requested information. Error: ${json.cause.toUpperCase()}`).then(async msg => {
-							setTimeout(() => {
-								msg.delete()
-							}, 10000)
-						});
-					}
 
 					function decimalsToUTC(decimal) {
 						if (/\./.test(decimal)) {
@@ -265,7 +251,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Most Recent Games - ${playerUsername}**`)
 							.addField(`No Recent Games Detected!`, `There are no recent games to show. Games played more than 3 days ago cannot be shown. Some players also have the recent games API option disabled.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 						return message.channel.send(noDataEmbed);
 					}
 
@@ -277,7 +263,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Recent Games - ${playerUsername} | Showing ${start + 1}-${start + current.length} out of ${recentData.games.length}**`)
 							.setDescription(`Some gametypes like Skyblock will not show up due to limitations with Hypixel's API. This data was gathered with the Hypixel API as the Slothpixel API did not respond.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 						for (let i = start; i < start + 5; i++) {
 							if (recentData.games[i]) {
 								recentGamesEmbed.addField(`${recentData.games[i].gameType} | ${funcImports.epochToCleanDate(new Date(recentData.games[i].date + tzOffset))} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData.games[i].hasOwnProperty("date") && recentData.games[i].date !== null && recentData.games[i].date !== "" ? `Game Start: ${new Date(recentData.games[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData.games[i].hasOwnProperty('ended') && recentData.games[i].ended !== null && recentData.games[i].ended !== "" ? `Game End: ${new Date(recentData.games[i].ended + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData.games[i].hasOwnProperty('ended') && recentData.games[i].ended !== null && recentData.games[i].ended !== "" ? `Play Time: ${new Date(recentData.games[i].ended - recentData.games[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData.games[i].date).toISOString().substr(11, 8)}\n` }${recentData.games[i].mode !== null && recentData.games[i].mode !== "" ? `Mode: ${recentData.games[i].mode}\n` : `` }${recentData.games[i].map !== null && recentData.games[i].map !== "" ? `Map: ${recentData.games[i].map}` : `` }`)
@@ -301,7 +287,7 @@ try {
 
 							if (message.channel.type === 'dm') {
 
-								message.channel.send(`This is a work in progress. Recent games in DMs does not current work correctly.`)
+								message.channel.send(`This is a work in progress. Recent games in DMs does not currently work correctly.`)
 								collector.stop()
 								
 							} else {
@@ -324,13 +310,13 @@ try {
 				.catch((err) => {
 					if (err.name === "AbortError") {
 						msg.delete();
-						message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond, and may be down. Try again later. https://status.hypixel.net/`);
+						message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond and may be down. Try again later. https://status.hypixel.net/`);
 					} else {
 						msg.delete();
-						console.log(`API Error 9: ${err}`);
-						message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
+						console.log(`Hypixel API Error 9: ${err}`);
+						message.channel.send(`${message.author}, Hypixel API Error: An error occured while executing this command. \`${err}\``);
 					}
-				});
+				  });
 		}
 	}); 
 } catch (err) {

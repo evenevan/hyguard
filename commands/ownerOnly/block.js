@@ -10,6 +10,7 @@ module.exports = {
     usage: `\`${prefix}block <user>\``,
   cooldown: 5,
   ownerReq: true,
+  args: true,
   database: false,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {

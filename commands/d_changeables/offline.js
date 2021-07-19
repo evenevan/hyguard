@@ -19,8 +19,7 @@ module.exports = {
     if (args[0].toLowerCase() == 'current') {
       return currentOffline();
     } else if (!/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9] ([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(message.content.slice(9))) {
-      return message.channel.send(`${message.author}, that doesn't seem to be valid! Refer to the proper command usage with \`${prefix}help offline\``).then(async msg => {
-        setTimeout(() => {msg.delete();}, 10000);});
+      return message.channel.send(`${message.author}, that doesn't seem to be valid! Refer to the proper command usage with \`${prefix}help offline\``);
     } else {
       function timeToDecimals(time) {
         let minutesToDecimal = (time.slice(-2) / 60);
@@ -37,11 +36,7 @@ module.exports = {
       try {
         let response = await databaseImports.getData(message.author.id);
         
-        if (offlineDecimalInput === response.offline) return message.channel.send(`${message.author}, your offline time on Hypixel was already set from ${twentyFourToTwelve(args[0])} to ${twentyFourToTwelve(args[1])}!`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 10000);
-        });
+        if (offlineDecimalInput === response.offline) return message.channel.send(`${message.author}, your offline time on Hypixel was already set from ${twentyFourToTwelve(args[0])} to ${twentyFourToTwelve(args[1])}!`);
 
         writeNewOffline(offlineDecimalInput)
     

@@ -17,8 +17,7 @@ module.exports = {
 			|| message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
 		if (!command) {
-			return message.channel.send(`${message.author}, there is no command with name or alias \`${prefix}${commandName}\`!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+			return message.channel.send(`${message.author}, there is no command with name or alias \`${prefix}${commandName}\`!`);
 		}
 
 		const commandFolders = fs.readdirSync('./commands');

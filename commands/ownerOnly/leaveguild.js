@@ -11,14 +11,10 @@ module.exports = {
     usage: `\`${prefix}\``,
   cooldown: 0,
   ownerReq: true,
+  args: true,
   database: false,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
-    if (!args[0]) return message.channel.send(`hey ${message.author}, you didn't provide any arguments. smh.`).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 30000);
-      });
     
     try {
         leaveGuild();
@@ -34,7 +30,7 @@ module.exports = {
 
     } catch (err) {
         try {
-            message.channel.send(`Minor errowr while attempting to leave a guild. ${err}`);
+            message.channel.send(`Minor error while attempting to leave a guild. ${err}`);
         } catch (err) {
             console.log(`Major error while attemtping to leave a guild. ${err}`);
         }

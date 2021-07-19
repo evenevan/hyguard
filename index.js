@@ -78,15 +78,13 @@ async function checkPermsOfBot() {
 async function checkDB() {
 	var isInDB = await databaseImports.isInDataBase(message.author.id)
 	console.log(`DB ${isInDB[0]}. ${message.author.tag} | ${message.author.id} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
-	if (isInDB[0] == false && command.database == true) return message.channel.send(`${message.author}, you must use \`${prefix}setup\` first before using this command!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});	
+	if (isInDB[0] == false && command.database == true) return message.channel.send(`${message.author}, you must use \`${prefix}setup\` first before using this command!`);
 	dm(isInDB[1]);
 };
 	
 function dm(rowData) {
 	if (command.guildOnly && message.channel.type === 'dm') {
-		return message.channel.send(`${message.author}, you can\'t execute that command inside DMs!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+		return message.channel.send(`${message.author}, you can\'t execute that command inside DMs!`);
 	}
 	owner(rowData);
 };
@@ -95,8 +93,7 @@ function owner(rowData) {
 	if (command.ownerReq) {
 		const authorID = message.author.id
 		if (!botOwner.includes(authorID)) {
-			return message.channel.send(`${message.author}, you must be the owner to do this!`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+			return message.channel.send(`${message.author}, you must be the owner to do this!`);
 		}
 	}
 	argument(rowData);
@@ -110,8 +107,7 @@ function argument(rowData) {
 			reply += `\nThe proper usage would be: ${command.usage}`;
 		}
 
-		return message.channel.send(reply).then(async msg => {
-		setTimeout(() => {msg.delete();}, 20000);});
+		return message.channel.send(reply);
 	}
 	cooldown(rowData);
 };
@@ -132,8 +128,7 @@ function cooldown(rowData) {
 
 		if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return message.channel.send(`${message.author}, please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${prefix}${command.name}\` command.`).then(async msg => {
-		setTimeout(() => {msg.delete();}, 10000);});
+			return message.channel.send(`${message.author}, please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${prefix}${command.name}\` command.`).then(async msg =>{setTimeout(() => {msg.delete();}, timeLeft * 1000);});
 		}
 	}
 

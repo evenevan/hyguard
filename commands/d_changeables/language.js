@@ -20,11 +20,7 @@ module.exports = {
     if (args[0].toLowerCase() == 'current') {
       return currentVersion();
     } else if (!languages.includes(args[0].toUpperCase())) {
-      return message.channel.send(`${message.author}, that doesn't seem to be a valid language! Please choose one of the following: English, German, French, Dutch, Spanish, Italian, Chinese_Simplified, Chinese_Traditional, Portuguese_BR, Russian, Korean, Polish, Japanese, Pirate, Portuguese_PT, or Greek.`).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 20000);
-      });
+      return message.channel.send(`${message.author}, that doesn't seem to be a valid language! Please choose one of the following: English, German, French, Dutch, Spanish, Italian, Chinese_Simplified, Chinese_Traditional, Portuguese_BR, Russian, Korean, Polish, Japanese, Pirate, Portuguese_PT, or Greek.`);
     } else {
       checkLanguage();
     }
@@ -33,11 +29,7 @@ module.exports = {
       try {
         let response = await databaseImports.getData(message.author.id);
     
-        if (args[0].toUpperCase() == response.language) return message.channel.send(`${message.author}, your whitelisted language on Hypixel was already set to ${args[0].toUpperCase()}!`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 10000);
-        });
+        if (args[0].toUpperCase() == response.language) return message.channel.send(`${message.author}, your whitelisted language on Hypixel was already set to ${args[0].toUpperCase()}!`);
     
         writeNewLanguage();
     

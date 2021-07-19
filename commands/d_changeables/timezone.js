@@ -32,17 +32,13 @@ module.exports = {
       let formatExample = new Discord.MessageEmbed()
       .setColor('#FF5555')
       .setTitle('Invalid Format Or Offset!')
-      .setFooter(`Executed at ${dateString}} | ${timeString} UTC`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+      .setFooter(`Executed at ${dateString}} | ${timeString} UTC`, 'https://i.imgur.com/MTClkTu.png')
       .setDescription(`That isn't valid! It must be between -23:59 and +23:59. Please use the format \`-/+0\` or \`-/+0:00\`. See \`${prefix}help timezone\` for common timezones nad thie UTC offsets\n\n**Examples:**`)
       .addField('-07:00', '7 hours behind UTC')
       .addField(`-7`, `7 hours behind UTC`)
       .addField('+05:45', '5 hours and 45 minutes ahead of UTC')
       .addField('+5:45', '5 hours and 45 minutes ahead of UTC')
-      return message.channel.send(formatExample).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 60000);
-      });
+      return message.channel.send(formatExample);
     } else {
       checkTimezone();
     }
@@ -66,11 +62,7 @@ module.exports = {
           return result;
           };
     
-        if (UTCOffsetToDecimals(args[0]) == response.timezone) return message.channel.send(`${message.author}, your timezone/UTC Offset was already set to ${args[0]}! Your local time should be ${new Date(Date.now() + UTCOffsetToDecimals(args[0]) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`).then(async msg => {
-          setTimeout(() => {
-            msg.delete();
-          }, 10000);
-        });
+        if (UTCOffsetToDecimals(args[0]) == response.timezone) return message.channel.send(`${message.author}, your timezone/UTC Offset was already set to ${args[0]}! Your local time should be ${new Date(Date.now() + UTCOffsetToDecimals(args[0]) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
     
         writeNewTimezone(UTCOffsetToDecimals(args[0]));
     

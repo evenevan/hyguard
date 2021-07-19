@@ -37,12 +37,11 @@ module.exports = {
         fetchTimeout(`https://status.mojang.com/check`, 5000, {
           signal: controller.signal
         })
-            .then(res => res.json())
+            .then(function(response) {
+					    if (!response.ok) {throw new Error("HTTP status " + response.status);}
+					    return response.json();
+				      })
                 .then((mojang) => {
-                  if (mojang.hasOwnProperty('error')) {
-                    msg.delete();
-                    return message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond. Try again later. This error is expected to occur occasionally.`);
-                }
             
         const arr = [];
         
@@ -75,7 +74,7 @@ module.exports = {
             { name: 'session.minecraft.net', value: `${array[6]}` },
             { name: 'textures.minecraft.net', value: `${array[7]}` },
           )
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
         
           msg.delete();
           message.reply(mojangStatus);
@@ -84,11 +83,11 @@ module.exports = {
               .catch((err) => {
                 if (err.name === "AbortError") {
                   msg.delete();
-                  message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond, and may be down. Try again later.`);
+                  message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond and may be down. Try again later.`);
                 } else {
                   msg.delete();
-                  console.log(`API Error 9: ${err}`);
-                  message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
+                  console.log(`Mojang API Error 9: ${err}`);
+                  message.channel.send(`${message.author}, Mojang API Error: An error occured while executing this command. \`${err}\``);
                 }
               });
             });

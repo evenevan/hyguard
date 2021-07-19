@@ -30,11 +30,7 @@ module.exports = {
     if (args[0].toLowerCase() == 'current') {
       return currentVersion();
     } else if (!versions.includes(`${/[a-zA-Z]/g.test(args[0]) ? `${args[0].toUpperCase()}` : `${args[0]}`}`)) {
-      return message.channel.send(`${message.author}, that isn't a valid version! Please select a valid version of Minecraft. Reference: <https://support.hypixel.net/hc/en-us/articles/360019634940-Changing-Minecraft-Versions> `).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 10000);
-      });
+      return message.channel.send(`${message.author}, that isn't a valid version! Please select a valid version of Minecraft. Reference: <https://support.hypixel.net/hc/en-us/articles/360019634940-Changing-Minecraft-Versions> `);
     } else {
       checkVersion();
     }
@@ -85,7 +81,7 @@ module.exports = {
         let versionData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s whitelisted version(s)`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621')
+          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
           .addField(`Your version(s)`, `${version.join(`, `)}`);
         return message.reply(versionData);
       } catch (err) {

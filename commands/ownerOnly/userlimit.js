@@ -19,7 +19,7 @@ module.exports = {
     userLimit = readData.userLimit,
     blockedUsers = readData.blockedUsers;
 
-    if (!args[0] || isNaN(args[0]) && args[0] !== 'current') return message.channel.send(`hey ${message.author}, you didn't provide any arguments. idiot.`);
+    if (!args[0] || isNaN(args[0]) && args[0] !== 'current') return message.channel.send(`${message.author}, you didn't provide any arguments.`);
 
     if (args[0] == 'current') return message.channel.send(`${userLimit}`);
 

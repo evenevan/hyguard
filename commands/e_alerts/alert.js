@@ -28,11 +28,7 @@ module.exports = {
     if (args[0].toLowerCase() == 'current') {
       return currentAlerts();
     } else if (!alertTypes.includes(args[0].toLowerCase())) {
-      return message.channel.send(`${message.author}, that isn't a valid alert type! Valid Alert Types: ${alertTypes.join(", ")}`).then(async msg => {
-        setTimeout(() => {
-          msg.delete();
-        }, 30000);
-      });
+      return message.channel.send(`${message.author}, that isn't a valid alert type! Valid Alert Types: ${alertTypes.join(", ")}`);
     } else {
       return getAlerts();
     }
@@ -94,7 +90,7 @@ module.exports = {
         let alertData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s Alerts`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/e/e9/Book_and_Quill_JE2_BE2.png/revision/latest/scale-to-width-down/160?cb=20190530235621');
+          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
           alertData.addFields(
             { name: 'Blacklisted Games Alert', value: `${alertsCurrent[0]}` },
             { name: 'Non-Whitelisted Games Alert', value: `${alertsCurrent[1]}` },
