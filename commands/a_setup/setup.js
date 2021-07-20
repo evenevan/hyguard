@@ -27,7 +27,8 @@ module.exports = {
 		const readData = funcImports.readOwnerSettings();
         const api = readData.api,
 		userLimit = readData.userLimit,
-		blockedUsers = readData.blockedUsers;
+		blockedUsers = readData.blockedUsers,
+		dst = readData.dst;
 
 		checkSystemLimits();
 
@@ -58,7 +59,7 @@ module.exports = {
 		};
 	
 		function checkMCAccount() {
-		  message.channel.send(`${message.author}, welcome! To begin, there are 5 steps. First, please send your Minecraft username in this chat.`)
+		  message.channel.send(`${message.author}, welcome! To begin, there are 6 steps. First, please send your Minecraft username in this chat.`)
 		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
 			max: 1,
 			time: 60000
@@ -86,7 +87,7 @@ module.exports = {
 						.setColor('#FF5555')
 						.setTitle(`Link your Discord on Hypixel!`)
 						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-						.setDescription('You have not linked your Discord account to Minecraft account on Hypixel! Follow the guide below:')
+						.setDescription('You have not linked your Discord account to your Minecraft account on Hypixel! Follow the guide below:')
 						.setImage('https://i.imgur.com/gGKd2s8.gif');
 					  return message.reply(linkError);
 					}
@@ -96,7 +97,7 @@ module.exports = {
 						.setColor('#FF5555')
 						.setTitle(`That isn't your account!`)
 						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-						.setDescription('If that is your account, follow the guide below to relink it:')
+						.setDescription('That Minecraft account currently has a different Discord account linked! If that is your account, follow the guide below to relink it: ')
 						.setImage('https://i.imgur.com/gGKd2s8.gif');
 					  return message.reply(linkError);
 					}
@@ -167,7 +168,7 @@ module.exports = {
 				return result;
 			  };
 	
-			verifyCorrectTimezone(player, UTCOffsetToDecimals(timezone))
+			daylightSavings(player, UTCOffsetToDecimals(timezone))
 	
 		  }).catch((err) => {
 			  console.log(`type error? ${err}`)
@@ -177,8 +178,8 @@ module.exports = {
 		  });
 		};
 
-		function verifyCorrectTimezone(player, timezone) {
-			message.channel.send(`${message.author}, is your current local time ${new Date(Date.now() + timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}?`).then(msg => {
+		function daylightSavings(player, timezone) {
+			message.channel.send(`${message.author}, do you use DST (Daylight saving time)?`).then(msg => {
 				msg.react('👍')
 				msg.react('👎');
 				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
@@ -186,18 +187,39 @@ module.exports = {
 				  time: 60000
 				}).then(collected => {
 				  if (collected.first().emoji.name == '👍') {
-					offlineTime1(player, timezone)
+					verifyCorrectTimezone(player, timezone, true)
+				  } else if (collected.first().emoji.name == '👎') {
+					verifyCorrectTimezone(player, timezone, false);
+				  }
+				}).catch((err) => {
+				  console.log(err)
+				  message.channel.send(`${message.author}, no reaction after 60 seconds. Setup canceled.`).then(async msg => {
+					setTimeout(() => {msg.delete()}, 30000)});
+				});
+			  });
+		};
+
+		function verifyCorrectTimezone(player, timezone, daylightBoolean) {
+			console.log(dst, daylightBoolean, timezone, (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone))
+			message.channel.send(`${message.author}, is your current local time ${new Date(Date.now() + (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleString('en-IN', { hour12: true })}? If not, you will get to go back and reselect your timezone and daylight savings selection.`).then(msg => {
+				msg.react('👍')
+				msg.react('👎');
+				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
+				  max: 1,
+				  time: 60000
+				}).then(collected => {
+				  if (collected.first().emoji.name == '👍') {
+					offlineTime1(player, timezone, daylightBoolean)
 				  } else if (collected.first().emoji.name == '👎') {
 					verifyTimezone(player);
 				  }
 				}).catch(() => {
-				  msg.delete();
-				  message.channel.send(`${message.author}, no reaction after 60 seconds, setup canceled`);
+				  message.channel.send(`${message.author}, no reaction after 60 seconds. Setup canceled.`);
 				});
 			  });
 		}
 	
-		function offlineTime1(player, timezone) {
+		function offlineTime1(player, timezone, daylightBoolean) {
 		  message.channel.send(`Timezone verified. ${message.author}, please enter when you usually **get off** Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. Logins after this time will be alerts, so you may want to add an hour or two.`)
 		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
 			max: 1,
@@ -215,7 +237,7 @@ module.exports = {
 			  return message.channel.send(formatExample);
 			}
 	
-			offlineTime2(player, timezone, TimeToDecimals(offlineLogout), offlineLogout)
+			offlineTime2(player, timezone, daylightBoolean, TimeToDecimals(offlineLogout), offlineLogout)
 	
 		  }).catch((err) => {
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
@@ -224,7 +246,7 @@ module.exports = {
 		  });
 		};
 	
-		function offlineTime2(player, timezone, logoutDecimal, offlineLogout) {
+		function offlineTime2(player, timezone, daylightBoolean, logoutDecimal, offlineLogout) {
 		  message.channel.send(`Logout time verified. ${message.author}, please enter when you usually **get on** Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. Logins after this time won't be alerts.`)
 		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
 			max: 1,
@@ -246,7 +268,7 @@ module.exports = {
 			let loginDecimal = TimeToDecimals(offlineLogin);
 			let offlineTime = logoutDecimal + " " + loginDecimal;
 	
-			createChannel(player, timezone, offlineTime, offlineLogout, offlineLogin);
+			createChannel(player, timezone, daylightBoolean, offlineTime, offlineLogout, offlineLogin);
 	
 		  }).catch((err) => {
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
@@ -255,7 +277,7 @@ module.exports = {
 		  });
 		};
 
-		async function createChannel(player, timezone, offlineTime, offlineLogout, offlineLogin) {
+		async function createChannel(player, timezone, daylightBoolean, offlineTime, offlineLogout, offlineLogin) {
 			try {
 
 			let logChannel = await message.guild.channels.create(`${message.author.tag}-log`, {type: 'text'})
@@ -308,7 +330,7 @@ module.exports = {
                 client.channels.cache.get(alertChannel.id).send(`${message.author}, your alert messages will be sent here. You should keep notifications **on** for this channel. The command \`${prefix}alert <blacklist, whitelist, language, session, offline, or version\` can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.`).then((msg) => msg.pin());
                 client.channels.cache.get(logChannel.id).send(`${message.author}, your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`).then((msg) => msg.pin());
 			
-			writeData(player, timezone, offlineTime, offlineLogout, offlineLogin, logChannel.id, alertChannel.id)
+			writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logChannel.id, alertChannel.id)
 
 			} catch (err) {
 				if (err.name == `MissingCategory`) {
@@ -320,7 +342,7 @@ module.exports = {
 			}
 		};
 	
-		function writeData(player, timezone, offlineTime, offlineLogout, offlineLogin, logID, alertID) {
+		function writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logID, alertID) {
 		  let uuid = player[0].uuid,
 			language = player[0].language,
 			version = player[0].mc_version
@@ -333,7 +355,7 @@ module.exports = {
 			db.serialize(() => {
 	
 				let insertdata = db.prepare(`INSERT INTO data VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-				insertdata.run(message.author.id, message.author.tag, uuid, language, version, offlineTime, "", "", login, logout, timezone, "0 0 1 1 1 1", message.guild.id, logID, alertID, "0", "", "");
+				insertdata.run(message.author.id, message.author.tag, uuid, language, version, offlineTime, "", "", login, logout, timezone, daylightBoolean,"0 0 1 1 1 1", message.guild.id, logID, alertID, "0", "");
 				insertdata.finalize();
 				db.close();
 			  });
@@ -387,13 +409,21 @@ module.exports = {
 			  time[0] = +time[0] % 12 || 12;
 			}
 			return time.join('');
-		  };
+		};
 
 		function TimeToDecimals(time) {
 			let minutesToDecimal = (time.slice(-2) / 60);
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
-			};
+		};
+
+		//function isDST() { //this won't work because utc DOESNT have daylight savings. the fix for now is the dst command. i had plans to make dst dynamic for each user, but it sucks so no.
+			//let localOffset = new Date().getTimezoneOffset()
+			//let jan = new Date(new Date().getFullYear(), 0, 1);
+			//let jul = new Date(new Date().getFullYear(), 6, 1);
+			//console.log(localOffset, jan.toString(), jul.toString())
+			//return (localOffset < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset()))
+		//};
 	},
 };

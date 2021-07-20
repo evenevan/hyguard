@@ -32,11 +32,12 @@ function readConstants(){
       console.log(`There was an error parsing the JSON. Error: ${err}`)
 }};
 
-function saveOwnerSettings(api, userLimit, blockedUsers) {
+function saveOwnerSettings(api, userLimit, blockedUsers, dst) {
   var constants = {
   api: api,
   userLimit: userLimit,
-  blockedUsers: blockedUsers
+  blockedUsers: blockedUsers,
+  dst: dst
     };
 
 var data = JSON.stringify(constants);
@@ -54,11 +55,13 @@ function readOwnerSettings(){
     savedData = JSON.parse(data);
     var api = savedData.api,
     userLimit = savedData.userLimit,
-    blockedUsers = savedData.blockedUsers;
+    blockedUsers = savedData.blockedUsers,
+    dst = savedData.dst;
         return {
       api,
       userLimit,
-      blockedUsers
+      blockedUsers,
+      dst
   };
   }
   catch (err) {

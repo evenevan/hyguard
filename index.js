@@ -16,15 +16,15 @@ client.commands = new Discord.Collection();
 client.cooldowns = new Discord.Collection();
 
 client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
+	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Logged in as ${client.user.tag}!`);
 	client.user
 		.setPresence({ activity: { name: `accounts | ${prefix}help | ✔`, type: 'WATCHING' }, status: 'dnd' })
-		.then(console.log)
+		.then(presence => {console.log(`${presence.status} ${presence.activities[0].type} ${presence.activities[0].name}`)})
 		.catch(console.error);
 
 	let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
 	db.serialize(() => {
-		db.run(`CREATE TABLE IF NOT EXISTS data(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT, expansion TEXT)`);
+		db.run(`CREATE TABLE IF NOT EXISTS data(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, daylightSavings INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT)`);
 		db.close();
 	  })
 	  setTimeout(() => {setInterval(logImports.logStarter, logInterval * 1000, client)}, 2500);
@@ -60,7 +60,7 @@ async function checkPermsOfBot() {
 		const requiredPermissions = command.permissions;
 		let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me, requiredPermissions);
 		if (returned) {
-			console.log(`Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
 			return message.channel.send(`This bot is missing the following permissions(s) for that command: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
 		}
 		checkDB();
@@ -77,7 +77,7 @@ async function checkPermsOfBot() {
 
 async function checkDB() {
 	var isInDB = await databaseImports.isInDataBase(message.author.id)
-	console.log(`DB ${isInDB[0]}. ${message.author.tag} | ${message.author.id} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
+	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | DB ${isInDB[0]} User: ${message.author.tag} ${message.author.id} ${message.guild ? `GuildID: ${message.guild.id}` : ``} made a request: ${message.content}`)
 	if (isInDB[0] == false && command.database == true) return message.channel.send(`${message.author}, you must use \`${prefix}setup\` first before using this command!`);
 	dm(isInDB[1]);
 };

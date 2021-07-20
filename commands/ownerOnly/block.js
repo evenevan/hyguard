@@ -18,17 +18,18 @@ module.exports = {
     let readData = funcImports.readOwnerSettings();
     let api = readData.api,
     userLimit = readData.userLimit,
-    blockedUsers = readData.blockedUsers;
+    blockedUsers = readData.blockedUsers
+    dst = readData.dst;
 
     if (!blockedUsers.includes(args[0])) {
         blockedUsers.push(args[0]);
-        funcImports.saveOwnerSettings(api, userLimit, blockedUsers);
-        return message.channel.send(`${args[0]} added.`);
+        funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
+        return message.channel.send(`${message.author}, ${args[0]} added.`);
     } else {
         let blockedUserIndex = blockedUsers.indexOf(args[0]);
         blockedUsers.splice(blockedUserIndex, 1);
-        funcImports.saveOwnerSettings(api, userLimit, blockedUsers);
-        return message.channel.send(`${args[0]} removed.`);
+        funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
+        return message.channel.send(`${message.author}, ${args[0]} removed.`);
     }
     
         } catch (err) {

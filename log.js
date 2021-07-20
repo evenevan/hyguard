@@ -20,7 +20,8 @@ return promise.finally(() => clearTimeout(timeout));
 
 function logStarter(client) {
     let readData = funcImports.readOwnerSettings();
-    let api = readData.api;
+    let api = readData.api,
+    dst = readData.dst;
 
     if (api == false) {
       client.user.setActivity(`an API problem | ${prefix}help`, { type: 'WATCHING' });
@@ -52,7 +53,7 @@ function logStarter(client) {
             if (user[i].log == 0) {
               continue;
             }
-                apiCall(user[i], client, i);
+                apiCall(user[i], client, i, dst);
                 await timer(`${loadedUsers < 1 ? `${1000}` : `${logInterval / loadedUsers * 1000}`}`); //calculates the ms between each loading to balance the load across the 30 seconds. the most anyone will shift is 15 seconds with 1 new log user.
           }
         };
@@ -64,7 +65,7 @@ function logStarter(client) {
     };
 };
 
-function apiCall(dbUserData, client, userNumber) {
+function apiCall(dbUserData, client, userNumber, dst) {
     if (!dbUserData.minecraftUUID || !dbUserData.language || !dbUserData.version || !dbUserData.offline || !dbUserData.timezone || !dbUserData.alerts || !dbUserData.logID) return console.log(`${botOwner[0]}, data was missing for a user during a log function. User: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
 
     try { 
@@ -83,11 +84,11 @@ function apiCall(dbUserData, client, userNumber) {
               })
             ])
             .then((apiData) => {
-              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber); //backup checkto ensure success
+              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber, dst); //backup checkto ensure success
             })
             .catch((err) => {
               if (err.name === "AbortError") {
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`APi Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}. Unix Epoch Time: ${Date.now()}`);
+                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Hypixel API Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}. Unix Epoch Time: ${Date.now()}`);
               } else {
                 console.log(`Hypixel API Error: ${err}. User ID: ${userNumber}`);
                 if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Hypixel API Error: An error occured while executing the monitoring. ${err}. User ID: ${userNumber}`);
@@ -100,7 +101,7 @@ function apiCall(dbUserData, client, userNumber) {
       }
 };
 
-async function checkIfServerExists(apiData, dbUserData, client, userNumber) {
+async function checkIfServerExists(apiData, dbUserData, client, userNumber, dst) {
   let guild = await client.guilds.cache.get(`${dbUserData.guildID}`)
 
   if (!guild) {
@@ -115,11 +116,11 @@ async function checkIfServerExists(apiData, dbUserData, client, userNumber) {
       }
     }
   } else {
-    checkAlertPermissions(apiData, dbUserData, client, userNumber)
+    checkAlertPermissions(apiData, dbUserData, client, userNumber, dst)
   }
 };
 
-async function checkAlertPermissions(data, dbUserData, client, userNumber) {
+async function checkAlertPermissions(data, dbUserData, client, userNumber, dst) {
 	try {
   const alerts = client.channels.cache.get(`${dbUserData.alertID}`);
 
@@ -129,16 +130,16 @@ async function checkAlertPermissions(data, dbUserData, client, userNumber) {
 
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
-		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
+		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stop these alerts.`);
 	}
-	checkLogPermissions(data, dbUserData, client, userNumber, alerts);
+	checkLogPermissions(data, dbUserData, client, userNumber, alerts, dst);
 	} catch (err) {
 		console.log(`Someone appears to be attempting to crash the bot. Alert Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`);
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Someone appears to be attempting to crash the bot. Alert Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`);
 	}	
 };
 
-async function checkLogPermissions(data, dbUserData, client, userNumber, alerts) {
+async function checkLogPermissions(data, dbUserData, client, userNumber, alerts, dst) {
 	try {
 
   const log = client.channels.cache.get(`${dbUserData.logID}`);
@@ -152,20 +153,20 @@ async function checkLogPermissions(data, dbUserData, client, userNumber, alerts)
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
 		return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
 	}
-	useAPIData(data, dbUserData, client, userNumber, alerts, log);
+	useAPIData(data, dbUserData, client, userNumber, alerts, log, dst);
 	} catch (err) {
 		console.log(`Someone appears to be attempting to crash the bot. Log Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`)
-    alerts.send(`This bot is missing the following permissions(s) in the log channel: ${err}. The bot cannot log. Turn these messages off temporarily with \`${prefix}log\``)
+    alerts.send(`This bot is missing the following permissions(s) in the log channel: ${err}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stop these alerts.`)
 	}	
 };
 
-function useAPIData(data, dbUserData, client, userNumber, alerts, log) {
+function useAPIData(data, dbUserData, client, userNumber, alerts, log, dst) {
 
 try {
 
     let notif = dbUserData.alerts.split(" ") //0 = blacklist, 1 = whitelist, 2 = language, 3 = session, 4 = offline, 5 = version
 
-    let tzOffset = (dbUserData.timezone * 3600000);
+    let tzOffset = ((dbUserData.daylightSavings == true && dst == true ? dbUserData.timezone * 1 + 1: dbUserData.timezone) * 3600000);
     let timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
     let dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
 

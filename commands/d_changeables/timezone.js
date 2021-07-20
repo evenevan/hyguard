@@ -25,6 +25,8 @@ module.exports = {
       var dateString = funcImports.epochToCleanDate(new Date());
     }
     
+    let readData = funcImports.readOwnerSettings();
+    var dst = readData.dst;
     
     if (args[0].toLowerCase() == 'current') {
       return currentTimezone();
@@ -45,7 +47,7 @@ module.exports = {
     
     async function checkTimezone() {
       try {
-        let response = await databaseImports.getData(message.author.id)
+        await databaseImports.getData(message.author.id)
 
         function UTCOffsetToDecimals(utc) {
           if (!utc.includes(":")) {
@@ -62,20 +64,41 @@ module.exports = {
           return result;
           };
     
-        if (UTCOffsetToDecimals(args[0]) == response.timezone) return message.channel.send(`${message.author}, your timezone/UTC Offset was already set to ${args[0]}! Your local time should be ${new Date(Date.now() + UTCOffsetToDecimals(args[0]) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
-    
-        writeNewTimezone(UTCOffsetToDecimals(args[0]));
+        daylightSavings(UTCOffsetToDecimals(args[0]));
     
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
         message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
       }
     };
+
+    function daylightSavings(timezone) {
+			message.channel.send(`${message.author}, do you use DST (Daylight saving time)?`).then(msg => {
+				msg.react('👍')
+				msg.react('👎');
+				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
+				  max: 1,
+				  time: 60000
+				}).then(collected => {
+				  if (collected.first().emoji.name == '👍') {
+					writeNewTimezone(timezone, true)
+				  } else if (collected.first().emoji.name == '👎') {
+					writeNewTimezone(timezone, false);
+				  }
+				}).catch((err) => {
+				  msg.delete();
+				  console.log(err)
+				  message.channel.send(`${message.author}, no reaction after 60 seconds, operation canceled`).then(async msg => {
+					setTimeout(() => {msg.delete()}, 30000)});
+				});
+			  });
+		}
     
-    async function writeNewTimezone(timezone) {
+    async function writeNewTimezone(timezone, dstBoolean) {
       try {
         await databaseImports.changeData(message.author.id, timezone, `UPDATE data SET timezone = ? WHERE discordID = ?`);
-        return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}. Your local time should be ${new Date(Date.now() + timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
+        await databaseImports.changeData(message.author.id, dstBoolean, `UPDATE data SET daylightSavings = ? WHERE discordID = ?`);
+        return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}. Your local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
         message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
@@ -99,7 +122,7 @@ module.exports = {
               return "+" + decimal;
           }    
         };
-        return message.channel.send(`${message.author}, your timezone/UTC offset is set to ${decimalsToUTC(response.timezone)}. Your local time should be ${new Date(Date.now() + response.timezone * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
+        return message.channel.send(`${message.author}, your timezone/UTC offset is set to ${decimalsToUTC(response.timezone)}. Daylight savings is ${response.daylightSavings == true ? `on` : `off`}. Your local time should be ${new Date(Date.now() + (response.daylightSavings == true && dst == true ? response.timezone * 1 + 1: response.timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
         console.log(`ERROR_3: ${err}`);
         message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);

@@ -17,14 +17,15 @@ module.exports = {
     let readData = funcImports.readOwnerSettings();
     var api = readData.api,
     userLimit = readData.userLimit,
-    blockedUsers = readData.blockedUsers;
+    blockedUsers = readData.blockedUsers
+    dst = readData.dst;
 
     if (!args[0] || isNaN(args[0]) && args[0] !== 'current') return message.channel.send(`${message.author}, you didn't provide any arguments.`);
 
     if (args[0] == 'current') return message.channel.send(`${userLimit}`);
 
     var userLimit = args[0]
-    funcImports.saveOwnerSettings(api, userLimit, blockedUsers);
+    funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
     return message.channel.send(`${message.author}, max amount of users is now set to ${args[0]}`);
 
     

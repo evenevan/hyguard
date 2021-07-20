@@ -5,10 +5,10 @@ const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const block = require('./block');
 module.exports = {
-	name: 'api',
-  title: 'Toggles API usage',
-	description: 'Toggles API usage',
-    usage: `\`${prefix}api\``,
+	name: 'dst',
+  title: 'Toggles DST',
+	description: 'Toggles DST, this is a temporary path.',
+    usage: `\`${prefix}dst\``,
   cooldown: 5,
   ownerReq: true,
   database: false,
@@ -18,22 +18,22 @@ module.exports = {
     let readData = funcImports.readOwnerSettings();
     var api = readData.api,
     userLimit = readData.userLimit,
-    blockedUsers = readData.blockedUsers
+    blockedUsers = readData.blockedUsers,
     dst = readData.dst;
 
-    if (api == false) {
+    if (dst == false) {
 
-        var api = true;
+        var dst = true;
         funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
-        console.log(`API commands and functions are now on!`);
-        return message.channel.send(`${message.author}, API commands and functions are now on!`);
+        console.log(`Daylight savings is now on!`);
+        return message.channel.send(`${message.author}, daylight savings is now on!`);
 
-    } else if (api == true) {
+    } else if (dst == true) {
 
-        var api = false;
+        var dst = false;
         funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
-        console.log(`API commands and functions are now off!`);
-        return message.channel.send(`${message.author}, API commands are now off!`);
+        console.log(`Daylight savings is now off now off!`);
+        return message.channel.send(`${message.author}, daylight savings is now off!`);
 
     }
         } catch (err) {

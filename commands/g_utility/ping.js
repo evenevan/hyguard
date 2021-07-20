@@ -9,13 +9,14 @@ module.exports = {
 	execute(message, args, client) {
 		try {
 			message.channel.send('Loading data').then(async msg => {
-				msg.delete();
-				message.channel.send(
-					`🏓 Ping! Latency is ${msg.createdTimestamp -
-						message.createdTimestamp}ms. API Latency is ${Math.round(
-						client.ws.ping
-					)}ms`
-				);
+				msg.delete().then(() => {
+					message.channel.send(
+						`🏓 Ping! Latency is ${msg.createdTimestamp -
+							message.createdTimestamp}ms. API Latency is ${Math.round(
+							client.ws.ping
+						)}ms`
+					);
+				})
 			});
 		} catch (err) {
 		console.log(`Error 11: ${err}`);
