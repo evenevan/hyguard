@@ -19,8 +19,8 @@ module.exports = {
 				})
 			});
 		} catch (err) {
-		console.log(`Error 11: ${err}`);
-		message.channel.send(`An unknown error occured. Please report this. ERROR_11: \`${err}\``);
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An unknown error occured. ${err}`);
+		message.channel.send(`${message.author}, an unknown error occured. Please report this. \`${err}\``);
 		}
 	},
 };

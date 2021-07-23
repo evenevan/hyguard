@@ -67,8 +67,8 @@ module.exports = {
         daylightSavings(UTCOffsetToDecimals(args[0]));
     
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
 
@@ -92,7 +92,7 @@ module.exports = {
 					setTimeout(() => {msg.delete()}, 30000)});
 				});
 			  });
-		}
+		};
     
     async function writeNewTimezone(timezone, dstBoolean) {
       try {
@@ -100,8 +100,8 @@ module.exports = {
         await databaseImports.changeData(message.author.id, dstBoolean, `UPDATE data SET daylightSavings = ? WHERE discordID = ?`);
         return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}. Your local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`An error occured while writing data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
       }
     
     };
@@ -124,8 +124,8 @@ module.exports = {
         };
         return message.channel.send(`${message.author}, your timezone/UTC offset is set to ${decimalsToUTC(response.timezone)}. Daylight savings is ${response.daylightSavings == true ? `on` : `off`}. Your local time should be ${new Date(Date.now() + (response.daylightSavings == true && dst == true ? response.timezone * 1 + 1: response.timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     

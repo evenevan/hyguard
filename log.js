@@ -59,15 +59,13 @@ function logStarter(client) {
         };
 
         } catch (err) {
-          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while attempting to read the database table. Error 17. \`${err}\``);
-            console.log(`An error occured while attempting to reach the database table. ERROR_17. \`${err}\``);
+          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to read the database table. \`${err}\``);
+            console.log(`An error occured while attempting to reach the database table. ${err}`);
         }
     };
 };
 
 function apiCall(dbUserData, client, userNumber, dst) {
-    if (!dbUserData.minecraftUUID || !dbUserData.language || !dbUserData.version || !dbUserData.offline || !dbUserData.timezone || !dbUserData.alerts || !dbUserData.logID) return console.log(`${botOwner[0]}, data was missing for a user during a log function. User: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
-
     try { 
           Promise.all([
               fetchTimeout(`https://api.hypixel.net/player?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 1500, {
@@ -88,16 +86,16 @@ function apiCall(dbUserData, client, userNumber, dst) {
             })
             .catch((err) => {
               if (err.name === "AbortError") {
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Hypixel API Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}. Unix Epoch Time: ${Date.now()}`);
+                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}.`);
               } else {
                 console.log(`Hypixel API Error: ${err}. User ID: ${userNumber}`);
-                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Hypixel API Error: An error occured while executing the monitoring. ${err}. User ID: ${userNumber}`);
+                if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: An error occured while executing the monitoring. ${err}. User ID: ${userNumber}`);
               }
             });
         
       } catch (err) {
-        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured outside of a promise. Error 10. \`${err}\``);
-        console.log(`Error 10: ${err}`);
+        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured outside of a promise. \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured outside of a promise. ${err}`);
       }
 };
 
@@ -112,7 +110,7 @@ async function checkIfServerExists(apiData, dbUserData, client, userNumber, dst)
         return console.log(`${dbUserData.discordID} | ${dbUserData.discordUsername} was deleted via the log delete function as their guild no longer exists.`)
       } catch (err) {
         console.log(`Error 15: ${err}`);
-        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while deleting a user as their guild/server no longer exists. Error 15: ${err}`);
+        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while deleting a user as their guild/server no longer exists. Error 15: ${err}`);
       }
     }
   } else {
@@ -129,13 +127,13 @@ async function checkAlertPermissions(data, dbUserData, client, userNumber, dst) 
 	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
 
 	if (returned) {
-		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
-		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stop these alerts.`);
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
+		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stops these alerts.`);
 	}
 	checkLogPermissions(data, dbUserData, client, userNumber, alerts, dst);
 	} catch (err) {
 		console.log(`Someone appears to be attempting to crash the bot. Alert Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`);
-    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Someone appears to be attempting to crash the bot. Alert Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`);
+    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Someone appears to be attempting to crash the bot. Alert Permissions. User: ${userNumber} ${err}`);
 	}	
 };
 
@@ -144,19 +142,19 @@ async function checkLogPermissions(data, dbUserData, client, userNumber, alerts,
 
   const log = client.channels.cache.get(`${dbUserData.logID}`);
 
-  if (!log) return console.log(`User's log channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
+  if (!log) return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | User's log channel is no longer valid. User: ${userNumber}`)
 
 	let returned = await funcImports.checkPermsOfBot(log, log.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
 
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
-    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
+    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
 		return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
 	}
 	useAPIData(data, dbUserData, client, userNumber, alerts, log, dst);
 	} catch (err) {
-		console.log(`Someone appears to be attempting to crash the bot. Log Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`)
-    alerts.send(`This bot is missing the following permissions(s) in the log channel: ${err}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stop these alerts.`)
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Someone appears to be attempting to crash the bot. Log Permissions. User: ${dbUserData.discordID} | ${dbUserData.minecraftUUID} ${err}`)
+    alerts.send(`This bot is missing the following permissions(s) in the log channel: ${err}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stops these alerts.`)
 	}	
 };
 
@@ -265,8 +263,8 @@ try {
         return alerts.send(`<@${dbUserData.discordID}>, Session Alert: Relog at ${timeString} that was ${roundedRelogTime} seconds long. You can turn off session alerts with \`${prefix}alert session\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
       } else return;
         } catch (err) {
-          console.log(`ERROR_3: ${err}`);
-          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while writing a new login or logout. ERROR_3: \`${err}\``);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new login or logout.${err}`);
+          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new login or logout.\`${err}\``);
         }
       };
       return;
@@ -292,8 +290,8 @@ try {
         alerts.send(`<@${dbUserData.discordID}>, Session Alert: Logout at ${timestampOfLastLogout}. Playtime was ${lastPlaytime}. You can turn off session alerts with \`${prefix}alert session\``);
           return;
         } catch (err) {
-          console.log(`ERROR_3: ${err}`);
-          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while writing a new logout. ERROR_3: \`${err}\``);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new logout. ${err}`);
+          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new logout. \`${err}\``);
         }
       };
     } 
@@ -316,8 +314,8 @@ try {
         return alerts.send(`<@${dbUserData.discordID}>, Session Alert: Login at ${timestampOfLastLogin}. You can turn off session alerts with \`${prefix}alert session\``);
       } else return;
         } catch (err) {
-          console.log(`ERROR_3: ${err}`);
-          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while writing a new login. ERROR_3: \`${err}\``);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new login. ${err}`);
+          if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing a new login. \`${err}\``);
         }
       };
     }
@@ -430,8 +428,8 @@ log.send(embed);
 
 } catch (error) {
   if (error instanceof TypeError) {
-    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`TypeError, someone may have left the server while a log was executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
-    return console.log(`TypeError, someone may have left the server while a log was executing. Error 19: ${error}. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
+    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | TypeError, someone may have left the server while a log was executing. User ${userNumber} ${error}`);
+    return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | TypeError, someone may have left the server while a log was executing. User ${userNumber} ${error}`)
   }
   try {
     const otherError = new Discord.MessageEmbed()
@@ -440,11 +438,11 @@ log.send(embed);
     .setFooter(`Error at ${dateString} | ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
     .setDescription(`This error is expected to happen occasionally. Please report this to the bot owner if this continues.`)
   log.send(otherError);
-  if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while attempting to generate a log message and check a user. Error 18: ${error}`);
-  console.log(`An error occured while attempting to generate a log message and check a user. Error 18: ${error}`)
+  if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to generate a log message and check a user. \`${error}\``);
+  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to generate a log message and check a user. ${error}`)
   } catch (err) {
-    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`Error 20: ${error}. Error 18 is the one that caused this, but failed to send a log message, which caused Error 20.`);
-    console.log(`Error 20: ${error}. Error 18 is the one that caused this, but failed to send a log message, which caused Error 20.`)
+    if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A error log message failed to send, which causeed this error. \`${err}\``);
+    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A error log message failed to send, which causeed this error. ${err}`)
   }
 }
   

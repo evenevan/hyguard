@@ -41,18 +41,18 @@ module.exports = {
         writeNewOffline(offlineDecimalInput)
     
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     
     async function writeNewOffline(offlineDecimalInput) {
       try {
-        let response = await databaseImports.changeData(message.author.id, offlineDecimalInput, `UPDATE data SET offline = ? WHERE discordID = ?`);
+        await databaseImports.changeData(message.author.id, offlineDecimalInput, `UPDATE data SET offline = ? WHERE discordID = ?`);
         return message.channel.send(`${message.author}, your offline time on Hypixel is now set to ${twentyFourToTwelve(args[0])} to ${twentyFourToTwelve(args[1])}.`)
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
       }
     
     };
@@ -64,8 +64,8 @@ module.exports = {
 
         return message.channel.send(`${message.author}, your offline time on Hypixel is set to ${twentyFourToTwelve(decimalToTime(offlineArray[0]))} to ${twentyFourToTwelve(decimalToTime(offlineArray[1]))}.`);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
 

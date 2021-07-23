@@ -91,7 +91,7 @@ module.exports = {
                         message.channel.send(`${message.author}, an error occured while executing this command. The Mojang API failed to respond and may be down. Try again later.`);
                     } else {
                         msg.delete();
-                        console.log(`Mojang API Error 9: ${err}`);
+                        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Mojang API Error 9: ${err}`);
                         message.channel.send(`${message.author}, Mojang API Error: An error occured while executing this command. \`${err}\``);
                     }
                 });
@@ -150,7 +150,7 @@ module.exports = {
                     hypixelAPICall();
                 } else {
                     msg.delete();
-                    console.log(`Slothpixel API Error 9: ${err}`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Slothpixel API Error 9: ${err}`);
                     message.channel.send(`${message.author}, Slothpixel API Error: An error occured while executing this command. \`${err}\``);
                 }
             });  
@@ -209,7 +209,7 @@ module.exports = {
                             message.channel.send(`${message.author}, an error occured while executing this command. The Hypixel API failed to respond and may be down. Try again later. <https://status.hypixel.net/>`);
                         } else {
                             msg.delete();
-                            console.log(`Hypixel API Error 9: ${err}`);
+                            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error 9: ${err}`);
                             message.channel.send(`${message.author}, Hypixel API Error: An error occured while executing this command. \`${err}\``);
                         }
                       });
@@ -217,8 +217,8 @@ module.exports = {
           
       })
   } catch (err) {
-      console.log(`Error 10: ${err}`);
-      message.channel.send(`${message.author}, something went very wrong outside of a promise catch. Please report this. ERROR_10: \`${err}\``);
+      console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went very wrong outside of a promise catch. ${err}`);
+      message.channel.send(`${message.author}, something went very wrong outside of a promise catch. Please report this. \`${err}\``);
   }    
 	},
 };

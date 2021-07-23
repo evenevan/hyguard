@@ -37,8 +37,8 @@ module.exports = {
 
     }
         } catch (err) {
-            console.log(`ERROR_14: ${err}`);
-			message.channel.send(`An error occured while writing data. Please report this. ERROR_4: \`${err}\``);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while using data with fs. ${err}`);
+			message.channel.send(`${message.author}, an error occured while using data with fs. Please report this. \`${err}\``);
         }
     },
 };

@@ -42,8 +42,8 @@ module.exports = {
 			if (api == false) return message.channel.send(`${message.author}, this command is temporarily disabled as the API is down!`);
 			isThisPlayerInTheDataBase();		
 		} catch (err) {
-			console.log(`ERROR_3: ${err}`);
-        	message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        	message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
 		}
 	};
 
@@ -53,8 +53,8 @@ module.exports = {
 			if (isInDB[0] == true) return message.channel.send(`${message.author}, you have already used this command!`);
 			checkMCAccount();
 		  } catch (err) {
-			console.log(`ERROR_3: ${err}`);
-			message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+			message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
 		  }
 		};
 	
@@ -112,7 +112,7 @@ module.exports = {
 					  message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond, and may be down. Try again later. https://status.hypixel.net/`);
 					} else {
 					  loadingmsg.delete();
-					  console.log(`API Error 9: ${err}`);
+					  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | API Error 9: ${err}`);
 					  message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
 					}
 				  });
@@ -123,8 +123,8 @@ module.exports = {
 	
 		  }).catch((err) => {
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`ERROR_4: ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_4: \`${err}\``);
+			console.log(`Something went wrong. An error occured while getting player data. ${err}`);
+			return message.channel.send(`${message.author}, something went wrong. An error occured while getting player data. Please report this. \`${err}\``);
 		  });
 		};
 	
@@ -173,8 +173,8 @@ module.exports = {
 		  }).catch((err) => {
 			  console.log(`type error? ${err}`)
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 2 minutes. Setup canceled.`);
-			console.log(`ERROR_5: ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_5: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the timezone variable. ${err}`);
+			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the timezone variable. Please report this. \`${err}\``);
 		  });
 		};
 
@@ -192,15 +192,14 @@ module.exports = {
 					verifyCorrectTimezone(player, timezone, false);
 				  }
 				}).catch((err) => {
-				  console.log(err)
-				  message.channel.send(`${message.author}, no reaction after 60 seconds. Setup canceled.`).then(async msg => {
-					setTimeout(() => {msg.delete()}, 30000)});
+				  if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
+				  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the DST variable. ${err}`);
+				  return message.channel.send(`${message.author}, something went wrong. An error occured while getting the DST variable. Please report this. \`${err}\``);
 				});
 			  });
 		};
 
 		function verifyCorrectTimezone(player, timezone, daylightBoolean) {
-			console.log(dst, daylightBoolean, timezone, (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone))
 			message.channel.send(`${message.author}, is your current local time ${new Date(Date.now() + (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleString('en-IN', { hour12: true })}? If not, you will get to go back and reselect your timezone and daylight savings selection.`).then(msg => {
 				msg.react('👍')
 				msg.react('👎');
@@ -214,10 +213,12 @@ module.exports = {
 					verifyTimezone(player);
 				  }
 				}).catch(() => {
-				  message.channel.send(`${message.author}, no reaction after 60 seconds. Setup canceled.`);
+					if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
+					console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while verifying the timezone variable. ${err}`);
+					return message.channel.send(`${message.author}, something went wrong. An error occured while verifying the timezone variable. Please report this. \`${err}\``);
 				});
 			  });
-		}
+		};
 	
 		function offlineTime1(player, timezone, daylightBoolean) {
 		  message.channel.send(`Timezone verified. ${message.author}, please enter when you usually **get off** Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. Logins after this time will be alerts, so you may want to add an hour or two.`)
@@ -241,8 +242,8 @@ module.exports = {
 	
 		  }).catch((err) => {
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`ERROR_6: ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_6: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the second offline time variable. ${err}`);
+			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the second offline time variable. Please report this. \`${err}\``);
 		  });
 		};
 	
@@ -272,8 +273,8 @@ module.exports = {
 	
 		  }).catch((err) => {
 			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`ERROR_7: ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_7: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the second offline time variable. ${err}`);
+			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the second offline time variable. Please report this. \`${err}\``);
 		  });
 		};
 
@@ -333,21 +334,17 @@ module.exports = {
 			writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logChannel.id, alertChannel.id)
 
 			} catch (err) {
-				if (err.name == `MissingCategory`) {
-					console.log(`ERROR_15: ${err}`);
-					return message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_15: \`${err}\``);
-				  }
-				console.log(`ERROR_16: ${err}`);
-				message.channel.send(`${message.author}, something went wrong. Please report this. ERROR_16 \`${err}\``)
+				console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while generating channels. ${err}`);
+				message.channel.send(`${message.author}, something went wrong. An error occured while generating channels. Please report this. \`${err}\``)
 			}
 		};
 	
 		function writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logID, alertID) {
 		  let uuid = player[0].uuid,
-			language = player[0].language,
-			version = player[0].mc_version
-		  login = player[0].last_login,
-			logout = player[0].last_logout;
+			language = player[0].language || `ENGLISH`,
+			version = player[0].mc_version || `1.8.9`,
+		  login = player[0].last_login || `0`,
+			logout = player[0].last_logout || `0`;
 	
 		  try {
 			let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
@@ -385,7 +382,10 @@ module.exports = {
 			  value: `${twentyFourToTwelve(offlineLogout)} to ${twentyFourToTwelve(offlineLogin)}`
 			}, {
 			  name: 'UTC Offset',
-			  value: `UTC ${timezone}`
+			  value: `UTC ${timezone} | Your time should be ${new Date(Date.now() + (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}`
+			}, {
+			  name: 'Daylight Savings',
+			  value: `${daylightBoolean == true ? `On` : `Off`}`
 			}, {
 			  name: 'Log Channel',
 			  value: `<#${logID}>`
@@ -393,11 +393,12 @@ module.exports = {
 			  name: 'Alert Channel',
 			  value: `<#${alertID}>`
 			},)
-			if (player[0].online == true && player[1].online == false) setupData.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.', true)
+			if (player[0].online == true && player[1].online == false) setupData.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
+			if (login == 0 || logout == 0) setupData.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
 			return message.reply(setupData);
 		  } catch (err) {
-			console.log(`ERROR_3: ${err}`);
-			message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+			message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
 		  }
 		};
 

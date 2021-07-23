@@ -141,8 +141,8 @@ function tryToExecute(rowData) {
 	try {
 		command.execute(message, args, client, rowData);
 	} catch (error) {
-		console.error(error);
-		return message.channel.send(`${message.author}, there was an error trying to execute that command! Please report this. Error: ${error}`);
+		console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | ${error}`);
+		return message.channel.send(`${message.author}, there was an error trying to execute that command! Please report this. Error: \`${error}\``);
 	}
 };
 

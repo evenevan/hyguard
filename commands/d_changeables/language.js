@@ -34,8 +34,8 @@ module.exports = {
         writeNewLanguage();
     
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     
@@ -44,8 +44,8 @@ module.exports = {
         await databaseImports.changeData(message.author.id, args[0].toUpperCase(), `UPDATE data SET language = ? WHERE discordID = ?`);
         return message.channel.send(`${message.author}, your whitelisted language on Hypixel is now set to ${args[0].toUpperCase()}.`);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
       }
     
     };
@@ -56,8 +56,8 @@ module.exports = {
 
         return message.channel.send(`${message.author}, your whitelisted language on Hypixel is set to ${response.language}.`);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     

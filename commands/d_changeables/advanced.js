@@ -66,8 +66,8 @@ module.exports = {
           await databaseImports.changeData(message.author.id, advancedSettings.join(" "), `UPDATE data SET advanced = ? WHERE discordID = ?`);
           return message.channel.send(returnedMSG);
         } catch (err) {
-          console.log(`ERROR_3: ${err}`);
-          message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+          message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
         }
       };
 
@@ -97,8 +97,8 @@ module.exports = {
           return message.reply(advancedEmbed);
   
         } catch (err) {
-          console.log(`ERROR_3: ${err}`);
-          message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+          message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
         }
       };
 

@@ -54,8 +54,8 @@ module.exports = {
         writeNewVersion(version);
     
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     
@@ -64,8 +64,8 @@ module.exports = {
         await databaseImports.changeData(message.author.id, `${version.join(" ")}`, `UPDATE data SET version = ? WHERE discordID = ?`);
         return message.channel.send(`${message.author}, your whitelisted version(s) of Minecraft on Hypixel is now set to ${version.join(`, `)}.`)
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`An error occured while writing data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
       }
     
     };
@@ -85,8 +85,8 @@ module.exports = {
           .addField(`Your version(s)`, `${version.join(`, `)}`);
         return message.reply(versionData);
       } catch (err) {
-        console.log(`ERROR_3: ${err}`);
-        message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+        message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
       }
     };
     

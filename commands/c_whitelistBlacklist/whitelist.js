@@ -90,8 +90,8 @@ try {
 		
   }
 } catch (err) {
-	  console.log(`ERROR_3: ${err}`);
-	  message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+	  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+	  message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
 }
 };
 
@@ -107,8 +107,8 @@ try {
 	  try {
 		await databaseImports.changeData(message.author.id, alertsData.join(" "), `UPDATE data SET alerts = ? WHERE discordID = ?`);
 	  } catch (err) {
-		console.log(`ERROR_3: ${err}`);
-		message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+		message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
 	  }
 };
 
@@ -136,8 +136,8 @@ try {
 		return message.reply(whitelistedData);
   }
 } catch (err) {
-	  console.log(`ERROR_3: ${err}`);
-	  message.channel.send(`An error occured while writing data. Please report this. ERROR_3: \`${err}\``);
+	  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
+	  message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
 }
 
 };
@@ -159,8 +159,8 @@ try {
 	  	.addField(`Your whitelisted game(s)`, `${!whitelistResponse || whitelistResponse == 0 ? `No whitelisted games found!` : `${whitelistResponse.join(`, `).toUpperCase()}`}`);
 	  return message.reply(whitelistedData);
 	} catch (err) {
-	  console.log(`ERROR_3: ${err}`);
-	  message.channel.send(`An error occured while fetching data. Please report this. ERROR_3: \`${err}\``);
+	  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
+	  message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
 	}
   };
 	},
