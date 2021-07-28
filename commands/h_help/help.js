@@ -9,10 +9,12 @@ module.exports = {
 	usage: `\`${prefix}help <command name>\``,
   database: false,
 	cooldown: 1,
-	permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+	permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
 		if (row !== undefined) {
-			var tzOffset = (row.timezone * 3600000);
+			let readData = funcImports.readOwnerSettings();
+    		let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
 			var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
 			var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset))
 		} else {
@@ -58,13 +60,13 @@ module.exports = {
         .setTitle(`**Information**`)
         .setFooter(`Programmed by Attituding#6517 with help from the internet`, 'https://i.imgur.com/MTClkTu.png')
 		.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity. This bot isn't most user-friendly, but used the right way, it works.`)
-		.addField(`Data Collection`, `${prefix}setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference.`)
-		.addField(`Bug Reports and Suggestions`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the [Hypixel Discord](https://discord.com/invite/hypixel) before you DM me so that you won't get blocked by Clyde.`)
-		.addField(`GitHub`, `This project has a [Github page](<https://github.com/Attituding/HyGuard>), where the code is available under the MIT license. There is also extra documentation there incase you need it.`)
+		.addField(`**Data Collection**`, `${prefix}setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference.`)
+		.addField(`**Bug Reports and Suggestions**`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the [Hypixel Discord](https://discord.com/invite/hypixel) before you DM me so that you won't get blocked by Clyde.`)
+		.addField(`**GitHub**`, `This project has a [Github page](<https://github.com/Attituding/HyGuard>), where the code is available under the MIT license. There is also extra documentation there incase you need it.`)
 		.addField('**Available Commands**', `You can send \`${prefix}help <command name>\` to get info on a specific command, along with aliases that can also execute the same command! Commands with a :white_check_mark: work without ${prefix}setup, while commands with :no_entry_sign: require ${prefix}setup\n\u200B`)
 
 			for (let i = 0; i < commandName.length; i++) {
-				commandHelp.addField(`**${commandName[i]}** | ${commandSetupReq[i] == true ? `:no_entry_sign:` : `:white_check_mark:`}`, `${commandTitle[i]}`, true)
+				commandHelp.addField(`**${commandName[i]}** ${commandSetupReq[i] == true ? `:no_entry_sign:` : `:white_check_mark:`}`, `${commandTitle[i]}`, true)
 			  }
 
 			return message.author.send(commandHelp)
@@ -88,12 +90,14 @@ module.exports = {
     const commandHelp = new Discord.MessageEmbed()
         .setColor('#7289DA')
         .setTitle(`${prefix}${command.name}`)
-        .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+        .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
 		if (command.description) commandHelp.setDescription(`${command.description}`);
         if (command.aliases) commandHelp.addField(`Aliases`, `${prefix + command.aliases.join(`, ${prefix}`)}`);
         if (command.usage) commandHelp.addField(`Usage`, `${command.usage}`);
         if (command.cooldown != undefined) commandHelp.addField(`Cooldown`, `${command.cooldown} second(s)`);
         if (command.permissions || command.ownerReq) commandHelp.addField(`Required Permission(s)`, `${command.permissions && command.ownerReq ? `${command.permissions}\nBot Owner` : `${command.permissions ? `${command.permissions}` : `Bot Owner` }` }`);
-message.reply(commandHelp);
+message.reply(commandHelp).catch(err => {
+	console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+});
 	},
 };

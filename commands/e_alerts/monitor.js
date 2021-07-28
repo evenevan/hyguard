@@ -7,7 +7,7 @@ module.exports = {
     usage: `\`${prefix}monitor\``,
   cooldown: 7.5,
   database: true,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
       
           getAlerts();

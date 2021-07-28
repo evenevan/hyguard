@@ -5,10 +5,10 @@ const sqlite = require('sqlite3').verbose();
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 module.exports = {
-	name: 'leaveguild',
-  title: 'Forces the bot to leave a guild',
-	description: 'Leave a guild',
-    usage: `\`${prefix}leaveguild <guildID>\``,
+	name: 'guildinfo',
+  title: 'Gives insight when diagnosing an error',
+	description: 'Gives insight when diagnosing an error',
+    usage: `\`${prefix}guildinfo <guildID>\``,
   cooldown: 0,
   ownerReq: true,
   args: true,
@@ -17,16 +17,16 @@ module.exports = {
 	execute(message, args, client) {
     
     try {
-        leaveGuild();
-    async function leaveGuild() {
+        getGuildInfo();
+    async function getGuildInfo() {
         let guild = await client.guilds.cache.get(`${args[0]}`);
 
         if (!guild) return message.channel.send(`${message.author}, that doesn't seem to be a valid guild!`);
 
         let guildOwner = await client.users.fetch(guild.ownerID);
-        guild.leave();
-        return message.channel.send(`${message.author}, bot has left this guild: ${args[0]} | "${guild.name}".\nGuild Owner: ${guildOwner} | ${guildOwner.id}\nGuild Members: ${guild.memberCount - 1}\n${JSON.stringify(guild.members.cache)}`, { split: true });
-        }
+        return message.channel.send(`${message.author}, ${args[0]} | "${guild.name}".\nGuild Owner: ${guildOwner.id}\nGuild Members: ${guild.memberCount - 1}\n${JSON.stringify(guild.members.cache)}`, { split: true });
+        
+    }
 
     } catch (err) {
         try {

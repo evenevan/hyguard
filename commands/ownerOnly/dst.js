@@ -12,7 +12,7 @@ module.exports = {
   cooldown: 5,
   ownerReq: true,
   database: false,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
         try {
     let readData = funcImports.readOwnerSettings();
@@ -25,14 +25,14 @@ module.exports = {
 
         var dst = true;
         funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
-        console.log(`Daylight savings is now on!`);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Daylight savings is now on!`);
         return message.channel.send(`${message.author}, daylight savings is now on!`);
 
     } else if (dst == true) {
 
         var dst = false;
         funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);
-        console.log(`Daylight savings is now off now off!`);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Daylight savings is now off now off!`);
         return message.channel.send(`${message.author}, daylight savings is now off!`);
 
     }

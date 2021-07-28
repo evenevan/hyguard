@@ -13,10 +13,12 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 2.5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-			var tzOffset = (row.timezone * 3600000);
+			let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
 			var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
 			var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
 		} else {
@@ -90,7 +92,7 @@ module.exports = {
         let alertData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s Alerts`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+          .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
           alertData.addFields(
             { name: 'Blacklisted Games Alert', value: `${alertsCurrent[0]}` },
             { name: 'Non-Whitelisted Games Alert', value: `${alertsCurrent[1]}` },
@@ -99,7 +101,9 @@ module.exports = {
             { name: 'Offline Time Alerts', value: `${alertsCurrent[4]}` },
             { name: 'Version Alerts', value: `${alertsCurrent[5]}` },
           )
-        return message.reply(alertData);
+        return message.reply(alertData).catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+        });
 
       } catch (err) {
         console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);

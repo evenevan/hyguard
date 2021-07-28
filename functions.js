@@ -44,7 +44,7 @@ var data = JSON.stringify(constants);
 
 fs.writeFile(__dirname + '/ownerSettings.json', data, function (err) {
 if (err) {
-  console.log(`There was an error saving the data. Error: ${err}`);
+  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | There was an error saving the data. Error: ${err}`);
 }
 });
 };
@@ -65,7 +65,7 @@ function readOwnerSettings(){
   };
   }
   catch (err) {
-    console.log(`There was an error parsing the JSON. Error: ${err}`)
+    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | There was an error parsing the JSON. Error: ${err}`)
 }};
 
 function pauseToHMS(pauseTime, amount, type) { //old function for a pause command

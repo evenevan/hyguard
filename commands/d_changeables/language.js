@@ -11,7 +11,7 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
 
     const readData = funcImports.readConstants();

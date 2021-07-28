@@ -11,18 +11,18 @@ module.exports = {
   cooldown: 5,
   ownerReq: true,
   database: false,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
         try {
     let readData = funcImports.readOwnerSettings();
     var api = readData.api,
     userLimit = readData.userLimit,
-    blockedUsers = readData.blockedUsers
+    blockedUsers = readData.blockedUsers,
     dst = readData.dst;
 
     if (!args[0] || isNaN(args[0]) && args[0] !== 'current') return message.channel.send(`${message.author}, you didn't provide any arguments.`);
 
-    if (args[0] == 'current') return message.channel.send(`${userLimit}`);
+    if (args[0] == 'current') return message.channel.send(`${message.author}, ${userLimit}`);
 
     var userLimit = args[0]
     funcImports.saveOwnerSettings(api, userLimit, blockedUsers, dst);

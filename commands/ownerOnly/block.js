@@ -12,13 +12,13 @@ module.exports = {
   ownerReq: true,
   args: true,
   database: false,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
         try {
     let readData = funcImports.readOwnerSettings();
     let api = readData.api,
     userLimit = readData.userLimit,
-    blockedUsers = readData.blockedUsers
+    blockedUsers = readData.blockedUsers,
     dst = readData.dst;
 
     if (!blockedUsers.includes(args[0])) {

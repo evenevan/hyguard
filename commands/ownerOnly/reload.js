@@ -10,7 +10,7 @@ module.exports = {
 	args: true,
   database: false,
   ownerReq: true,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args) {
 		const commandName = args[0].toLowerCase();
 		const command = message.client.commands.get(commandName)
@@ -29,10 +29,10 @@ module.exports = {
 			const newCommand = require(`../${folderName}/${command.name}.js`);
 			message.client.commands.set(newCommand.name, newCommand);
 			message.channel.send(`Command \`${newCommand.name}\` was reloaded!`)
-			console.error(`Command ${newCommand.name} was reloaded!`);
+			console.log(`Command ${newCommand.name} was reloaded!`);
 		} catch (error) {
-			console.error(error);
-			message.channel.send(`There was an error while reloading a command \`${command.name}\`:\n\`${error.message}\``);
+			console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | ${error}`);
+			message.channel.send(`${message.author}, there was an error while reloading a command \`${command.name}\`:\n\`${error.message}\``);
 		}
 	},
 };

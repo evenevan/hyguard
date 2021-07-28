@@ -5,7 +5,7 @@ module.exports = {
 	description: 'Shows the ping of the bot!',
   database: false,
   cooldown: 5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
 		try {
 			message.channel.send('Loading data').then(async msg => {

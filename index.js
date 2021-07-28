@@ -18,7 +18,7 @@ client.cooldowns = new Discord.Collection();
 client.on('ready', () => {
 	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Logged in as ${client.user.tag}!`);
 	client.user
-		.setPresence({ activity: { name: `accounts | ${prefix}help | ✔`, type: 'WATCHING' }, status: 'dnd' })
+		.setPresence({ activity: { name: `startup | ${prefix}help`, type: 'WATCHING' }, status: 'dnd' })
 		.then(presence => {console.log(`${presence.status} ${presence.activities[0].type} ${presence.activities[0].name}`)})
 		.catch(console.error);
 
@@ -54,26 +54,29 @@ client.on('message', message => {
 checkPermsOfBot();
 
 async function checkPermsOfBot() {
-  if (message.channel.type !== 'dm') {
-	try {
-		if (command.permissions) {
-		const requiredPermissions = command.permissions;
-		let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me, requiredPermissions);
-		if (returned) {
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
-			return message.channel.send(`This bot is missing the following permissions(s) for that command: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
-		}
-		checkDB();
-		} else {
-			return message.channel.send(`This command was not set up correctly by the owner. Please notify them. It is missing a permission configuration.`);
-		}
-	} catch (err) {
-			console.log(`Someone appears to be attempting to crash the bot. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id} Content: ${message.content}`);
-	}	
-  } else {
-		checkDB()
-  }
+	if (message.channel.type !== 'dm') {
+	  try {
+		  if (command.permissions) {
+		  const requiredPermissions = command.permissions;
+		  let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me, requiredPermissions);
+		  if (returned) {
+			  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
+			  return message.channel.send(`${message.author}, this bot is missing the following permissions(s) for that command: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
+		  }
+		  checkDB();
+		  } else {
+			  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A command was not set up properly and is missing a permission configuration. User: ${message.author.tag} | ${message.author.id}${message.guild ? ` GuildID: ${message.guild.id}` : ``} Content: ${message.content}.`);
+			  return message.channel.send(`${message.author}, this command was not set up correctly by the owner. Please notify them. It is missing a permission configuration.`);
+		  }
+	  } catch (err) {
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A user is attempting to use the bot without essential permissions. User: ${message.author.tag} | ${message.author.id}${message.guild ? ` GuildID: ${message.guild.id}` : ``} Content: ${message.content}. User is missing ${err}`);
+		return message.author.send(`${message.author}, this bot is missing the following permissions(s) for that command: ${err}. These include the essential permission **SEND_MESSAGES**. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`).then(() => {console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions DM sent`)}).catch(error => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Could not send a missing permissions DM to ${message.author.tag}.\n`, error);});
+	  }	
+	} else {
+		  checkDB()
+	}
 };
+
 
 async function checkDB() {
 	var isInDB = await databaseImports.isInDataBase(message.author.id)

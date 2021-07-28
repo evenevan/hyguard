@@ -24,7 +24,7 @@ function logStarter(client) {
     dst = readData.dst;
 
     if (api == false) {
-      client.user.setActivity(`an API problem | ${prefix}help`, { type: 'WATCHING' });
+      client.user.setActivity(`an API problem, be right back! | ${prefix}help`, {type: 'WATCHING'});
     }
     
           
@@ -44,7 +44,7 @@ function logStarter(client) {
             loadedUsers++
           }
         } finally {
-          client.user.setActivity(`${loadedUsers == 1 ? `${loadedUsers} account` : `${loadedUsers} accounts`} | ,help`, { type: 'WATCHING' }); //updates presense. max presence updates per min is like 1 every 15 sec, so don't set the thing in index to less than 20, or just delete this line
+          client.user.setActivity(`${loadedUsers == 1 ? `${loadedUsers} account` : `${loadedUsers} accounts`} | ${prefix}help`, { type: 'WATCHING' }); //updates presense. max presence updates per min is like 1 every 15 sec, so don't set the thing in index to less than 20, or just delete this line
           loadUsers();
         }
 
@@ -82,13 +82,14 @@ function apiCall(dbUserData, client, userNumber, dst) {
               })
             ])
             .then((apiData) => {
-              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber, dst); //backup checkto ensure success
+              if (apiData[0].success == true && apiData[1].success == true) checkIfServerExists(apiData, dbUserData, client, userNumber, dst); //backup check to ensure success
+              else console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: HTTP 200 but success as not true. ${err}. User ID: ${userNumber}`)
             })
             .catch((err) => {
               if (err.name === "AbortError") {
                 if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: The API failed to respond within 1500 ms, and the AbortController aborted. User: ${userNumber}.`);
               } else {
-                console.log(`Hypixel API Error: ${err}. User ID: ${userNumber}`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: ${err}. User ID: ${userNumber}`);
                 if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error: An error occured while executing the monitoring. ${err}. User ID: ${userNumber}`);
               }
             });
@@ -107,10 +108,10 @@ async function checkIfServerExists(apiData, dbUserData, client, userNumber, dst)
     async function deleteData() {
       try {
         await databaseImports.deleteData(dbUserData.discordID);
-        return console.log(`${dbUserData.discordID} | ${dbUserData.discordUsername} was deleted via the log delete function as their guild no longer exists.`)
+        return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | ${dbUserData.discordID} | ${dbUserData.discordUsername} was deleted via the log delete function as their guild no longer exists.`)
       } catch (err) {
-        console.log(`Error 15: ${err}`);
-        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while deleting a user as their guild/server no longer exists. Error 15: ${err}`);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while deleting a user as their guild/server no longer exists. User: ${userNumber} ${err}`);
+        if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`An error occured while deleting a user as their guild/server no longer exists. User: ${userNumber} \`${err}\``);
       }
     }
   } else {
@@ -122,13 +123,14 @@ async function checkAlertPermissions(data, dbUserData, client, userNumber, dst) 
 	try {
   const alerts = client.channels.cache.get(`${dbUserData.alertID}`);
 
-  if (!alerts) return console.log(`User's alert channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`)
+  if (!alerts) return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | User's alert channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
 
-	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
+	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"]);
 
 	if (returned) {
-		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
-		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stops these alerts.`);
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
+		return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`${prefix}monitor\` which in turn stops these alerts.`).catch(err => {
+      console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a permission error for an alert channel from User ID ${userNumber}.\n`, err);});
 	}
 	checkLogPermissions(data, dbUserData, client, userNumber, alerts, dst);
 	} catch (err) {
@@ -149,7 +151,8 @@ async function checkLogPermissions(data, dbUserData, client, userNumber, alerts,
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
-		return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``);
+		return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${returned}. The bot cannot log. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. Turn these messages off temporarily with \`${prefix}log\``).catch(err => {
+      console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a permission error for a log channel from User ID ${userNumber}.\n`, err);});
 	}
 	useAPIData(data, dbUserData, client, userNumber, alerts, log, dst);
 	} catch (err) {
@@ -250,8 +253,9 @@ try {
           .setTitle(`${loginTimeState == true ? `**Unusual Relog/Login Time detected!**` : `**Relog detected!**` }`)
           .setDescription(`A relog that lasted ${roundedRelogTime} seconds was detected at ${timeString}`)
           .setDescription(`${loginTimeState == true ? `An usual relog/login time that lasted ${roundedRelogTime} seconds was detected at ${timeString}` : `A relog that lasted ${roundedRelogTime} seconds was detected at ${timeString}` }`)
-          .setFooter(`Alert at ${dateString} | ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png');
-      log.send(relogEmbed);
+          .setFooter(`Alert at ${timeString} | ${dateString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png');
+      log.send(relogEmbed).catch(err => {
+        console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a relog message from User ID ${userNumber}.\n`, err);});
       async function writeLoginAndLogoutMS() {
         try {
           await databaseImports.changeData(dbUserData.discordID, data[0].player.lastLogin, `UPDATE data SET loginMS = ? WHERE discordID = ?`);
@@ -279,9 +283,10 @@ try {
       let logoutEmbed = new Discord.MessageEmbed()
             .setColor('#555555')
             .setTitle('**Logout detected!**')
-            .setFooter(`Alert at ${dateString} | ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
-            .setDescription(`A logout at ${timestampOfLastLogout} was detected at ${timeString}. Playtime was ${lastPlaytime}`);
-        log.send(logoutEmbed);
+            .setFooter(`Alert at ${timeString} | ${dateString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
+            .setDescription(`A logout on ${timestampOfLastLogout} was detected at ${timeString}. Playtime was ${lastPlaytime}`);
+        log.send(logoutEmbed).catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a logout message from User ID ${userNumber}.\n`, err);});
       async function writeLogoutMS() {
         try {
           await databaseImports.changeData(dbUserData.discordID, data[0].player.lastLogout, `UPDATE data SET logoutMS = ? WHERE discordID = ?`);
@@ -301,9 +306,10 @@ try {
       let loginEmbed = new Discord.MessageEmbed()
             .setColor(`${loginTimeState == true ? `FFAA00` : `#00AA00`}`)
             .setTitle(`${loginTimeState == true ? `**Unusual Login Time detected!**` : `**Login detected!**` }`)
-            .setFooter(`Alert at ${dateString} | ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
-            .setDescription(`${loginTimeState == true ? `An unusual login time of ${timestampOfLastLogin} was detected.` : `A login at ${timestampOfLastLogin} was detected.` }`);
-        log.send(loginEmbed);
+            .setFooter(`Alert at ${timeString} | ${dateString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
+            .setDescription(`${loginTimeState == true ? `An unusual login time at ${timestampOfLastLogin} was detected at ${timeString}.` : `A login on ${timestampOfLastLogin} was detected at ${timeString}.` }`);
+        log.send(loginEmbed).catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a login message from User ID ${userNumber}.\n`, err);});
       async function writeLoginMS() {
         try {
           await databaseImports.changeData(dbUserData.discordID, data[0].player.lastLogin, `UPDATE data SET loginMS = ? WHERE discordID = ?`);
@@ -363,7 +369,7 @@ function useData() { //shhh dont look too close
   var isAlert = true
   var versionAlert = true;
   if (notif[5] == true) {
-    alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can change your whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
+    alerts.send(`<@${dbUserData.discordID}>, Unusual Version of Minecraft Alert: ${data[0].player.mcVersionRp ? `**${data[0].player.mcVersionRp}**` : `**Unknown..?**`}! You can add a whitelisted version with \`${prefix}version ${data[0].player.mcVersionRp}\`, or turning the alert off with \`${prefix}alert version\`. Otherwise, please ensure your account is secure. Mojang Accounts: <https://bit.ly/3ilhpS5> Microsoft Accounts: <https://bit.ly/3zUdVOo>`);
     }
   }
   if (dbUserData.language !== data[0].player.userLanguage && data[0].player.userLanguage) {
@@ -401,7 +407,7 @@ gametypeAlert = embedData.gametypeAlert;
 let embed = new Discord.MessageEmbed()
 .setColor(embedColor)
 .setTitle(`${!data[1].session.online ? `**Offline!**` : `${isAlert ? `**Unusual activity detected!**` : `**Nothing abnormal detected!**` }` }`)
-.setFooter(`${isAlert == true ? `Alert at ${dateString} | ${timeString}` : `Log at ${dateString} | ${timeString}` }`, 'https://i.imgur.com/MTClkTu.png')
+.setFooter(`${isAlert == true ? `Alert at ${timeString} | ${dateString}` : `Log at ${timeString} | ${dateString}` }`, 'https://i.imgur.com/MTClkTu.png')
 if (!data[1].session.online) {
     embed.addFields(
     { name: 'Status', value: `${data[0].player.displayname} is offline` },
@@ -424,22 +430,23 @@ if (!data[1].session.online) {
         if (gametypeAlert && data[1].session.online) embed.addField(`**Unusual Game Type**`, `**${data[1].session.gameType ? `${data[1].session.gameType}` : `Unknown` }**`, true);
         if (versionAlert) embed.addField(`**Unusual Version**`, `**${data[0].player.mcVersionRp ? `${data[0].player.mcVersionRp}` : `Unknown` }**`, true);
 }
-log.send(embed);
+log.send(embed).catch(err => {
+  console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while sending a log message from User ID ${userNumber}.\n`, err);});
 
 } catch (error) {
   if (error instanceof TypeError) {
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | TypeError, someone may have left the server while a log was executing. User ${userNumber} ${error}`);
-    return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | TypeError, someone may have left the server while a log was executing. User ${userNumber} ${error}`)
+    return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | TypeError, someone may have left the server while a log was executing. User ${userNumber} ${error}`);
   }
   try {
     const otherError = new Discord.MessageEmbed()
     .setColor('#AA0000')
     .setTitle('**Error In Using Data**')
-    .setFooter(`Error at ${dateString} | ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
+    .setFooter(`Error at ${timeString} | ${dateString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
     .setDescription(`This error is expected to happen occasionally. Please report this to the bot owner if this continues.`)
   log.send(otherError);
   if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to generate a log message and check a user. \`${error}\``);
-  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to generate a log message and check a user. ${error}`)
+  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while attempting to generate a log message and check a user. ${error}`);
   } catch (err) {
     if (client.channels.cache.get(cnsle)) client.channels.cache.get(cnsle).send(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A error log message failed to send, which causeed this error. \`${err}\``);
     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A error log message failed to send, which causeed this error. ${err}`)

@@ -20,10 +20,14 @@ module.exports = {
   args: true,
   database: false,
   cooldown: 7.5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
-    if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
+let readData = funcImports.readOwnerSettings();
+let api = readData.api,
+dst = readData.dst;;
+
+  if (row !== undefined) {
+      var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
       var tz = row.timezone
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true });
       var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
@@ -37,9 +41,6 @@ module.exports = {
   try {
       message.channel.send('Loading..').then(async msg => {
           const controller = new AbortController();
-  
-          const readData = funcImports.readOwnerSettings();
-          const api = readData.api;
   
           if (api == false) {
               msg.delete();
@@ -141,13 +142,15 @@ module.exports = {
                     embed.addFields({ name: 'Status', value: `${player[0].username} is online` }, { name: 'UUID', value: `${player[0].uuid}` }, { name: 'Session', value: `${player[0].last_login ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${player[1].game.type ? `Game: ${player[1].game.type}\n` : `` }${player[1].game.mode ? `Mode: ${player[1].game.mode}\n` : `` }${player[1].game.map ? `Map: ${player[1].game.map}` : `` }${!player[1].game.type && !player[1].game.mode && !player[1].game.map ? `Data not available: Limited API!` : `` }` }, { name: 'Last Login', value: `${player[0].last_login ? `${timestampOfLastLogin} UTC ${decimalsToUTC(tz)}\n${timeSinceLastLogin} ago` : `Last Login: Unknown`}` }, { name: 'Last Logout', value: `${player[0].last_logout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(tz)}\n${timeSincefLastLogout} ago` : `Last Logout: Unknown`}` }, { name: 'Settings', value: `${player[0].language ? `Language: ${player[0].language}` : `Language: Unknown` }\n${player[0].mc_version ? `Version: ${player[0].mc_version}` : `Version: Unknown` }` });
                 }
                 msg.delete();
-                message.reply(embed);
+                message.reply(embed).catch(err => {
+                    console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+                });
 
             })
             .catch((err) => {
                 if (err.name === "AbortError") {
                     message.channel.send(`Slothpixel API failed, changing to Hypixel API.`);
-                    hypixelAPICall();
+                    hypixelAPICall(uuid);
                 } else {
                     msg.delete();
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Slothpixel API Error 9: ${err}`);
@@ -161,12 +164,22 @@ module.exports = {
                           fetchTimeout(`https://api.hypixel.net/player?uuid=${uuid}&key=${hypixelAPIkey}`, 2000, {
                               signal: controller.signal
                           }).then(function(response) {
+                            if (response.status == 422) {
+                                let error = new Error('Username Invalid');
+                                error.name = `NameError`;
+                                throw error;
+                            }
                             if (!response.ok) {throw new Error("HTTP status " + response.status);}
                             return response.json();
                           }),
                           fetchTimeout(`https://api.hypixel.net/status?uuid=${uuid}&key=${hypixelAPIkey}`, 2000, {
                               signal: controller.signal
                           }).then(function(response) {
+                            if (response.status == 422) {
+                                let error = new Error('Username Invalid');
+                                error.name = `NameError`;
+                                throw error;
+                            }
                             if (!response.ok) {throw new Error("HTTP status " + response.status);}
                             return response.json();
                           })
@@ -193,20 +206,25 @@ module.exports = {
                               .setColor('#7289DA')
                               .setTitle(`Status of ${data[0].player.displayname}`)
                               .setDescription(`Data is not quite real-time, and some fields may be inaccurate. This data was gathered with the Hypixel API as the Slothpixel API did not respond.`)
-                              .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+                              .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
                           if (!data[1].session.online) {
-                              embed.addFields({ name: 'Status', value: `${data[0].player.displayname} is offline` }, { name: 'UUID', value: `${data[0].player.uuid}` }, { name: 'Last Session', value: `${data[0].player.lastLogin && data[0].player.lastLogin < data[0].player.lastLogout ? `Last Playtime: ${lastPlaytime} long` : `Playtime: Unknown`}\n${data[0].player.mostRecentGameType ? `Last Gametype: ${data[0].player.mostRecentGameType}` : `Last Gametype: Unknown` }` }, { name: 'Last Login', value: `${data[0].player.lastLogin ? `${timestampOfLastLogin} UTC ${decimalsToUTC(`${tz}`)}\n${timeSinceLastLogin} ago` : `Unknown` }` }, { name: 'Last Logout', value: `${data[0].player.lastLogout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(`${tz}`)}\n${timeSincefLastLogout} ago` : `Unknown` }` }, { name: 'Settings', value: `${data[0].player.userLanguage ? `Language: ${data[0].player.userLanguage}` : `Language: Unknown. Language Alerts won't function while this is unknown.` }\n${data[0].player.mcVersionRp ? `Version: ${data[0].player.mcVersionRp}` : `Version: Unknown. Version Alerts won't function while this is unknown.` }` });
+                              embed.addFields({ name: 'Status', value: `${data[0].player.displayname} is offline` }, { name: 'UUID', value: `${data[0].player.uuid}` }, { name: 'Last Session', value: `${data[0].player.lastLogin && data[0].player.lastLogin < data[0].player.lastLogout ? `Last Playtime: ${lastPlaytime} long` : `Playtime: Unknown`}\n${data[0].player.mostRecentGameType ? `Last Gametype: ${data[0].player.mostRecentGameType}` : `Last Gametype: Unknown` }` }, { name: 'Last Login', value: `${data[0].player.lastLogin ? `${timestampOfLastLogin} UTC ${decimalsToUTC(`${tz}`)}\n${timeSinceLastLogin} ago` : `Unknown` }` }, { name: 'Last Logout', value: `${data[0].player.lastLogout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(`${tz}`)}\n${timeSincefLastLogout} ago` : `Unknown` }` }, { name: 'Settings', value: `${data[0].player.userLanguage ? `Language: ${data[0].player.userLanguage}` : `Language: Unknown` }\n${data[0].player.mcVersionRp ? `Version: ${data[0].player.mcVersionRp}` : `Version: Unknown` }` });
                               if (!data[1].session.online && (data[0].player.lastLogout < data[0].player.lastLogin * 1)) embed.addField(`**API Limitation**`, `The Online Status API must be on\nfor Gametype data and alerts to \nfunction. Please turn it on.`);
                           } else if (data[1].session.online) {
-                              embed.addFields({ name: 'Status', value: `${data[0].player.displayname} is online` }, { name: 'UUID', value: `${data[0].player.uuid}` }, { name: 'Session', value: `${data[0].player.lastLogin ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${data[1].session.gameType ? `Game: ${data[1].session.gameType}\n` : `` }${data[1].session.mode ? `Mode: ${data[1].session.mode}\n` : `` }${data[1].session.map ? `Map: ${data[1].session.map}` : `` }${!data[1].session.gameType && !data[1].session.mode && !data[1].session.map ? `Data not available: Limited API!` : `` }` }, { name: 'Last Login', value: `${data[0].player.lastLogin ? `${timestampOfLastLogin} UTC ${decimalsToUTC(`${tz}`)}\n${timeSinceLastLogin} ago` : `Last Login: Unknown`}` }, { name: 'Last Logout', value: `${data[0].player.lastLogout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(`${tz}`)}\n${timeSincefLastLogout} ago` : `Last Logout: Unknown`}` }, { name: 'Settings', value: `${data[0].player.userLanguage ? `Language: ${data[0].player.userLanguage}` : `Language: Unknown. Langauage Alerts won't function while this is unknown.` }\n${data[0].player.mcVersionRp ? `Version: ${data[0].player.mcVersionRp}` : `Version: Unknown. Version Alerts won't function while this is unknown.` }` });
+                              embed.addFields({ name: 'Status', value: `${data[0].player.displayname} is online` }, { name: 'UUID', value: `${data[0].player.uuid}` }, { name: 'Session', value: `${data[0].player.lastLogin ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${data[1].session.gameType ? `Game: ${data[1].session.gameType}\n` : `` }${data[1].session.mode ? `Mode: ${data[1].session.mode}\n` : `` }${data[1].session.map ? `Map: ${data[1].session.map}` : `` }${!data[1].session.gameType && !data[1].session.mode && !data[1].session.map ? `Data not available: Limited API!` : `` }` }, { name: 'Last Login', value: `${data[0].player.lastLogin ? `${timestampOfLastLogin} UTC ${decimalsToUTC(`${tz}`)}\n${timeSinceLastLogin} ago` : `Last Login: Unknown`}` }, { name: 'Last Logout', value: `${data[0].player.lastLogout ? `${timestampOfLastLogout} UTC ${decimalsToUTC(`${tz}`)}\n${timeSincefLastLogout} ago` : `Last Logout: Unknown`}` }, { name: 'Settings', value: `${data[0].player.userLanguage ? `Language: ${data[0].player.userLanguage}` : `Language: Unknown` }\n${data[0].player.mcVersionRp ? `Version: ${data[0].player.mcVersionRp}` : `Version: Unknown` }` });
                           }
                           msg.delete();
-                          message.channel.send(embed);
+                          message.channel.send(embed).catch(err => {
+                            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+                        });
                       })
                       .catch((err) => {
                         if (err.name === "AbortError") {
                             msg.delete();
                             message.channel.send(`${message.author}, an error occured while executing this command. The Hypixel API failed to respond and may be down. Try again later. <https://status.hypixel.net/>`);
+                        } else if (err.name === "NameError") {
+                            msg.delete();
+                            message.channel.send(`${message.author}, that username doesn\'t seem to be valid.`);
                         } else {
                             msg.delete();
                             console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error 9: ${err}`);

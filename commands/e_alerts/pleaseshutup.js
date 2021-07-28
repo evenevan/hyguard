@@ -10,7 +10,7 @@ module.exports = {
   usage: `\`${prefix}orange\``,
   database: true,
   cooldown: 5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
     getAlerts();
     
@@ -23,7 +23,7 @@ module.exports = {
               let newAlertsToggle =  alertsResponse.map(function(item) { return item == '0' ? '1' : item; });
               if (!response.blacklist) newAlertsToggle[0] = 0
               if (!response.whitelist) newAlertsToggle[1] = 0
-              return writeAlerts(newAlertsToggle, `${message.author}, ${!response.blacklist || !response.whitelist ? `most alerts are now on! Your whitelist and/or blacklist is off as you did not set it up.` : `all alerts are now on!`}`)
+              return writeAlerts(newAlertsToggle, `${message.author}, ${!response.blacklist || !response.whitelist ? `${!response.blacklist && !response.whitelist ? `most alerts are now on! Your whitelisted and blacklisted games alerts are both off as you did not set them up!` : `${!response.blacklist ? `most alerts are now on! Your blacklisted games alerts are off as you did not set them up.` : `most alerts are now on! Your whitelisted games alerts are off as you did not set them up.`}`}` : `all alerts are now on!`}`)
     
             } else {
               let newAlertsToggle =  alertsResponse.map(function(item) { return item == '1' ? '0' : item; });

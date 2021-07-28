@@ -11,10 +11,12 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
+      let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
       var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
     } else {
@@ -45,7 +47,7 @@ module.exports = {
         if (version.includes(args[0])) {
           let findAndRemove = version.indexOf(args[0]);
           version.splice(findAndRemove, 1);
-          if (version.length == 0) return message.channel.send(`${message.author}, you must have atleast 1 whitelisted version!`)
+          if (version.length == 0) return message.channel.send(`${message.author}, you must have atleast 1 whitelisted version! If a version is already added, typing it again removes it.`)
           return writeNewVersion(version);
         }
         
@@ -81,9 +83,11 @@ module.exports = {
         let versionData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s whitelisted version(s)`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
+          .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png')
           .addField(`Your version(s)`, `${version.join(`, `)}`);
-        return message.reply(versionData);
+        return message.reply(versionData).catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+        });
       } catch (err) {
         console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
         message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);

@@ -11,10 +11,12 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
+      let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
       var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
     } else {
@@ -23,7 +25,7 @@ module.exports = {
       var dateString = funcImports.epochToCleanDate(new Date());
     }
 
-    const validAdvancedSettings = ["LOGINTIME"]
+    const validAdvancedSettings = ["LOGINTIME","DM_OPT_OUT"]
 
     if (args[0].toLowerCase() == 'current') {
         return currentData();
@@ -46,8 +48,9 @@ module.exports = {
             case 'LOGINTIME':
               logintime();
               break;
-            //case '':
-              //function here
+            case 'DM_OPT_OUT':
+              dmOptOut();
+              break;
         }
 
         function logintime() {
@@ -59,7 +62,19 @@ module.exports = {
           }
           return writeData(advancedSettings, `${message.author}, the advanced setting \`Login Time\` is now ${!advancedSettings.includes("LOGINTIME") ? `set to only active once upon an irregular login!` : `set to repeateadly ping you upon an irregular login!`}`);
         };
+
+        function dmOptOut() {
+          if (advancedSettings.includes("DM_OPT_OUT")) {
+            let findAndRemove = advancedSettings.indexOf(args[0].toUpperCase());
+            advancedSettings.splice(findAndRemove, 1);
+          } else {
+            advancedSettings.push("DM_OPT_OUT");
+          }
+          return writeData(advancedSettings, `${message.author}, the advanced setting \`DM Opt Out\` is now ${!advancedSettings.includes("DM_OPT_OUT") ? `set to where you will recieve DMs about this eervice, ie: This service shutting down, errors, etc.` : `set to where you will not recieve any more DMs! You will **not** recieve DMs about this eervice, ie: This service shutting down, errors, etc. Your profile will be terminated if there is an error where I, Attituding#6517 have no other choice.`}`);
+        };
       }
+
+      
 
       async function writeData(advancedSettings, returnedMSG) {
         try {
@@ -84,17 +99,19 @@ module.exports = {
           let advancedEmbed = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${message.author.tag}'s Advanced Settings`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+            .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
 
           for (let i = 0; i < validAdvancedSettings.length; i++) {
-            if (validAdvancedSettings[i].includes(advancedSettings[i])) {
+            if (advancedSettings.includes(validAdvancedSettings[i])) {
               advancedEmbed.addField(`${validAdvancedSettings[i]}`, `:green_square:`);
             } else {
               advancedEmbed.addField(`${validAdvancedSettings[i]}`, `:red_square:`);
             }
           }
         
-          return message.reply(advancedEmbed);
+          return message.reply(advancedEmbed).catch(err => {
+            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+          });
   
         } catch (err) {
           console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);

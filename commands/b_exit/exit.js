@@ -10,7 +10,7 @@ module.exports = {
 	usage: `\`${prefix}exit <Minecrfat Username> <Your UTC Offset>\` \`Example: ${prefix}exit Attituding -7\``,
   cooldown: 10,
   database: true,
-  permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
 	execute(message, args, client) {
         try {
 message.channel.send('Deleting..').then(async loadingmsg => {
@@ -23,7 +23,10 @@ message.channel.send('Deleting..').then(async loadingmsg => {
         loadingmsg.delete();
         message.channel.send(`${message.author}, you are about to delete all of your data. Confirm with a thumb up or deny with a thumb down.`).then(msg => {
           msg.react('👍')
-          msg.react('👎');
+          .then(() => {msg.react('👎');})
+          .catch(err => {
+            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+          });
           msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
             max: 1,
             time: 30000

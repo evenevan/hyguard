@@ -11,10 +11,12 @@ module.exports = {
   args: true,
   database: true,
   cooldown: 2.5,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
+      let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
       var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
     } else {
@@ -121,19 +123,23 @@ module.exports = {
           let blacklistedData = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${args[1].toUpperCase()} has been added!`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
+            .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
           if (blacklist.length == 1) blacklistedData.setDescription(`Your blacklisted games alert is now on! If you want to turn them off, use \`${prefix}alert blacklist\``);
-          return message.reply(blacklistedData);
+          return message.reply(blacklistedData).catch(err => {
+            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+          });
 
     } else if (args[0] == 'remove') {
           let blacklistedData = new Discord.MessageEmbed()
             .setColor('#7289DA')
             .setTitle(`${args[1].toUpperCase()} has been removed!`)
-            .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
+            .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png')
             .addField(`${message.author.tag}'s blacklisted game(s)`, `${blacklist === undefined || blacklist == 0 ? `No blacklisted games found!` : `${blacklist.join(`, `).toUpperCase()}`}`);
           if (blacklist.length == 0) blacklistedData.setDescription(`Your blacklisted games alert is now off, as you have no blacklisted games.`);
-          return message.reply(blacklistedData);
+          return message.reply(blacklistedData).catch(err => {
+            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+          });
     }
   } catch (err) {
         console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
@@ -155,9 +161,11 @@ module.exports = {
         let blacklistedData = new Discord.MessageEmbed()
           .setColor('#7289DA')
           .setTitle(`${message.author.tag}'s Blacklisted Games`)
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
+          .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png')
           .addField(`Your blacklisted game(s)`, `${!blacklistResponse || blacklistResponse == 0 ? `No blacklisted games found!` : `${blacklistResponse.join(`, `).toUpperCase()}`}`);
-        return message.reply(blacklistedData);
+        return message.reply(blacklistedData).catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+        });
       } catch (err) {
         console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
         message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);

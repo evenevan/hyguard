@@ -24,8 +24,11 @@ module.exports = {
   cooldown: 7.5,
   permissions: ["ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","MANAGE_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
+let readData = funcImports.readOwnerSettings();
+let api = readData.api,
+dst = readData.dst;;
   if (row !== undefined) {
-    var tzOffset = (row.timezone * 3600000);
+    var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
 	var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
 	var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
     var isInDatabase = true;
@@ -35,9 +38,6 @@ module.exports = {
 	var dateString = funcImports.epochToCleanDate(new Date());
     var isInDatabase = false;
   }
-
-  const readData = funcImports.readOwnerSettings();
-  const api = readData.api;
 
   const author = message.author
 
@@ -154,11 +154,12 @@ try {
 					};
 
 					if (!recentData[0]) {
+						msg.delete();
 						let noDataEmbed = new Discord.MessageEmbed()
 							.setColor('#7289DA')
 							.setTitle(`**Most Recent Games - ${playerUsername}**`)
 							.addField(`No Recent Games Detected!`, `There are no recent games to show. Games played more than 3 days ago cannot be shown. Some players also have the recent games API option disabled.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+							.setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
 						return message.channel.send(noDataEmbed);
 					}
 
@@ -170,7 +171,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Recent Games - ${playerUsername} | Showing ${start + 1}-${start + current.length} out of ${recentData.length}**`)
 							.setDescription(`Some gametypes like Skyblock will not show up due to limitations with Hypixel's API. Games may take a while to appear here due to use of the Slothpixel API.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+							.setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
 						for (let i = start; i < start + 5; i++) {
 							if (recentData[i]) {
 								recentGamesEmbed.addField(`${recentData[i].gameType} | ${funcImports.epochToCleanDate(new Date(recentData[i].date+ tzOffset))} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData[i].hasOwnProperty("date") && recentData[i].date !== null && recentData[i].date !== "" ? `Game Start: ${new Date(recentData[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Game End: ${new Date(recentData[i].ended + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData[i].hasOwnProperty('ended') && recentData[i].ended !== null && recentData[i].ended !== "" ? `Play Time: ${new Date(recentData[i].ended - recentData[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData[i].date).toISOString().substr(11, 8)}\n` }${recentData[i].mode !== null && recentData[i].mode !== "" ? `Mode: ${recentData[i].mode}\n` : `` }${recentData[i].map !== null && recentData[i].map !== "" ? `Map: ${recentData[i].map}` : `` }`)
@@ -196,18 +197,24 @@ try {
 								message.reactions.removeAll().then(async() => {
 									reaction.emoji.name === '⬅️' ? currentIndex -= 5 : currentIndex += 5;
 	
-									message.edit(generateEmbed(currentIndex));
+									message.edit(generateEmbed(currentIndex)).catch(err => {
+										console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+									});
 	
 									if (currentIndex > 0) await message.react('⬅️');
 									if (currentIndex + 5 < recentData.length) message.react('➡️');
-								})
+								}).catch(err => {
+									console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+								});
 							
 						})
 
 						collector.on('end', () => { //my brain is dead
 							message.reactions.removeAll();
 						});
-					})
+					}).catch(err => {
+						console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+					});
 				})
 				.catch((err) => {
                   if (err.name === "AbortError") {
@@ -228,6 +235,11 @@ try {
 					signal: controller.signal
 				})
 				.then(function(response) {
+					if (response.status == 422) {
+						let error = new Error('Username Invalid');
+						error.name = `NameError`;
+						throw error;
+					}
 					if (!response.ok) {throw new Error("HTTP status " + response.status);}
 					return response.json();
 				  })
@@ -247,12 +259,15 @@ try {
 					};
 
 					if (!recentData.games[0]) {
+						msg.delete();
 						let noDataEmbed = new Discord.MessageEmbed()
 							.setColor('#7289DA')
 							.setTitle(`**Most Recent Games - ${playerUsername}**`)
 							.addField(`No Recent Games Detected!`, `There are no recent games to show. Games played more than 3 days ago cannot be shown. Some players also have the recent games API option disabled.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
-						return message.channel.send(noDataEmbed);
+							.setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
+						return message.channel.send(noDataEmbed).catch(err => {
+							console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+						});
 					}
 
 
@@ -263,7 +278,7 @@ try {
 							.setColor('#7289DA')
 							.setTitle(`**Recent Games - ${playerUsername} | Showing ${start + 1}-${start + current.length} out of ${recentData.games.length}**`)
 							.setDescription(`Some gametypes like Skyblock will not show up due to limitations with Hypixel's API. This data was gathered with the Hypixel API as the Slothpixel API did not respond.`)
-							.setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+							.setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png');
 						for (let i = start; i < start + 5; i++) {
 							if (recentData.games[i]) {
 								recentGamesEmbed.addField(`${recentData.games[i].gameType} | ${funcImports.epochToCleanDate(new Date(recentData.games[i].date + tzOffset))} | ${isInDatabase ? `UTC ${decimalsToUTC(row.timezone)}` : `UTC ±0`}`, `${recentData.games[i].hasOwnProperty("date") && recentData.games[i].date !== null && recentData.games[i].date !== "" ? `Game Start: ${new Date(recentData.games[i].date + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game Start: Unknown\n`}${recentData.games[i].hasOwnProperty('ended') && recentData.games[i].ended !== null && recentData.games[i].ended !== "" ? `Game End: ${new Date(recentData.games[i].ended + tzOffset).toLocaleTimeString('en-IN', { hour12: true })}\n` : `Game End: In progress\n` }${recentData.games[i].hasOwnProperty('ended') && recentData.games[i].ended !== null && recentData.games[i].ended !== "" ? `Play Time: ${new Date(recentData.games[i].ended - recentData.games[i].date).toISOString().substr(11, 8)}\n` : `Play Time Elapsed: ${new Date(new Date() - recentData.games[i].date).toISOString().substr(11, 8)}\n` }${recentData.games[i].mode !== null && recentData.games[i].mode !== "" ? `Mode: ${recentData.games[i].mode}\n` : `` }${recentData.games[i].map !== null && recentData.games[i].map !== "" ? `Map: ${recentData.games[i].map}` : `` }`)
@@ -294,23 +309,34 @@ try {
 								message.reactions.removeAll().then(async() => {
 									reaction.emoji.name === '⬅️' ? currentIndex -= 5 : currentIndex += 5;
 	
-									message.edit(generateEmbed(currentIndex));
+									message.edit(generateEmbed(currentIndex)).catch(err => {
+										console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+									});
 	
 									if (currentIndex > 0) await message.react('⬅️');
 									if (currentIndex + 5 < recentData.games.length) message.react('➡️');
-								})
+								}).catch(err => {
+									console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+								});
 							}
 						})
 
 						collector.on('end', () => { //my brain is dead
-							message.reactions.removeAll();
+							message.reactions.removeAll().catch(err => {
+								console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+							});
 						});
-					})
+					}).catch(err => {
+						console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+					});
 				})
 				.catch((err) => {
 					if (err.name === "AbortError") {
 						msg.delete();
 						message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond and may be down. Try again later. https://status.hypixel.net/`);
+					} else if (err.name === "NameError") {
+						msg.delete();
+						message.channel.send(`${message.author}, that username doesn\'t seem to be valid.`);
 					} else {
 						msg.delete();
 						console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Hypixel API Error 9: ${err}`);

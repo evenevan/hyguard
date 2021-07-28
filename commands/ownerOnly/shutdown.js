@@ -6,7 +6,7 @@ module.exports = {
   usage: `\`${prefix}shutdown\``,
   ownerReq: true,
   database: false,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
 	execute(message, args, client) {
 		message.channel.send('Shutting down...').then(() => {
         client.destroy();

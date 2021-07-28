@@ -18,10 +18,12 @@ module.exports = {
   args: false,
   database: false,
   cooldown: 10,
-  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
+  permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-			var tzOffset = (row.timezone * 3600000);
+      let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
 			var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
 			var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
 		} else {
@@ -74,10 +76,12 @@ module.exports = {
             { name: 'session.minecraft.net', value: `${array[6]}` },
             { name: 'textures.minecraft.net', value: `${array[7]}` },
           )
-          .setFooter(`Executed at ${dateString} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png')
+          .setFooter(`Executed at ${timeString} | ${dateString}`, 'https://i.imgur.com/MTClkTu.png')
         
           msg.delete();
-          message.reply(mojangStatus);
+          message.reply(mojangStatus).catch(err => {
+            console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+          });
         
               })
               .catch((err) => {

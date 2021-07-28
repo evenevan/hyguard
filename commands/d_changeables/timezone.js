@@ -16,7 +16,9 @@ module.exports = {
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY"],
 	execute(message, args, client, row) {
     if (row !== undefined) {
-      var tzOffset = (row.timezone * 3600000);
+      let readData = funcImports.readOwnerSettings();
+    	let dst = readData.dst;
+			var tzOffset = (dst == true ? row.timezone * 1 + 1: row.timezone) * 3600000;
       var timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }); 
       var dateString = funcImports.epochToCleanDate(new Date(Date.now() + tzOffset));
     } else {
@@ -34,7 +36,7 @@ module.exports = {
       let formatExample = new Discord.MessageEmbed()
       .setColor('#FF5555')
       .setTitle('Invalid Format Or Offset!')
-      .setFooter(`Executed at ${dateString}} | ${timeString} UTC`, 'https://i.imgur.com/MTClkTu.png')
+      .setFooter(`Executed at ${timeString} | ${dateString} UTC`, 'https://i.imgur.com/MTClkTu.png')
       .setDescription(`That isn't valid! It must be between -23:59 and +23:59. Please use the format \`-/+0\` or \`-/+0:00\`. See \`${prefix}help timezone\` for common timezones nad thie UTC offsets\n\n**Examples:**`)
       .addField('-07:00', '7 hours behind UTC')
       .addField(`-7`, `7 hours behind UTC`)
@@ -75,7 +77,10 @@ module.exports = {
     function daylightSavings(timezone) {
 			message.channel.send(`${message.author}, do you use DST (Daylight saving time)?`).then(msg => {
 				msg.react('👍')
-				msg.react('👎');
+        .then(() => {msg.react('👎');})
+        .catch(err => {
+          console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while executing a command from ${message.author.tag}.\n`, err);
+        });
 				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
 				  max: 1,
 				  time: 60000
@@ -87,9 +92,8 @@ module.exports = {
 				  }
 				}).catch((err) => {
 				  msg.delete();
-				  console.log(err)
-				  message.channel.send(`${message.author}, no reaction after 60 seconds, operation canceled`).then(async msg => {
-					setTimeout(() => {msg.delete()}, 30000)});
+          if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds, operation canceled.`);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while obtaining DST data. ${err}`);
 				});
 			  });
 		};
@@ -100,7 +104,7 @@ module.exports = {
         await databaseImports.changeData(message.author.id, dstBoolean, `UPDATE data SET daylightSavings = ? WHERE discordID = ?`);
         return message.channel.send(`${message.author}, your timezone/UTC offset is now set to ${args[0]}. Your local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}`);
       } catch (err) {
-        console.log(`An error occured while writing data. ${err}`);
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
         message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
       }
     
