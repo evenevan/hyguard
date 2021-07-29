@@ -2,7 +2,7 @@
     "Timezone": "UTC",
     "BotOwnerID": ["Put Owner ID's Here", ""],
     "consoleID": "A Channel ID for a Console Here",
-    "prefix": "-",
+    "prefix": "h!",
     "hypixelAPIkey": "Your Hypixel API Key",
     "discordAPIkey": "Your Discord API Key Here",
     "logInterval": "30"

@@ -6,6 +6,7 @@ module.exports = {
   database: false,
   cooldown: 5,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
+  guildPermissions: [],
 	execute(message, args, client) {
 		try {
 			message.channel.send('Loading data').then(async msg => {

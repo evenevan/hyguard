@@ -56,12 +56,14 @@ checkPermsOfBot();
 async function checkPermsOfBot() {
 	if (message.channel.type !== 'dm') {
 	  try {
-		  if (command.permissions) {
-		  const requiredPermissions = command.permissions;
-		  let returned = await funcImports.checkPermsOfBot(message.channel, message.guild.me, requiredPermissions);
+		  if (command.permissions && command.guildPermissions) {
+		  const channelPermissions = command.permissions;
+		  const guildPermissions = command.guildPermissions;
+		  let returned = await funcImports.checkPermsOfBot(message.channel, channelPermissions, guildPermissions, message.guild.me);
 		  if (returned) {
-			  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${returned}`);
-			  return message.channel.send(`${message.author}, this bot is missing the following permissions(s) for that command: ${returned}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`);
+			  let type = returned.pop()
+			  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions. User: ${message.author.tag} | ${message.author.id} GuildID: ${message.guild.id}. Content: ${message.content}. User is missing ${type === "BOTH" ? `Channel: ${returned[0]} Guild: ${returned[1]}`: `${type}: ${returned[0]}`}`);
+			  return message.channel.send(`${message.author}, this bot is missing the following permissions(s) for that command: ${type === "BOTH" ? `${returned[0]}. The permission(s) ${returned[1]} must be given at a server-wide level through the bot's role.` : `${returned[0]}. ${type == "CHANNEL" ? `If the bot's roles appear to contain all of these permissions, check the channel's advanced permissions.` : `These permission(s) must be given at a server-wide level through the bot's role.`}`}`);
 		  }
 		  checkDB();
 		  } else {
@@ -69,8 +71,8 @@ async function checkPermsOfBot() {
 			  return message.channel.send(`${message.author}, this command was not set up correctly by the owner. Please notify them. It is missing a permission configuration.`);
 		  }
 	  } catch (err) {
-		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A user is attempting to use the bot without essential permissions. User: ${message.author.tag} | ${message.author.id}${message.guild ? ` GuildID: ${message.guild.id}` : ``} Content: ${message.content}. User is missing ${err}`);
-		return message.author.send(`${message.author}, this bot is missing the following permissions(s) for that command: ${err}. These include the essential permission **SEND_MESSAGES**. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`).then(() => {console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions DM sent`)}).catch(error => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Could not send a missing permissions DM to ${message.author.tag}.\n`, error);});
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | A user is attempting to use the bot without essential permissions. User: ${message.author.tag} | ${message.author.id}${message.guild ? ` GuildID: ${message.guild.id}` : ``} Content: ${message.content}. User is missing ${err[0]} in a channel.${!err[1] ? `` : ` ${err[1]} is missing in the guild.`}`);
+		return message.author.send(`This bot is missing the following permissions(s) the command ${prefix}${commandName}: ${err[0]}.${!err[1] ? `` : ` This bot is also missing ${err[1]}, which must be given at a server-wide level through the bot's role.`} **Send Messages** is an essential permission to this bot's function. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions.`).then(() => {console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Missing Permissions DM sent`)}).catch(error => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Could not send a missing permissions DM to ${message.author.tag}.\n`, error);});
 	  }	
 	} else {
 		  checkDB()

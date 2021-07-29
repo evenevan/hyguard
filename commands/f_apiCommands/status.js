@@ -21,6 +21,7 @@ module.exports = {
   database: false,
   cooldown: 7.5,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
+  guildPermissions: [],
 	execute(message, args, client, row) {
 let readData = funcImports.readOwnerSettings();
 let api = readData.api,

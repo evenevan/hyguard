@@ -12,6 +12,7 @@ module.exports = {
   database: true,
   cooldown: 2.5,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"],
+  guildPermissions: [],
 	execute(message, args, client, row) {
     if (row !== undefined) {
       let readData = funcImports.readOwnerSettings();

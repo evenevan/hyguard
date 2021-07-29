@@ -84,14 +84,31 @@ function unitType(unit) { // old thing for pause command
     return {multiple, type};
 };
 
-async function checkPermsOfBot(channel, bot, requiredPermissions) {
-	let perm = await channel.permissionsFor(bot).toArray()
-  let missingPermissions = []
-  requiredPermissions.forEach(permission => {if (!perm.includes(permission)) missingPermissions.push(permission)})
+async function checkPermsOfBot(channel, requiredChannelPermissions, requiredGuildPermissions, bot) {
+    let channelPermissions = await channel.permissionsFor(bot).toArray()
+    let missingChannelPermissions = []
+    requiredChannelPermissions.forEach(permission => {if (!channelPermissions.includes(permission)) missingChannelPermissions.push(permission)})
 
-  if (missingPermissions == []) return;
-  else if (missingPermissions.includes("SEND_MESSAGES")) {throw missingPermissions}
-  else return missingPermissions.join(", ")
+    let missingGuildPermissions = []
+    requiredGuildPermissions.forEach(permission => {if (!bot.hasPermission(permission)) missingGuildPermissions.push(permission)})
+
+    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permission list: ${channelPermissions}\n${requiredChannelPermissions}\n${requiredGuildPermissions}`)
+
+    if (missingChannelPermissions.length == 0 && missingGuildPermissions.length == 0) return;
+    else if (missingChannelPermissions.includes("SEND_MESSAGES")) {throw [missingChannelPermissions.join(", "),missingGuildPermissions.join(", ")]}
+    else if (missingChannelPermissions.length !== 0 && missingGuildPermissions.length !== 0) return [missingChannelPermissions.join(", "),missingGuildPermissions.join(", "),"BOTH"]
+    else if (missingChannelPermissions.length !== 0) return [missingChannelPermissions.join(", "),"CHANNEL"]
+    else if (missingGuildPermissions.length !== 0) return [missingGuildPermissions.join(", "),"GUILD"];
+};
+
+async function checkPermsOfBotLogFunction(channel, requiredChannelPermissions, bot) {
+    let channelPermissions = await channel.permissionsFor(bot).toArray()
+    let missingChannelPermissions = []
+    requiredChannelPermissions.forEach(permission => {if (!channelPermissions.includes(permission)) missingChannelPermissions.push(permission)})
+
+    if (missingChannelPermissions.length == 0) return;
+    else if (missingChannelPermissions.includes("SEND_MESSAGES")) {throw missingChannelPermissions.join(", ")}
+    else return missingChannelPermissions.join(", ")
 };
 
 function epochToCleanDate(epoch) {
@@ -101,4 +118,4 @@ function epochToCleanDate(epoch) {
   return month + " " + date + ", " + year
 }
 
-module.exports = { saveConstants, readConstants, pauseToHMS, unitType, saveOwnerSettings, readOwnerSettings, checkPermsOfBot, epochToCleanDate };
+module.exports = { saveConstants, readConstants, pauseToHMS, unitType, saveOwnerSettings, readOwnerSettings, checkPermsOfBot, checkPermsOfBotLogFunction,epochToCleanDate };

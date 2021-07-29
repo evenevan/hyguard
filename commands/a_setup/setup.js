@@ -21,6 +21,7 @@ module.exports = {
   guildOnly: true,
   database: false,
   permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","MANAGE_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY","MANAGE_ROLES"],
+  guildPermissions: ["MANAGE_CHANNELS","MANAGE_MESSAGES","MANAGE_ROLES"],
 	execute(message, args, client) {
 		const controller = new AbortController();
 

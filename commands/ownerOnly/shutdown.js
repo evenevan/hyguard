@@ -7,6 +7,7 @@ module.exports = {
   ownerReq: true,
   database: false,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
+  guildPermissions: [],
 	execute(message, args, client) {
 		message.channel.send('Shutting down...').then(() => {
         client.destroy();

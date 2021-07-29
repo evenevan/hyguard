@@ -11,6 +11,7 @@ module.exports = {
   database: false,
   ownerReq: true,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
+  guildPermissions: [],
 	execute(message, args) {
 		const commandName = args[0].toLowerCase();
 		const command = message.client.commands.get(commandName)

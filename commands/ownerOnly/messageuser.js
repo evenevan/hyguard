@@ -15,6 +15,7 @@ module.exports = {
   args: true,
   database: false,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
+  guildPermissions: [],
 	execute(message, args, client) {
 
     if (!args[0]) return message.channel.send(`${message.author}, you didn't provide the User ID or Message!`)

@@ -11,6 +11,7 @@ module.exports = {
   cooldown: 10,
   database: true,
   permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","READ_MESSAGE_HISTORY"],
+  guildPermissions: [],
 	execute(message, args, client) {
         try {
 message.channel.send('Deleting..').then(async loadingmsg => {
@@ -42,8 +43,8 @@ message.channel.send('Deleting..').then(async loadingmsg => {
                 let log = await guild.channels.cache.get(rowRespoonse.logID);
                 let alert = await guild.channels.cache.get(rowRespoonse.alertID);
 
-                if (log) log.delete();
-                if (alert) alert.delete();
+                if (log) log.delete().catch(err => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while deleting the log while executing a command from ${message.author.tag}.\n`, err);});
+                if (alert) alert.delete().catch(err => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while deleting the alert channel while executing a command from ${message.author.tag}.\n`, err);});
                 return;
               };
 
@@ -55,7 +56,7 @@ message.channel.send('Deleting..').then(async loadingmsg => {
                 if (guild) {
                   let category = guild.channels.cache.find(c => c.name == "log" && c.type == "category");
                   if (category.children.size == 0) {
-                    category.delete();
+                    category.delete().catch(err => {console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Caught an error while deleting a category while executing a command from ${message.author.tag}.\n`, err);});
                   }
                 } 
 

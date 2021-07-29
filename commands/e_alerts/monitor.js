@@ -8,6 +8,7 @@ module.exports = {
   cooldown: 7.5,
   database: true,
   permissions: ["VIEW_CHANNEL","SEND_MESSAGES"],
+  guildPermissions: [],
 	execute(message, args, client) {
       
           getAlerts();

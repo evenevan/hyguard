@@ -125,7 +125,7 @@ async function checkAlertPermissions(data, dbUserData, client, userNumber, dst) 
 
   if (!alerts) return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | User's alert channel is no longer valid. User ${userNumber}: ${dbUserData.discordID} | ${dbUserData.discordUsername} | UUID: ${dbUserData.minecraftUUID}`);
 
-	let returned = await funcImports.checkPermsOfBot(alerts, alerts.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"]);
+	let returned = await funcImports.checkPermsOfBot(alerts, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"], alerts.guild.me);
 
 	if (returned) {
 		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`);
@@ -146,7 +146,7 @@ async function checkLogPermissions(data, dbUserData, client, userNumber, alerts,
 
   if (!log) return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | User's log channel is no longer valid. User: ${userNumber}`)
 
-	let returned = await funcImports.checkPermsOfBot(log, log.guild.me, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"])
+	let returned = await funcImports.checkPermsOfBot(log, ["VIEW_CHANNEL","SEND_MESSAGES","EMBED_LINKS"], log.guild.me)
 
 	if (returned) {
 		console.log(`Permissions: ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${returned}`)
