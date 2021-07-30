@@ -47,11 +47,11 @@ Use **h!help < command >** to see details and usage of that specific command
 | h!alert        | 2.5                    | Allows you to toggle individual alert types                                    | Y                  |
 | h!monitor      | 7.5                    | Allows you to toggle the logging and monitoring of your account                | Y                  |
 | h!pleaseshutup | 5                      | Allows you to toggle all alerts                                                | Y                  |
+| h!compromised  | 5                      | Shows a copy-pasteable summary of a user's last session                        | N                  |
 | h!mojang       | 10                     | Shows the status of Mojang's services                                          | N                  |
 | h!recentgames  | 7.5                    | Shows the recent games of any player                                           | N                  |
 | h!status       | 7.5                    | Shows the status of any player                                                 | N                  |
 | h!ping         | 5                      | Shows the ping of the bot                                                      | N                  |
-| h!uptime       | 5                      | Shows the uptime of the bot                                                    | N                  |
 | h!help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
 ## Issue(s)
