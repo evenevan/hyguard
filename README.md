@@ -34,22 +34,22 @@ Use **/help command:<command>** to see details and usage of that specific comman
 |    Commands   | Cooldown<br>in seconds |                                   Description                                  | Requires<br>setup? |
 |:-------------:|:----------------------:|:------------------------------------------------------------------------------|:------------------:|
 | /setup        | 5                      | Allows players to begin using HyGuard                                          | N                  |
-| /exit         | 10                     | Allows users to delete their data and stop the use of HyGuard                  | Y                  |
-| /blacklist    | 2.5                    | Allows you to set blacklist games on Hypixel                                   | Y                  |
-| /whitelist    | 2.5                    | Allows you to set whitelisted game to play on Hypixel                          | Y                  |
-| /advanced     | 5                      | Allows you to add or change some special advanced options                      | Y                  |
+| /deletedata   | 10                     | Allows users to delete their data                                              | Y                  |
+| /blacklist    | 2.5                    | Allows you to set blacklist game(s) on Hypixel                                 | Y                  |
+| /whitelist    | 2.5                    | Allows you to set whitelisted game() to play on Hypixel                        | Y                  |
 | /language     | 5                      | Allows you to whitelist a language for use on Hypixel                          | Y                  |
-| /offline      | 5                      | Allows you to set when logins should not occur                                 | Y                  |
+| /offlinetime  | 5                      | Allows you to set when logins should not occur                                 | Y                  |
+| /version      | 5                      | Allows you to whitelist version(s) of Minecraft for use on Hypixel             | Y                  |
 | /timezone     | 5                      | Allows you to set a new timezone for the bot's services that utilise timezones | Y                  |
-| /version      | 5                      | Allows you to whitelist a version of Minecraft for use on Hypixel              | Y                  |
-| /alert        | 2.5                    | Allows you to toggle individual alert types                                    | Y                  |
+| /alerts       | 2.5                    | Allows you to toggle individual alert types                                    | Y                  |
+| /advanced     | 5                      | Allows you to add or change some special advanced options                      | Y                  |
 | /monitor      | 7.5                    | Allows you to toggle the logging and monitoring of your account                | Y                  |
-| /pleaseshutup | 5                      | Allows you to toggle all alerts                                                | Y                  |
-| /compromised  | 5                      | Shows a copy-pasteable summary of a user's last session                        | N                  |
+| /server       | 5                      | Allows you to edit the bot settings for this server                            | N                  |
 | /mojang       | 10                     | Shows the status of Mojang's services                                          | N                  |
+| /ping         | 5                      | Shows the ping of the bot                                                      | N                  |
+| /compromised  | 5                      | Shows a copy-pasteable summary of a user's last session                        | N                  |
 | /recentgames  | 7.5                    | Shows the recent games of any player                                           | N                  |
 | /status       | 7.5                    | Shows the status of any player                                                 | N                  |
-| /ping         | 5                      | Shows the ping of the bot                                                      | N                  |
 | /help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
 ## Issue(s)
@@ -67,6 +67,8 @@ You can and modify my code, as per the MIT license.
 I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database. It doesn't crash the bot, and is just annoying.
 
 ## Quick Links
+
+[Top.gg Page](https://top.gg/bot/841021942249422868)
 
 [HyGuard Invite Link](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot)
 
