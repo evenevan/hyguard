@@ -1,430 +1,634 @@
-const { prefix } = require('../../userConfig.json');
-const funcImports = require( __dirname + '../../../functions');
-const sqlite = require('sqlite3').verbose();
+const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+const funcImports = require('../../functions.js');
+const database = require('../../database.js');
+const events = require('../../events');
 const fetch = require('node-fetch');
-const Discord = require('discord.js');
-const databaseImports = require('../../databaseFuncs');
-const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
 const controller = new AbortController();
-const promise = fetch(url, { signal: controller.signal, ...options });
-if (signal) signal.addEventListener("abort", () => controller.abort());
-const timeout = setTimeout(() => controller.abort(), ms);
-return promise.finally(() => clearTimeout(timeout));
+const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
+    const promise = fetch(url, { signal: controller.signal, ...options });
+    if (signal) signal.addEventListener("abort", () => controller.abort());
+    const timeout = setTimeout(() => controller.abort(), ms);
+    return promise.finally(() => clearTimeout(timeout));
 };
 module.exports = {
-	name: 'setup',
-	title: 'Allows players to begin using HyGuard',
-	description: 'Allows players to begin using HyGuard. When prompted, send your username. Then, when prompted, send your UTC Offset. Learn more about the UTC Offset at <https://en.wikipedia.org/wiki/List_of_UTC_time_offsets>',
-	usage: `\`${prefix}setup\``,
-  cooldown: 5,
-  args: false,
-  guildOnly: true,
-  database: false,
-  permissions: ["MANAGE_CHANNELS","ADD_REACTIONS","VIEW_CHANNEL","SEND_MESSAGES","MANAGE_MESSAGES","EMBED_LINKS","READ_MESSAGE_HISTORY","MANAGE_ROLES"],
-	execute(message, args, client) {
-		const controller = new AbortController();
+  	name: 'setup',
+  	title: 'Allows players to begin using HyGuard',
+	description: 'Allows players to begin using HyGuard. This command has about 5 steps and will create channels once completed.',
+  	usage: `\`/setup [UUID or username]\``,
+  	database: false,
+  	guildOnly: true,
+  	ownerReq: false,
+  	cooldown: 7.5,
+    commandPermissions: [],
+  	botChannelPermissions: ["VIEW_CHANNEL","READ_MESSAGE_HISTORY"], //May not need read message history
+  	botGuildPermissions: ["MANAGE_CHANNELS","MANAGE_MESSAGES","MANAGE_ROLES"],
+	async execute(interaction, client, row) {
+    let readData = funcImports.readOwnerSettings();
+    let api = readData.api,
+        userLimit = readData.userLimit,
+        blockedUsers = readData.blockedUsers,
+        dst = readData.dst;
 
-		const readData = funcImports.readOwnerSettings();
-        const api = readData.api,
-		userLimit = readData.userLimit,
-		blockedUsers = readData.blockedUsers,
-		dst = readData.dst;
+    let tzOffset = row ? (dst == true && row.daylightSavings == true ? row.timezone * 1 + 1: row.timezone) * 3600000 : 0;
+    let tz = row ? (dst == true && row.daylightSavings == true == true ? row.timezone * 1 + 1: row.timezone) : 0;
+    let timeString = row ? `${new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(tz)}` : `${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0`;
 
-		checkSystemLimits();
+    let setupEmbed = new MessageEmbed()
+        .setTimestamp()
+        .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+    let noResponseEmbed = new MessageEmbed()
+        .setTimestamp()
+        .setColor('#FF5555')
+        .setTitle(`No Response!`)
+        .setDescription('Setup has been canceled as you did not respond.')
+        .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+    if (row) {
+        setupEmbed.setColor(`#FF5555`);
+        setupEmbed.setTitle(`Command Used Already!`);
+        setupEmbed.setDescription(`You already used this command! You cannot use this command again unless you delete all your data first.`);
+        return interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+    }
 
-		async function checkSystemLimits() {
+    let assets = funcImports.readAssets();
+
+    checkSystemLimits();
+
+	async function checkSystemLimits() { //Basic system checks
+        let player = interaction.options.getString('player');
 		try {
-			if (blockedUsers.includes(message.author.id)) {
-				return message.channel.send(`You have been blocked from using this system.`);
+			if (blockedUsers.includes(interaction.user.id)) {
+				setupEmbed.setColor(`#FF5555`);
+                setupEmbed.setTitle(`Access Denied!`);
+                setupEmbed.setDescription(`You are blocked from using this system.`);
+                return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
 			}
-			let checkUserLimit = await databaseImports.getUserCount()
-			if (checkUserLimit['count(1)'] >= userLimit) return message.channel.send(`${message.author}, the maximum amount of users of ${userLimit} was reached. Please check back later!`);
-			if (api == false) return message.channel.send(`${message.author}, this command is temporarily disabled as the API is down!`);
-			isThisPlayerInTheDataBase();		
+			let checkUserLimit = await database.getUserCount()
+			if (checkUserLimit['count(1)'] >= userLimit) {
+                setupEmbed.setColor(`#FF5555`);
+                setupEmbed.setTitle(`Max Users Reached!`);
+                setupEmbed.setDescription(`The max amount of users was reached. Please check back later!`);
+                return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            }
+			if (api == false) {
+                setupEmbed.setColor(`#FF5555`);
+                setupEmbed.setTitle(`API is down!`);
+                setupEmbed.setDescription(`This command was disabled temporarily as the Hypixel API is down!`);
+                return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            }
+            if (!/^[a-zA-Z0-9_-]{1,24}$/g.test(player) && !/^[0-9a-f]{8}(-?)[0-9a-f]{4}(-?)[1-5][0-9a-f]{3}(-?)[89AB][0-9a-f]{3}(-?)[0-9a-f]{12}$/i.test(player)) {
+                setupEmbed.setColor(`#FF5555`);
+                setupEmbed.setTitle(`Invalid Username or UUID!`);
+                setupEmbed.setDescription(`The username/UUID provided is invalid! The username cannot contain invalid characters. UUIDs must match the following regex: \`/^[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89AB][0-9a-f]{3}[0-9a-f]{12}$/i\`. You can test this regex with [__this__](https://regex101.com/r/A866mm/1) site.`);
+                return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            }
+            await interaction.deferReply(); //In case the API requests below take more than the 3 seconds the interaction gets
+            if (/^[0-9a-f]{8}(-?)[0-9a-f]{4}(-?)[1-5][0-9a-f]{3}(-?)[89AB][0-9a-f]{3}(-?)[0-9a-f]{12}$/i.test(player)) return requestPlayer(player);
+            requestUUID(player);	
 		} catch (err) {
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
-        	message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
+			events.errorMsg(interaction, err)
 		}
 	};
 
-		async function isThisPlayerInTheDataBase() { //isn't nessessary if change is made to only execute this command if player isn't in db from index.js
-		  try {
-			let isInDB = await databaseImports.isInDataBase(message.author.id)
-			if (isInDB[0] == true) return message.channel.send(`${message.author}, you have already used this command!`);
-			checkMCAccount();
-		  } catch (err) {
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while fetching data. ${err}`);
-			message.channel.send(`${message.author}, an error occured while fetching data. Please report this. \`${err}\``);
-		  }
-		};
-	
-		function checkMCAccount() {
-		  message.channel.send(`${message.author}, welcome! To begin, there are 6 steps. First, please send your Minecraft username in this chat.`)
-		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
-			max: 1,
-			time: 60000
-		  }).then(collected => {
-			let msg = collected.first().content.toLowerCase()
-			if (/^[\w+]{1,16}$/gm.test(msg)) {
-			  message.channel.send('Loading..').then(async loadingmsg => {
-	
-				Promise.all([
-					fetchTimeout(`https://api.slothpixel.me/api/players/${msg}/`, 2000, {
-						signal: controller.signal
-					  }).then(player => player.json()),
-					fetchTimeout(`https://api.slothpixel.me/api/players/${msg}/status/`, 2000, {
-						signal: controller.signal
-					  }).then(player => player.json()),
-				  ])
-				  .then((player) => {
-					if (player[0].hasOwnProperty('error')) {
-					  loadingmsg.delete();
-					  return message.channel.send(`${message.author}, that Minecraft username doesn\'t seem to have exist or hasn\`t logged onto Hypixel. Setup canceled.`);
-					}
-					if (!player[0].links.DISCORD) {
-					  loadingmsg.delete();
-					  let linkError = new Discord.MessageEmbed()
-						.setColor('#FF5555')
-						.setTitle(`Link your Discord on Hypixel!`)
-						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-						.setDescription('You have not linked your Discord account to your Minecraft account on Hypixel! Follow the guide below:')
-						.setImage('https://i.imgur.com/gGKd2s8.gif');
-					  return message.reply(linkError);
-					}
-					if (player[0].links.DISCORD !== message.author.tag) {
-					  loadingmsg.delete();
-					  let linkError = new Discord.MessageEmbed()
-						.setColor('#FF5555')
-						.setTitle(`That isn't your account!`)
-						.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-						.setDescription('That Minecraft account currently has a different Discord account linked! If that is your account, follow the guide below to relink it: ')
-						.setImage('https://i.imgur.com/gGKd2s8.gif');
-					  return message.reply(linkError);
-					}
-	
-					loadingmsg.delete();
-					verifyTimezone(player);
-	
-				  })
-				  .catch((err) => {
-					if (err.name === "AbortError") {
-					  loadingmsg.delete();
-					  message.channel.send(`${message.author}, an error occured while executing this command. The API failed to respond, and may be down. Try again later. https://status.hypixel.net/`);
-					} else {
-					  loadingmsg.delete();
-					  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | API Error 9: ${err}`);
-					  message.channel.send(`${message.author}, an error occured while executing this command. This error is expected to occur occasionally. Please report this if it continues. ERROR_9: \`${err}\``);
-					}
-				  });
-			  })
-	
-			} else return message.channel.send(`${message.author}, that doesn't seem to be a valid Minecraft username! It cannot contain illegal characters! Setup canceled.`);
-	
-	
-		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`Something went wrong. An error occured while getting player data. ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. An error occured while getting player data. Please report this. \`${err}\``);
-		  });
-		};
-	
-		function verifyTimezone(player) {
-		  let tzExample = new Discord.MessageEmbed()
-				.setColor('#7289DA')
-				.setTitle('Quick Reference')
-				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-				.setDescription(`Username verified. ${message.author}, please enter your UTC offset in this format: \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have two minutes, so take your time to find it.\n\n**+0** Greenwich Mean Time (GMT)\n**+1** Central European Time (CET)\n**+2** Eastern European Time (EET)\n**+3** Moscow Time (MSK)\n**+4** Armenia Time (AMT)\n**+5** Pakistan Standard Time (PKT)\n**+6** Omsk Time (OMSK)\n**+7** Kranoyask Time (KRAT)\n**+8** China Standard Time (CST)\n**+9** Japan Standard Time (JST)\n**+10** Eastern Australia Standard Time (AEST)\n**+11** Sakhalin Time (SAKT)\n**+12** New Zealand Standard Time (NZST)\n\n**-0** Greenwich Mean Time (GMT)\n**-1**	West Africa Time (WAT)\n**-2** Azores Time (AT)\n**-3**	Argentina Time (ART)\n**-4** Atlantic Standard Time (AST)\n**-5** Eastern Standard Time (EST)\n**-6** Central Standard Time (CST)\n**-7** Mountain Standard Time (MST)\n**-8** Pacific Standard Time (PST)\n**-9** Alaska Standard Time (AKST)\n**-10** Hawaii Standard Time (HST)\n**-11** Nome Time (NT)\n**-12** International Date Line West (IDLW)`)
-				message.channel.send(tzExample)
-		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
-			max: 1,
-			time: 1200000
-		  }).then(collected => {
-			let timezone = collected.first().content.toLowerCase()
-			if (!/^([+-](?:2[0-3]|1[0-9]|[0-9]|0[0-9])(:?[0-5]\d)?)$/g.test(timezone)) {
-			  let formatExample = new Discord.MessageEmbed()
-				.setColor('#FF5555')
-				.setTitle('Invalid Format Or Offset!')
-				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-				.setDescription(`That isn't valid! It must be between -23:59 and +23:59. Please use the format \`-/+0\` or \`-/+0:00\`\n\n**Examples:**`)
-				.addField('-07:00', '7 hours behind UTC')
-				.addField(`-7`, `7 hours behind UTC`)
-				.addField('+05:45', '5 hours and 45 minutes ahead of UTC')
-				.addField('+5:45', '5 hours and 45 minutes ahead of UTC');
-			  return message.channel.send(formatExample);
-			}
-	
-			function UTCOffsetToDecimals(utc) {
-				if (!utc.includes(":")) {
-				  return `${utc * 1}`;
-				} else if (utc.slice(0, 1) !== "+" && utc.slice(0, 1) !== "-") {
-				  let minutesToDecimal = (utc.slice(-2) / 60);
-				  let hours = utc.slice(0, -3) * 1;
-				  let result = (hours + minutesToDecimal);
-				  return result;
-				}
-				let minutesToDecimal = (utc.slice(-2) / 60);
-				let hours = utc.slice(1, -3) * 1;
-				let result = `${utc.slice(0, 1) == '+' ? `${hours + minutesToDecimal}` : `${utc.slice(0, 1) + (hours + minutesToDecimal)}`}`;
-				return result;
-			  };
-	
-			daylightSavings(player, UTCOffsetToDecimals(timezone))
-	
-		  }).catch((err) => {
-			  console.log(`type error? ${err}`)
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 2 minutes. Setup canceled.`);
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the timezone variable. ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the timezone variable. Please report this. \`${err}\``);
-		  });
-		};
+    async function requestUUID(username) {
+        Promise.all([
+            fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${username}`, 5000, {
+                signal: controller.signal
+            })
+            .then(function(response) {
+              if (response.status === 204) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
+              if (!response.ok) {throw new Error("HTTP status " + response.status);}
+              return response.json();
+            })
+          ])
+            .then((response) => {
+                requestPlayer(response[0].id);
+            })
+            .catch(async (err) => {
+                if (err.name === "AbortError") {
+                    recentEmbed.setColor('#AA0000');
+                    recentEmbed.setTitle(`Abort Error!`);
+                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                  return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else if (err.name === "NotFound") {
+                    recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
+                    recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else {
+                    return events.errorMsg(interaction, err);
+                }
+            });
+    };
 
-		function daylightSavings(player, timezone) {
-			message.channel.send(`${message.author}, do you use DST (Daylight saving time)?`).then(msg => {
-				msg.react('👍')
-				msg.react('👎');
-				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
-				  max: 1,
-				  time: 60000
-				}).then(collected => {
-				  if (collected.first().emoji.name == '👍') {
-					verifyCorrectTimezone(player, timezone, true)
-				  } else if (collected.first().emoji.name == '👎') {
-					verifyCorrectTimezone(player, timezone, false);
-				  }
-				}).catch((err) => {
-				  if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-				  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the DST variable. ${err}`);
-				  return message.channel.send(`${message.author}, something went wrong. An error occured while getting the DST variable. Please report this. \`${err}\``);
-				});
-			  });
-		};
+    function requestPlayer(uuid) { //Requests the player data from Slothpixel
+        Promise.all([
+            fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/`, 2000, {
+                signal: controller.signal
+              }).then(function(response) {
+                if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
+                if (!response.ok) {let newError = new Error("HTTP status " + response.status); newError.name = "HTTPError"; throw newError;}
+                return response.json();
+              }),
+            fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/status/`, 2000, {
+                signal: controller.signal
+              }).then(function(response) {
+                if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
+                if (!response.ok) {let newError = new Error("HTTP status " + response.status); newError.name = "HTTPError"; throw newError;}
+                return response.json();
+              })
+          ])
+          .then((player) => {
+            let discordTag = `${interaction.user.username}#${interaction.user.discriminator}`
+            if (!player[0].links.DISCORD) {
+                setupEmbed.setColor('#FF5555');
+                setupEmbed.setTitle(`Link your Discord on Hypixel!`);
+                setupEmbed.setDescription('You have not linked your Discord account to your Minecraft account on Hypixel! Follow the guide below:');
+                setupEmbed.setImage('https://i.imgur.com/gGKd2s8.gif');
+                return interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            }
+            if (player[0].links.DISCORD !== discordTag) {
+                setupEmbed.setColor('#FF5555');
+                setupEmbed.setTitle(`That isn't your account!`);
+                setupEmbed.setDescription('That Minecraft account currently has a different Discord account linked! If that is your account, follow the guide below to relink it: ');
+                setupEmbed.setImage('https://i.imgur.com/gGKd2s8.gif');
+                return interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            }
+            introduction(player);
+          })
+          .catch(async (err) => {
+            if (err.name === "AbortError") {
+                setupEmbed.setColor('#AA0000');
+                setupEmbed.setTitle(`Abort Error!`);
+                setupEmbed.setDescription('The API failed to respond, and may be down. Try again later.');
+              return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            } else if (err.name === "NotFound") {
+                setupEmbed.setColor(`#FF5555`); setupEmbed.setTitle(`Player Not Found!`);
+                setupEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel. Setup canceled.`);
+                return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            } else {
+                return events.errorMsg(interaction, err);
+            }
+          });
+    }
 
-		function verifyCorrectTimezone(player, timezone, daylightBoolean) {
-			message.channel.send(`${message.author}, is your current local time ${new Date(Date.now() + (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleString('en-IN', { hour12: true })}? If not, you will get to go back and reselect your timezone and daylight savings selection.`).then(msg => {
-				msg.react('👍')
-				msg.react('👎');
-				msg.awaitReactions((reaction, user) => user.id == message.author.id && (reaction.emoji.name == '👍' || reaction.emoji.name == '👎'), {
-				  max: 1,
-				  time: 60000
-				}).then(collected => {
-				  if (collected.first().emoji.name == '👍') {
-					offlineTime1(player, timezone, daylightBoolean)
-				  } else if (collected.first().emoji.name == '👎') {
-					verifyTimezone(player);
-				  }
-				}).catch(() => {
-					if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-					console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while verifying the timezone variable. ${err}`);
-					return message.channel.send(`${message.author}, something went wrong. An error occured while verifying the timezone variable. Please report this. \`${err}\``);
-				});
-			  });
-		};
-	
-		function offlineTime1(player, timezone, daylightBoolean) {
-		  message.channel.send(`Timezone verified. ${message.author}, please enter when you usually **get off** Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. Logins after this time will be alerts, so you may want to add an hour or two.`)
-		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
-			max: 1,
-			time: 60000
-		  }).then(collected => {
-			let offlineLogout = collected.first().content.toLowerCase()
-			if (!/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(offlineLogout)) {
-			  let formatExample = new Discord.MessageEmbed()
-				.setColor('#FF5555')
-				.setTitle('Invalid Format Or Numbers!')
-				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-				.setDescription(`That isn't valid! It must be between 0:00 and 23:59. 0:00 is 12:00 am. Please use the format \`-/+00:00\` and enter it in your timezone\n\n**Examples:**`)
-				.addField('23:00', 'Alerts occur if a login is detected after 11:00 pm')
-				.addField('3:00', 'Alerts occur if a login is detected after 3:00 am')
-			  return message.channel.send(formatExample);
-			}
-	
-			offlineTime2(player, timezone, daylightBoolean, TimeToDecimals(offlineLogout), offlineLogout)
-	
-		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the second offline time variable. ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the second offline time variable. Please report this. \`${err}\``);
-		  });
-		};
-	
-		function offlineTime2(player, timezone, daylightBoolean, logoutDecimal, offlineLogout) {
-		  message.channel.send(`Logout time verified. ${message.author}, please enter when you usually **get on** Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. Logins after this time won't be alerts.`)
-		  message.channel.awaitMessages(m => m.author.id == message.author.id, {
-			max: 1,
-			time: 60000
-		  }).then(collected => {
-			let offlineLogin = collected.first().content.toLowerCase()
-			if (!/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(offlineLogin)) {
-			  let formatExample = new Discord.MessageEmbed()
-				.setColor('#FF5555')
-				.setTitle('Invalid Format Or Numbers!')
-				.setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png')
-				.setDescription(`That isn't valid! It must be between 0:00 and 23:59. 0:00 is 12 am. Please use the format \`-/+00:00\` and enter it in your timezone\n\n**Examples:**`)
-				.addField('9:00', 'Alerts will not occur if a login is detected after 9:00 am')
-				.addField('6:00', 'Alerts will not occur if a login is detected after 6:00 am')
-			  return message.channel.send(formatExample);
-			}
-	
-	
-			let loginDecimal = TimeToDecimals(offlineLogin);
-			let offlineTime = logoutDecimal + " " + loginDecimal;
-	
-			createChannel(player, timezone, daylightBoolean, offlineTime, offlineLogout, offlineLogin);
-	
-		  }).catch((err) => {
-			if (err instanceof TypeError) return message.channel.send(`${message.author}, no response after 60 seconds. Setup canceled.`);
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while getting the second offline time variable. ${err}`);
-			return message.channel.send(`${message.author}, something went wrong. An error occured while getting the second offline time variable. Please report this. \`${err}\``);
-		  });
-		};
+    async function introduction(playerData) { //More friendly, less overwhelming
+        setupEmbed.setColor('#7289DA');
+        setupEmbed.setTitle(`Setup!`);
+        setupEmbed.setDescription(`Welcome! There are about 5 steps to complete. This process has been redesigned with new features like select menus and buttons to be more friendly. To begin, press Ok!`);
+        let introButton = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId('true')
+					.setLabel('Ok')
+					.setStyle('PRIMARY'),
+			);
+        let introButtonMsg = await interaction.editReply({ embeds: [setupEmbed], components: [introButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+        let filter = i => {
+            i.deferUpdate();
+            return i.user.id === interaction.user.id;
+        };
+        let updatedIntroButton = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+				    .setCustomId('true')
+					    .setLabel('Ok')
+					    .setStyle('PRIMARY')
+                        .setDisabled(true),
+			);
+        introButtonMsg.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 60000 })
+	        .then(async i => {
+                await interaction.editReply({ embeds: [setupEmbed], components: [updatedIntroButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+                return verifyTimezone(playerData);
+            })
+	        .catch(async (err) => {
+                if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await interaction.editReply({ embeds: [setupEmbed], components: [updatedIntroButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else return events.errorMsg(interaction, err);
+            });
+    }
 
-		async function createChannel(player, timezone, daylightBoolean, offlineTime, offlineLogout, offlineLogin) {
-			try {
+    async function verifyTimezone(playerData) {
+        let setupTZ = assets.setupTZ;
+        let tzMenu = new MessageActionRow()
+			.addComponents(
+				new MessageSelectMenu()
+					.setCustomId('tzselect')
+					.setPlaceholder('Select a Timezone')
+					.addOptions(setupTZ),
+			);
+            setupEmbed.setColor('#7289DA');
+            setupEmbed.setTitle(`Timezone!`);
+            setupEmbed.setDescription('Please select your timezone in the drop down below or select \`Other\` if your timezone is not listed.');
+        let tzSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
-			let logChannel = await message.guild.channels.create(`${message.author.tag}-log`, {type: 'text'})
-            let alertChannel = await message.guild.channels.create(`${message.author.tag}-alerts`, {type: 'text'})
-			
-			if (!message.guild.channels.cache.find(c => c.name == "log" && c.type == "category")) {
-				await message.guild.channels.create("log", {type: 'category'});
-				const category = message.guild.channels.cache.find(c => c.name == "log" && c.type == "category");
-				logChannel.setParent(category.id);
-                alertChannel.setParent(category.id);
-			} else {
-				const category = message.guild.channels.cache.find(c => c.name == "log" && c.type == "category");
-				logChannel.setParent(category.id);
-                alertChannel.setParent(category.id);
-			}
+        let filter = i => {
+            i.deferUpdate();
+            return i.user.id === interaction.user.id;
+        };
 
+        function UTCOffsetToDecimals(utc) {
+            if (!utc.includes(":")) {
+              return `${utc * 1}`;
+            } else if (utc.slice(0, 1) !== "+" && utc.slice(0, 1) !== "-") {
+              let minutesToDecimal = (utc.slice(-2) / 60);
+              let hours = utc.slice(0, -3) * 1;
+              let result = (hours + minutesToDecimal);
+              return result;
+            }
+            let minutesToDecimal = (utc.slice(-2) / 60);
+            let hours = utc.slice(1, -3) * 1;
+            let result = `${utc.slice(0, 1) == '+' ? `${hours + minutesToDecimal}` : `${utc.slice(0, 1) + (hours + minutesToDecimal)}`}`;
+            return result;
+          };
+        
+        tzSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+            .then(async selectInteraction => {
+                if (selectInteraction.values[0] !== 'custom') { //Ignores the section below if they didn't select custom
+                    await tzSelectMenu.delete();
+                    return daylightSavings(playerData, selectInteraction.values[0] * 1);
+                }
+                setupEmbed.setColor('#7289DA');
+                setupEmbed.setTitle(`Custom UTC Offset!`);
+                setupEmbed.setDescription('Please type your UTC offset in the format \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
+                await tzSelectMenu.delete()
+                await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
+	                .then((customTZMsg) => {
+                        let filter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let responses = []
+                            collector.on('collect', async collected => {
+                                responses.push(collected.content.toLowerCase())
+                                if (!/^([+-](?:2[0-3]|1[0-9]|[0-9]|0[0-9])(:?[0-5]\d)?)$/g.test(collected.content.toLowerCase()) && responses.length < 5) {
+                                    setupEmbed.setColor('#FF5555');
+                                    setupEmbed.setTitle(`Invalid Format!`);
+                                    setupEmbed.setDescription(`Please try again. You have ${5 - responses.length} chances left. Enter your UTC offset in the format \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have 5 minutes, so please take your time. You have 5 total chances before setup automatically cancels. List of UTC Offsets: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)`);
+                                    await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                } else {
+                                    collector.stop()
+                                }
+                            })
+                            collector.on('end', async collected => {
+                                customTZMsg.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                                if (responses.length === 0) return await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                if (/^([+-](?:2[0-3]|1[0-9]|[0-9]|0[0-9])(:?[0-5]\d)?)$/g.test(collected.last().content.toLowerCase())) {
+                                    return daylightSavings(playerData, UTCOffsetToDecimals(collected.last().content.toLowerCase()));
+                                }
+                                setupEmbed.setColor('#FF5555');
+                                setupEmbed.setTitle(`Invalid Format!`);
+                                setupEmbed.setDescription('Setup has been canceled as you either did not provide an offset.');
+				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                            });
+	                });
+            })
+            .catch(async (err) => {
+                if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    let updatedtzSelectMenu = new MessageActionRow()
+			            .addComponents(
+				            new MessageSelectMenu()
+					            .setCustomId('updatedtzSelectMenu')
+					            .setPlaceholder('Select a Timezone')
+                                .setDisabled(true)
+                                .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
+			            );
+                    await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await tzSelectMenu.edit({ embeds: [setupEmbed], components: [updatedtzSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else return events.errorMsg(interaction, err);
+            });
+    }
     
+    async function daylightSavings(playerData, timezone) {
+        setupEmbed.setColor('#7289DA');
+        setupEmbed.setTitle(`Daylight Savings!`);
+        setupEmbed.setDescription(`Timezone has been verified. Do you use DST (Daylight Saving Time)?${dst === true ? ` If you do, your current time and date should be ${new Date(Date.now() + (timezone * 1 + 1) * 3600000).toLocaleTimeString('en-IN', { hour12: true })}, ${funcImports.epochToCleanDate(new Date(Date.now() + (timezone * 1 + 1) * 3600000))}.` : ``}`);
+        let dstButton = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId('true')
+					.setLabel('Yes')
+					.setStyle('SUCCESS'),
+                new MessageButton()
+					.setCustomId('false')
+					.setLabel('No')
+					.setStyle('DANGER'),
+			);
+        let dstButtonMsg = await interaction.followUp({ embeds: [setupEmbed], components: [dstButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+        let filter = i => {
+            i.deferUpdate();
+            return i.user.id === interaction.user.id;
+        };
+        dstButtonMsg.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 120000 })
+	        .then(async i => {
+                await dstButtonMsg.delete();
+                if (i.customId === 'true') return logoutTime(playerData, timezone, true);
+                else return logoutTime(playerData, timezone, false);
+            })
+	        .catch(async err => {
+                if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    let updatedDSTButton = new MessageActionRow() //Sets the buttons to disabled to shwo that you cant interact anymore
+			        .addComponents(
+				        new MessageButton()
+					        .setCustomId('true')
+					        .setLabel('Yes')
+					        .setStyle('SUCCESS')
+                            .setDisabled(true),
+                        new MessageButton()
+					        .setCustomId('false')
+					        .setLabel('No')
+					        .setStyle('DANGER')
+                            .setDisabled(true),
+			        );
+                    await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await dstButtonMsg.edit({ embeds: [setupEmbed], components: [updatedDSTButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else return events.errorMsg(interaction, err);
+            });
+    }
 
-                logChannel.overwritePermissions([
-                    {
-                        id: message.guild.id,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: message.author.id,
-                        allow: ['VIEW_CHANNEL'],
-						deny: ['SEND_MESSAGES'],
-                    },
-					{
-                        id: message.client.user.id,
-                        allow: ['VIEW_CHANNEL','SEND_MESSAGES','MANAGE_MESSAGES','MANAGE_CHANNELS'],
-                    },
-                ]);
-                alertChannel.overwritePermissions([
-                    {
-                        id: message.guild.id,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                    {
-                        id: message.author.id,
-                        allow: ['VIEW_CHANNEL'],
-						deny: ['SEND_MESSAGES'],
-                    },
-					{
-                        id: message.client.user.id,
-                        allow: ['VIEW_CHANNEL','SEND_MESSAGES','MANAGE_MESSAGES','MANAGE_CHANNELS'],
-                    },
-                ]);
-    
-                client.channels.cache.get(alertChannel.id).send(`${message.author}, your alert messages will be sent here. You should keep notifications **on** for this channel. The command \`${prefix}alert <blacklist, whitelist, language, session, offline, or version\` can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.`).then((msg) => msg.pin());
-                client.channels.cache.get(logChannel.id).send(`${message.author}, your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`).then((msg) => msg.pin());
-			
-			writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logChannel.id, alertChannel.id)
+    async function logoutTime(playerData, timezone, dstBoolean) {
+        let setupLogout = assets.setupLogout
+        let logoutMenu = new MessageActionRow()
+			.addComponents(
+				new MessageSelectMenu()
+					.setCustomId('logoutselect')
+					.setPlaceholder('Select a Logout Time')
+					.addOptions(setupLogout),
+			);
+            setupEmbed.setColor('#7289DA');
+            setupEmbed.setTitle(`Logout Time!`);
+            setupEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
+        let logoutSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [logoutMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
-			} catch (err) {
-				console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | Something went wrong. An error occured while generating channels. ${err}`);
-				message.channel.send(`${message.author}, something went wrong. An error occured while generating channels. Please report this. \`${err}\``)
-			}
-		};
-	
-		function writeData(player, daylightBoolean, timezone, offlineTime, offlineLogout, offlineLogin, logID, alertID) {
-		  let uuid = player[0].uuid,
-			language = player[0].language || `ENGLISH`,
-			version = player[0].mc_version || `1.8.9`,
-		  login = player[0].last_login || `0`,
-			logout = player[0].last_logout || `0`;
-	
-		  try {
-			let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
-
-			db.serialize(() => {
-	
-				let insertdata = db.prepare(`INSERT INTO data VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-				insertdata.run(message.author.id, message.author.tag, uuid, language, version, offlineTime, "", "", login, logout, timezone, daylightBoolean,"0 0 1 1 1 1", message.guild.id, logID, alertID, "0", "");
-				insertdata.finalize();
-				db.close();
-			  });
-
-			let setupData = new Discord.MessageEmbed()
-			  .setColor('#00AA00')
-			  .setTitle(`Success!`)
-			  .setDescription(`You can change most of these at anytime. Check ${prefix}help to see what's available. Now, execute the command \`${prefix}monitor\` to start the logging and monitoring. Additionally, \`${prefix}monitor\` can turn the logging and monitoring on or off at your convenience.`)
-			  .setFooter(`Executed at ${funcImports.epochToCleanDate(new Date())} | ${new Date().toLocaleTimeString()} UTC`, 'https://i.imgur.com/MTClkTu.png');
-			setupData.addFields({
-			  name: 'Discord ID',
-			  value: `${message.author.id}`
-			}, {
-			  name: 'Discord Tag',
-			  value: `${message.author.tag}`
-			}, {
-			  name: 'UUID',
-			  value: `${uuid}`
-			}, {
-			  name: 'Language',
-			  value: `${language}`
-			}, {
-			  name: 'Version',
-			  value: `${version}`
-			}, {
-			  name: 'Offline Time',
-			  value: `${twentyFourToTwelve(offlineLogout)} to ${twentyFourToTwelve(offlineLogin)}`
-			}, {
-			  name: 'UTC Offset',
-			  value: `UTC ${timezone} | Your time should be ${new Date(Date.now() + (daylightBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}`
-			}, {
-			  name: 'Daylight Savings',
-			  value: `${daylightBoolean == true ? `On` : `Off`}`
-			}, {
-			  name: 'Log Channel',
-			  value: `<#${logID}>`
-			}, {
-			  name: 'Alert Channel',
-			  value: `<#${alertID}>`
-			},)
-			if (player[0].online == true && player[1].online == false) setupData.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
-			if (login == 0 || logout == 0) setupData.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
-			return message.reply(setupData);
-		  } catch (err) {
-			console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC ±0 | An error occured while writing data. ${err}`);
-			message.channel.send(`${message.author}, an error occured while writing data. Please report this. \`${err}\``);
-		  }
-		};
-
-		function twentyFourToTwelve(time) {
-			var time = time.toString().match(/^([01]?\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
-			if (time.length > 1) {
-			  time = time.slice(1);
-			  time[5] = +time[0] < 12 ? ' AM' : ' PM';
-			  time[0] = +time[0] % 12 || 12;
-			}
-			return time.join('');
-		};
-
-		function TimeToDecimals(time) {
+        function TimeToDecimals(time) {
 			let minutesToDecimal = (time.slice(-2) / 60);
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
 		};
 
-		//function isDST() { //this won't work because utc DOESNT have daylight savings. the fix for now is the dst command. i had plans to make dst dynamic for each user, but it sucks so no.
-			//let localOffset = new Date().getTimezoneOffset()
-			//let jan = new Date(new Date().getFullYear(), 0, 1);
-			//let jul = new Date(new Date().getFullYear(), 6, 1);
-			//console.log(localOffset, jan.toString(), jul.toString())
-			//return (localOffset < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset()))
-		//};
-	},
+        let filter = i => {
+            i.deferUpdate();
+            return i.user.id === interaction.user.id;
+        };
+        
+        logoutSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+            .then(async selectInteraction => {
+                if (selectInteraction.values[0] !== 'custom') {
+                    await logoutSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                    return loginTime(playerData, timezone, dstBoolean, selectInteraction.values[0] * 1);
+                }
+                setupEmbed.setColor('#7289DA');
+                setupEmbed.setTitle(`Custom Logout Time!`);
+                setupEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
+                await logoutSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
+	                .then((customLogoutMsg) => {
+                        let filter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let responses = []
+                            collector.on('collect', async collected => {
+                                responses.push(collected.content.toLowerCase())
+                                if (!/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(collected.content.toLowerCase()) && responses.length < 5) {
+                                    setupEmbed.setColor('#FF5555');
+                                    setupEmbed.setTitle(`Invalid Format!`);
+                                    setupEmbed.setDescription(`Please try again. You have ${5 - responses.length} chances left. Enter your login time in the 24 hour format, eg: \`23:45\`, \`00:30\`.`);
+                                    await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                } else {
+                                    collector.stop()
+                                }
+                            })
+                            collector.on('end', async collected => {
+                                customLogoutMsg.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                                if (responses.length === 0) return await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(collected.last().content.toLowerCase())) {
+                                    return loginTime(playerData, timezone, dstBoolean, TimeToDecimals(collected.last().content.toLowerCase()));
+                                }
+                                setupEmbed.setColor('#FF5555');
+                                setupEmbed.setTitle(`Invalid Format!`);
+                                setupEmbed.setDescription('Setup has been canceled as you either did not provide a logout time.');
+				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                            });
+	                });
+            })
+            .catch(async (err) => {
+                if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    let updatedLogoutSelectMenu = new MessageActionRow()
+			            .addComponents(
+				            new MessageSelectMenu()
+					            .setCustomId('updatedLogoutSelectMenu')
+					            .setPlaceholder('Select a Logout Time')
+                                .setDisabled(true)
+                                .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
+			            );
+                    await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await logoutSelectMenu.edit({ embeds: [setupEmbed], components: [updatedLogoutSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else return events.errorMsg(interaction, err);
+            });
+    }
+
+    async function loginTime(playerData, timezone, dstBoolean, playerLogoutTime) {
+        let setupLogin = assets.setupLogin
+        let loginMenu = new MessageActionRow()
+			.addComponents(
+				new MessageSelectMenu()
+					.setCustomId('loginselect')
+					.setPlaceholder('Select a Login Time')
+					.addOptions(setupLogin),
+			);
+            setupEmbed.setColor('#7289DA');
+            setupEmbed.setTitle(`Login Time!`);
+            setupEmbed.setDescription('Please select when you usually **get on** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time **will not** send an alert.');
+        let loginSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [loginMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+
+        function TimeToDecimals(time) {
+			let minutesToDecimal = (time.slice(-2) / 60);
+			let hourToDecimal = time.slice(0, -3) * 1;
+			let result = (hourToDecimal + minutesToDecimal);
+			return result;
+		};
+
+        let filter = i => {
+            i.deferUpdate();
+            return i.user.id === interaction.user.id;
+        };
+
+        loginSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+            .then(async selectInteraction => {
+                if (selectInteraction.values[0] !== 'custom') {
+                    await loginSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                    return createChannel(playerData, timezone, dstBoolean, playerLogoutTime, selectInteraction.values[0] * 1);
+                }
+                setupEmbed.setColor('#7289DA');
+                setupEmbed.setTitle(`Custom Login Time!`);
+                setupEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
+                await loginSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
+	                .then((customLoginMsg) => {
+                        let filter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let responses = []
+                            collector.on('collect', async collected => {
+                                responses.push(collected.content.toLowerCase())
+                                if (!/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(collected.content.toLowerCase()) && responses.length < 5) {
+                                    setupEmbed.setColor('#FF5555');
+                                    setupEmbed.setTitle(`Invalid Format!`);
+                                    setupEmbed.setDescription(`Please try again. You have ${5 - responses.length} chances left. Enter your login time in the 24 hour format, eg: \`23:45\`, \`00:30\`.`);
+                                    await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                } else {
+                                    collector.stop()
+                                }
+                            })
+                            collector.on('end', async collected => {
+                                customLoginMsg.delete().catch((err) => {return events.errorMsg(interaction, err)});
+                                if (responses.length === 0) return await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                                if (/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/g.test(collected.last().content.toLowerCase())) {
+                                    return createChannel(playerData, timezone, dstBoolean, playerLogoutTime, TimeToDecimals(collected.last().content.toLowerCase()));
+                                }
+                                setupEmbed.setColor('#FF5555');
+                                setupEmbed.setTitle(`Invalid Format!`);
+                                setupEmbed.setDescription('Setup has been canceled as you either did not provide a login time.');
+				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                            });
+	                });
+            })
+            .catch(async (err) => {
+                if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    let updatedLoginSelectMenu = new MessageActionRow()
+			            .addComponents(
+				            new MessageSelectMenu()
+					            .setCustomId('updatedLoginSelectMenu')
+					            .setPlaceholder('Select a Login Time')
+                                .setDisabled(true)
+                                .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
+			            );
+                    await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await loginSelectMenu.edit({ embeds: [setupEmbed], components: [updatedLoginSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+                } else return events.errorMsg(interaction, err)
+            });
+    }
+
+    async function createChannel(playerData, timezone, dstBoolean, playerLogoutTime, playerLoginTime) {
+        let findCategory = await interaction.guild.channels.cache.find(c => c.name == "log" && c.type == "GUILD_CATEGORY");
+        if (!findCategory) await interaction.guild.channels.create("log", {type: 'GUILD_CATEGORY'}).catch((err) => {return events.errorMsg(interaction, err)});
+        let category = findCategory ? findCategory : await interaction.guild.channels.cache.find(c => c.name == "log" && c.type == "GUILD_CATEGORY");
+
+        //Creates two channels, one for the log, one for the guild
+        let logChannel = await interaction.guild.channels.create(`${interaction.user.username}#${interaction.user.discriminator}-log`, {
+            type: 'GUILD_TEXT',
+            parent: category,
+            permissionOverwrites: [ //Overwrites the advanced permissios
+                {
+                    id: interaction.guild.id,
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL],
+                },
+                {
+                    id: interaction.user.id,
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL],
+                    deny: [Permissions.FLAGS.SEND_MESSAGES],
+                },
+                {
+                    id: client.user.id,
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.MANAGE_CHANNELS],
+                },
+            ]
+        }).catch((err) => {return events.errorMsg(interaction, err)});
+
+        let alertChannel = await interaction.guild.channels.create(`${interaction.user.username}#${interaction.user.discriminator}-alerts`, {
+            type: 'GUILD_TEXT',
+            parent: category,
+            permissionOverwrites: [
+                {
+                    id: interaction.guild.id,
+                    deny: [Permissions.FLAGS.VIEW_CHANNEL],
+                },
+                {
+                    id: interaction.user.id,
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL],
+                    deny: [Permissions.FLAGS.SEND_MESSAGES],
+                },
+                {
+                    id: client.user.id,
+                    allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.MANAGE_CHANNELS],
+                },
+            ]
+        }).catch((err) => {return events.errorMsg(interaction, err)});;
+
+        let helpfulButtons = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setURL('https://www.minecraft.net/en-us/login')
+					.setLabel('⚙️ Account Login Portal')
+					.setStyle('LINK'),
+                new MessageButton()
+					.setURL('https://account.live.com/password/reset')
+					.setLabel('🔁 Microsoft Password Reset')
+					.setStyle('LINK'),
+                new MessageButton()
+					.setURL('https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide')
+					.setLabel('🔒 Account Security Guide')
+					.setStyle('LINK'),
+			);
+
+        let alertChannelEmbed = new MessageEmbed()
+            .setTitle('Alert Channel!')
+            .setDescription('Your alert messages will be sent here. You should keep notifications **on** for this channel. The command **\`/alert <blacklist, whitelist, language, session, offline, or version>\`** can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.')
+            .addField('Helpful Resources', 'The buttons below are links to helpful resources related to account security. You can access these at any time by viewing the pinned messagesd in this channel.')
+            .setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
+        alertChannel.send({ content: `${interaction.user}`, embeds: [alertChannelEmbed], components: [helpfulButtons] }).then((msg) => msg.pin()).catch((err) => {return events.errorMsg(interaction, err)});
+
+        let logChannelEmbed = new MessageEmbed()
+            .setTitle('Log Channel!')
+            .setDescription('Your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. \`/monitor\` can turn the logging and monitoring on or off at your convenience; this will completely turn toggle all detection, logging, and alerts.')
+            .setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
+        logChannel.send({ content: `${interaction.user}`, embeds: [logChannelEmbed] }).then((msg) => msg.pin()).catch((err) => {return events.errorMsg(interaction, err)});
+        
+        writeData(playerData, dstBoolean, timezone, playerLogoutTime, playerLoginTime, logChannel.id, alertChannel.id)
+    };
+
+    async function writeData(playerData, dstBoolean, timezone, playerLogoutTime, playerLoginTime, logID, alertID) {
+        let uuid = playerData[0].uuid,
+			language = playerData[0].language || 'ENGLISH',
+		  version = playerData[0].mc_version || '1.8.9',
+		    login = playerData[0].last_login || '0',
+		  logout = playerData[0].last_logout || '0',
+          offlineTime = playerLogoutTime + " " + playerLoginTime;
+
+        await database.newRow(`INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [interaction.user.id, `${interaction.user.username}#${interaction.user.discriminator}`, uuid, language, version, offlineTime, "", "", login, logout, timezone, dstBoolean,"0 0 1 1 1 1", interaction.guild.id, logID, alertID, "1", ""]);
+
+        setupEmbed.setColor('#00AA00');
+        setupEmbed.setTitle(`Success!`);
+        setupEmbed.setDescription(`You can change most of these at anytime. Check \`/help\` to see what's available. \`/monitor\` can turn the logging and monitoring on or off at your convenience; this will completely toggle all detection, logging, and alerts.`);
+        setupEmbed.setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
+        setupEmbed.addFields({
+            name: 'Discord ID', value: `${interaction.user.id}`
+          }, {name: 'Discord Tag', value: `${interaction.user.username}#${interaction.user.discriminator}`
+          }, {name: 'UUID', value: `${uuid}`
+          }, {name: 'Language', value: `${language}`
+          }, {name: 'Version', value: `${version}`
+          }, {name: 'Offline Time', value: `${twentyFourToTwelve(decimalToTime(playerLogoutTime))} to ${twentyFourToTwelve(decimalToTime(playerLoginTime))}`
+          }, {name: 'UTC Offset', value: `UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)} | Your time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}`
+          }, {name: 'Daylight Savings', value: `${dstBoolean == true ? `On` : `Off`}`
+          }, { name: 'Log Channel', value: `<#${logID}>`
+          }, {name: 'Alert Channel', value: `<#${alertID}>`
+          },)
+        if (playerData[0].online == true && playerData[1].online == false) setupData.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
+		if (login == 0 || logout == 0) setupData.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
+
+        await interaction.followUp({ embeds: [setupEmbed] });
+        
+        function twentyFourToTwelve(time) {
+            time = time.toString().match(/^([01]?\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+            if (time.length > 1) {
+              time = time.slice(1);
+              time[5] = +time[0] < 12 ? ' am' : ' pm';
+              time[0] = +time[0] % 12 || 12;
+            }
+            return time.join('');
+        };
+
+        function decimalToTime(decimal) {
+            let hour = Math.floor(decimal);
+            let min = Math.round((decimal - hour) * 60);
+            return hour + ":" + (min / 100).toFixed(2).slice(2);
+        };
+    }
+  },
 };
