@@ -16,7 +16,7 @@ Another common situation is having your account be compromised while you are off
 ## Setup as a user
 The following contains the information for the average individual looking to gain the protection of this project:
 
- - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot) my Discord Bot to a server or join a server with it
+ - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528656&scope=bot%20applications.commands) my Discord Bot to a server or join a server with it
  - Type **h!setup**
  - Follow the setup instructions
    - You must have joined Hypixel before
@@ -70,7 +70,7 @@ I reserve the right to terminate any user who I believe is abusing the system. A
 
 [Top.gg Page](https://top.gg/bot/841021942249422868)
 
-[HyGuard Invite Link](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528720&scope=bot)
+[HyGuard Invite Link](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528656&scope=bot%20applications.commands)
 
 [HyGuard Discord Server Invite Link](https://discord.gg/yMdZsdbaEN)
 
