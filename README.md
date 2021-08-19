@@ -61,9 +61,9 @@ Given that crowd sourcing API keys is 100% not allowed, having the community hos
 #### Bug Reports and Suggestions
 You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](https://discord.gg/NacwrAaWgE) the Discord Server for this bot and create a ticket. If you decide to DM bug reports, join the Hypixel Discord first so that you won't get blocked by Clyde.
 
-## Setup as a host
+## Updates
 
-  Work in Progress
+  HyGuard is now at v2! This breaking change makes the change to Discord's v9 API, which includes slash commands!
 
 ## Code
 
