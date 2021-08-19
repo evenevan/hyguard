@@ -29,35 +29,30 @@ The following contains the information for the average individual looking to gai
  - Try out **h!advanced logintime** which turns offline logins into repeated alerts
 ## Commands
 
-### Prefix: h!
-
-Use **h!help < command >** to see details and usage of that specific command
+Use **/help command:<command>** to see details and usage of that specific command
 
 |    Commands   | Cooldown<br>in seconds |                                   Description                                  | Requires<br>setup? |
 |:-------------:|:----------------------:|:------------------------------------------------------------------------------|:------------------:|
-| h!setup        | 5                      | Allows players to begin using HyGuard                                          | N                  |
-| h!exit         | 10                     | Allows users to delete their data and stop the use of HyGuard                  | Y                  |
-| h!blacklist    | 2.5                    | Allows you to set blacklist games on Hypixel                                   | Y                  |
-| h!whitelist    | 2.5                    | Allows you to set whitelisted game to play on Hypixel                          | Y                  |
-| h!advanced     | 5                      | Allows you to add or change some special advanced options                      | Y                  |
-| h!language     | 5                      | Allows you to whitelist a language for use on Hypixel                          | Y                  |
-| h!offline      | 5                      | Allows you to set when logins should not occur                                 | Y                  |
-| h!timezone     | 5                      | Allows you to set a new timezone for the bot's services that utilise timezones | Y                  |
-| h!version      | 5                      | Allows you to whitelist a version of Minecraft for use on Hypixel              | Y                  |
-| h!alert        | 2.5                    | Allows you to toggle individual alert types                                    | Y                  |
-| h!monitor      | 7.5                    | Allows you to toggle the logging and monitoring of your account                | Y                  |
-| h!pleaseshutup | 5                      | Allows you to toggle all alerts                                                | Y                  |
-| h!compromised  | 5                      | Shows a copy-pasteable summary of a user's last session                        | N                  |
-| h!mojang       | 10                     | Shows the status of Mojang's services                                          | N                  |
-| h!recentgames  | 7.5                    | Shows the recent games of any player                                           | N                  |
-| h!status       | 7.5                    | Shows the status of any player                                                 | N                  |
-| h!ping         | 5                      | Shows the ping of the bot                                                      | N                  |
-| h!help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
+| /setup        | 5                      | Allows players to begin using HyGuard                                          | N                  |
+| /exit         | 10                     | Allows users to delete their data and stop the use of HyGuard                  | Y                  |
+| /blacklist    | 2.5                    | Allows you to set blacklist games on Hypixel                                   | Y                  |
+| /whitelist    | 2.5                    | Allows you to set whitelisted game to play on Hypixel                          | Y                  |
+| /advanced     | 5                      | Allows you to add or change some special advanced options                      | Y                  |
+| /language     | 5                      | Allows you to whitelist a language for use on Hypixel                          | Y                  |
+| /offline      | 5                      | Allows you to set when logins should not occur                                 | Y                  |
+| /timezone     | 5                      | Allows you to set a new timezone for the bot's services that utilise timezones | Y                  |
+| /version      | 5                      | Allows you to whitelist a version of Minecraft for use on Hypixel              | Y                  |
+| /alert        | 2.5                    | Allows you to toggle individual alert types                                    | Y                  |
+| /monitor      | 7.5                    | Allows you to toggle the logging and monitoring of your account                | Y                  |
+| /pleaseshutup | 5                      | Allows you to toggle all alerts                                                | Y                  |
+| /compromised  | 5                      | Shows a copy-pasteable summary of a user's last session                        | N                  |
+| /mojang       | 10                     | Shows the status of Mojang's services                                          | N                  |
+| /recentgames  | 7.5                    | Shows the recent games of any player                                           | N                  |
+| /status       | 7.5                    | Shows the status of any player                                                 | N                  |
+| /ping         | 5                      | Shows the ping of the bot                                                      | N                  |
+| /help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
 ## Issue(s)
-One major issue currently is the API limit. With the complementary limit of 120 requests per minute, I can only host 30 users, as each user uses a status request and a gametype request twice a minute. This means that slots are quite limited. If this project is successful and many people are interested, I will make some changes and also seek a higher API request limit. This may mean that the current interval of two checks per minute may need to change to 1 per minute, but I have some other ideas in mind too.
-
-Given that crowd sourcing API keys is 100% not allowed, having the community host multiple instances of this bot may be a solution moving forward, assuming that there is enough demand.
 #### Bug Reports and Suggestions
 You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](https://discord.gg/NacwrAaWgE) the Discord Server for this bot and create a ticket. If you decide to DM bug reports, join the Hypixel Discord first so that you won't get blocked by Clyde.
 
@@ -67,7 +62,7 @@ You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](ht
 
 ## Code
 
-You can and modify my code, as per the MIT license. The code is barely readable. Good luck lol.
+You can and modify my code, as per the MIT license.
 ## Warning
 I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database. It doesn't crash the bot, and is just annoying.
 
