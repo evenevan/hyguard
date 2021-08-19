@@ -75,7 +75,7 @@ module.exports = {
         serverChannels.splice(findIndex, 1);
       }
       await database.changeData(interaction.guild.id, `UPDATE servers SET channels = ? WHERE serverID = ?`, serverChannels.join(" "));
-      let cleanChannel = `<#${serverChannels.join(">\n<$")}>`
+      let cleanChannel = `<#${serverChannels.join(">\n<#")}>`
       channelEmbed.setTitle(`Updated Channel Whitelist!`);
       channelEmbed.setColor('#7289DA');
       channelEmbed.setDescription(`The channel whitelist has been updated! ${serverChannels.length > 0 ? `HyGuard commands can be used in these channels.` : `HyGuard commands can be used in any channel.`}`);
