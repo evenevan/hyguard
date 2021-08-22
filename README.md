@@ -17,7 +17,7 @@ Another common situation is having your account be compromised while you are off
 The following contains the information for the average individual looking to gain the protection of this project:
 
  - [Invite](https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528656&scope=bot%20applications.commands) my Discord Bot to a server or join a server with it
- - Type **h!setup**
+ - Type **/setup**
  - Follow the setup instructions
    - You must have joined Hypixel before
    - Use the 24 hour time system for the login time/logout time questions
@@ -25,8 +25,8 @@ The following contains the information for the average individual looking to gai
  - Type **h!monitor** to have the bot start monitoring your account
  - Use **h!help < command >** to see its usage and description
  #### Optional
- - Try out **h!whitelist** & **h!blacklist** for added protection and safeguards
- - Try out **h!advanced logintime** which turns offline logins into repeated alerts
+ - Try out **/whitelist** & **/blacklist** for added protection and safeguards
+ - Try out **/advanced logintime** which turns offline logins into repeated alerts
 ## Commands
 
 Use **/help command:<command>** to see details and usage of that specific command
