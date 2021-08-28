@@ -6,8 +6,6 @@ const funcImports = require('./functions.js');
 const database = require('./database.js');
 const userConfig = require('./userConfig.json');
 const botOwner = userConfig["BotOwnerID"];
-const prefix = userConfig["prefix"];
-const cnsle = userConfig["consoleID"];
 const logInterval = userConfig["logInterval"];
 const hypixelAPIkey = userConfig["hypixelAPIkey"];
 
@@ -41,10 +39,11 @@ async function loadBalancer(client) {
     client.user.setPresence({ activities: [{ name: `${loadedUsers === 1 ? `${loadedUsers} account` : `${loadedUsers} accounts`} | /help /setup | ${client.guilds.cache.size} ${client.guilds.cache.size === 1 ? 'server' : 'servers'}`, type: `WATCHING` }], status: 'dnd' });
 
     for (let i = 0; i < table.length; i++) {
+      if (api === false) return;
       if (table[i].log == 0) continue;
         
         checkIfServerExists(table[i], client, i, dst);
-        await timer(`${loadedUsers < 1 ? `${1000}` : `${logInterval / loadedUsers * 1000}`}`); //calculates the ms between each loading to balance the load across the 30 seconds. the most anyone will shift is 15 seconds with 1 new log user.
+        await timer(`${loadedUsers < 1 ? `${1000}` : `${logInterval / loadedUsers * 1000}`}`); //calculates the ms between each loading to balance the load across the log interval. the most anyone will shift is 15 seconds with 1 new log user.
     }
 }
 
@@ -88,14 +87,14 @@ async function checkLogChannel(dbUserData, client, userNumber, dst, alerts) {
 
 function apiCall(dbUserData, client, userNumber, dst, alerts, logs) {
   Promise.all([
-    fetchTimeout(`https://api.hypixel.net/player?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 1500, {
+    fetchTimeout(`https://api.hypixel.net/player?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 2500, {
         signal: controller.signal
       }).then(function(response) {
         if (response.status === 429) {let newError = new Error("HTTP status " + response.status); newError.name = "LimitError"; throw newError;}
         if (!response.ok) {throw new Error("HTTP status " + response.status);}
         return response.json();
       }),
-    fetchTimeout(`https://api.hypixel.net/status?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 1500, {
+    fetchTimeout(`https://api.hypixel.net/status?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 2500, {
         signal: controller.signal
       }).then(function(response) {
         if (response.status === 429) {let newError = new Error("HTTP status " + response.status); newError.name = "LimitError"; throw newError;}
@@ -108,9 +107,10 @@ function apiCall(dbUserData, client, userNumber, dst, alerts, logs) {
     })
     .catch((err) => {
       if (err.name === "AbortError") {
-        events.logErrorMsg(client, userNumber, err, `Hypixel Abort Error`, cnsle, false, false);
+        events.logErrorMsg(client, userNumber, err, `Hypixel Abort Error`, false, true, false);
+        //logErrorMsg(client, userNumber, rawError, description, writeToConsole, writeToDiscordConsole, pingBoolean)
       } else {
-        events.logErrorMsg(client, userNumber, err, `Likely a 502 or 429`, cnsle, true, false);
+        events.logErrorMsg(client, userNumber, err, `Likely a 502 or 429`, false, true, false);
       }
     });  
 };
@@ -174,10 +174,13 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
   let blacklistAlert = statusData.session.online ? blacklistAlertBoolean : false,
     whitelistAlert = statusData.session.online ? whitelistAlertBoolean : false,
     languageAlert = statusData.session.online ? playerData.player.userLanguage && dbUserData.language !== playerData.player.userLanguage : false,
-    relogAlert = dbUserData.loginMS !== playerData.player.lastLogin && (relogEventTime < 10 && relogEventTime > 0),
+    relogAlert = dbUserData.loginMS !== playerData.player.lastLogin && (relogEventTime < 20 && relogEventTime > 0),
     logoutAlert = dbUserData.logoutMS !== playerData.player.lastLogout,
     loginAlert = dbUserData.loginMS !== playerData.player.lastLogin,
-    loginTimeAlert = statusData.session.online ? loginTimeFunc() : false,
+    loginTimeAlert = !statusData.session.online ? false 
+                    : loginTimeFunc() && dbUserData.loginMS !== playerData.player.lastLogin ? true
+                    : loginTimeFunc() && advancedSettings.includes("LOGINTIME") && dbUserData.loginMS == playerData.player.lastLogin ? true
+                    : false,
     versionAlert = statusData.session.online ? playerData.player.mcVersionRp && !userVersions.includes(playerData.player.mcVersionRp) : false;
 
   let isAlert = blacklistAlert || whitelistAlert || languageAlert || relogAlert || logoutAlert || loginAlert || loginTimeAlert || versionAlert;
@@ -191,7 +194,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     try {
       await database.changeData(dbUserData.discordID, `UPDATE users SET logoutMS = ? WHERE discordID = ?`, playerData.player.lastLogout);
     } catch (err) {
-      events.logErrorMsg(client, userNumber, err, `Failed to write a new logout. Database is likely locked`, cnsle, true, true);
+      events.logErrorMsg(client, userNumber, err, `Failed to write a new logout. Database is likely locked`, true, true, true);
     }
   }
 
@@ -199,62 +202,69 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     try {
       await database.changeData(dbUserData.discordID, `UPDATE users SET loginMS = ? WHERE discordID = ?`, playerData.player.lastLogin);
     } catch (err) {
-      events.logErrorMsg(client, userNumber, err, `Failed to write a new login. Database is likely locked`, cnsle, true, true);
+      events.logErrorMsg(client, userNumber, err, `Failed to write a new login. Database is likely locked`, true, true, true);
     }
   }
       
   if (isAlert) {
     let alertEmbed = new MessageEmbed()
-      .setColor(embedColor)
       .setTimestamp()
       .setFooter(`Alert at ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png');
 
-    if (embedColor !== '#00AA00') alertEmbed.addField('Quick References', '[Account Login Portal](https://www.minecraft.net/en-us/login) - [Microsoft Account Reset](https://account.live.com/password/reset) - [Account Security Guide](https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide)')
+    if (embedColor !== '#00AA00' && embedColor !== '#555555') alertEmbed.addField('Quick References', '[Account Login Portal](https://www.minecraft.net/en-us/login) • [Mojang Password Reset](https://www.minecraft.net/en-us/password/forgot) • [Microsoft Password Reset](https://account.live.com/password/reset) • [Account Security Guide](https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide)')
 
-    if (blacklistAlert && userAlerts[0]) {
+    if (blacklistAlert && userAlerts[0] == true) {
+      alertEmbed.setColor(`#FF5555`); //Red
       alertEmbed.setTitle(`Blacklisted Game Alert!`);
-      alertEmbed.setDescription(`Your account was detected playing a blacklisted game: **${statusData.session.gameType}**. You can update your blacklisted games with /whitelist add/remove <gametype>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setDescription(`Your account was detected playing a blacklisted game: **${statusData.session.gameType}**. You can update your blacklisted games with /blacklist [add/remove/current] <gametype>`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (whitelistAlert && userAlerts[1]) {
+    if (whitelistAlert && userAlerts[1] == true) {
       alertEmbed.setTitle(`Non-Whitelisted Game Alert!`);
-      alertEmbed.setDescription(`Your account was detected playing a game that isn't whitelisted: **${statusData.session.gameType}**. You can update your whitelisted games with /whitelist add/remove <gametype>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#FFAA00`); //Orange
+      alertEmbed.setDescription(`Your account was detected playing a game that isn't whitelisted: **${statusData.session.gameType}**. You can update your whitelisted games with /whitelist [add/remove/current] <gametype>`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (languageAlert && userAlerts[2]) {
+    if (languageAlert && userAlerts[2] == true) {
       alertEmbed.setTitle(`Language Alert!`);
-      alertEmbed.setDescription(`Your account was detected using an unexpected language: **${playerData.player.userLanguage}**. You can update your set language with /language <language>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#FF5555`); //Red
+      alertEmbed.setDescription(`Your account was detected using an unexpected language: **${playerData.player.userLanguage}**. You can update your set language with /language [language]`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (relogAlert && ceilRoundedLastLogin <= logInterval * 2 && userAlerts[3]) {
+    if (relogAlert && ceilRoundedLastLogin <= logInterval * 2 && userAlerts[3] == true) {
       alertEmbed.setTitle(`Session Alert!`);
-      alertEmbed.setDescription(`Your account relogged for ${roundedRelogTime} seconds after logging out at ${timestampOfLastLogout}, or ${timeSincefLastLogout}, and then logging back in at ${timestampOfLastLogin}, or ${timeSinceLastLogin}. You can update your session alerts with /alerts <login/logout/relog>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#FFAA00`); //Orange
+      alertEmbed.setDescription(`Your account relogged for ${roundedRelogTime} seconds after logging out at ${timestampOfLastLogout}, or ${timeSincefLastLogout}, and then logging back in at ${timestampOfLastLogin}, or ${timeSinceLastLogin}. You can update your session alerts with /alerts [login/logout/relog]`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (logoutAlert && ceilRoundedLastLogout <= logInterval * 2 && !relogAlert && userAlerts[3]) {
+    if (logoutAlert && ceilRoundedLastLogout <= logInterval * 2 && !relogAlert && userAlerts[3] == true) {
       alertEmbed.setTitle(`Session Alert!`);
-      alertEmbed.setDescription(`Your account logged out at ${timestampOfLastLogout} or ${timeSincefLastLogout} ago. Playtime was ${lastPlaytime}. You can update your session alerts with /alerts <login/logout/relog>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#555555`); //Grey/Gray whatever
+      alertEmbed.setDescription(`Your account logged out at ${timestampOfLastLogout} or ${timeSincefLastLogout} ago. Playtime was ${lastPlaytime}. You can update your session alerts with /alerts [login/logout/relog]`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (loginAlert && ceilRoundedLastLogin <= logInterval * 2 && !relogAlert && userAlerts[3]) {
+    if (loginAlert && ceilRoundedLastLogin <= logInterval * 2 && !relogAlert && userAlerts[3] == true) {
       alertEmbed.setTitle(`Session Alert!`);
-      alertEmbed.setDescription(`Your account logged in at ${timestampOfLastLogin} or ${timeSinceLastLogin} ago. You can update your session alerts with /alerts <login/logout/relog>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#00AA00`); //Green
+      alertEmbed.setDescription(`Your account logged in at ${timestampOfLastLogin} or ${timeSinceLastLogin} ago. You can update your session alerts with /alerts [login/logout/relog]`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (whitelistAlert && userAlerts[4] && advancedSettings.includes("LOGINTIME") && dbUserData.loginMS == data[0].player.lastLogin) { //Will only  active if the user has selected the advanced option to do so. Last constraint is to make sure I don't double alerts, as an alert is send on login.
+    if (loginTimeAlert && userAlerts[4] == true) {
       alertEmbed.setTitle(`Login Time Alert!`);
+      alertEmbed.setColor(`#FFAA00`); //Orange
       alertEmbed.setDescription(`Your account was detected logging in at an unexpected time: **${timestampOfLastLogin}** or **${timeSinceLastLogin}** ago. You can update your online/offline time with /offlinetime`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
-    if (versionAlert && userAlerts[5]) {
+    if (versionAlert && userAlerts[5] == true) {
       alertEmbed.setTitle(`Minecraft Version Alert!`);
-      alertEmbed.setDescription(`Your account was detected using an unexpected Minecraft version: **${playerData.player.mcVersionRp}**. You can update your whitelisted version(s) of Minecraft with /version add/remove <version>`);
-      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, cnsle, true, false)});
+      alertEmbed.setColor(`#FFAA00`); //Orange
+      alertEmbed.setDescription(`Your account was detected using an unexpected Minecraft version: **${playerData.player.mcVersionRp}**. You can update your whitelisted version(s) of Minecraft with /version [add/remove/current] <version>`);
+      alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
   }
   
   let logEmbed = new MessageEmbed()
-    .setColor(embedColor)
+    .setColor(embedColor) //Takes the color of the highest active alert
     .setTitle(relogAlert ? '**Relog Detected!**' : logoutAlert ? '**Logout Detected!**' : loginAlert ? '**Login Detected!**' : !statusData.session.online ? '**Offline**' : isAlert ? '**Unusual Activity Detected!**' : '**Nothing Abnormal Detected!**')
     .setTimestamp()
     .setFooter(isAlert ? `Alert at ${timeString}` : `Log at ${timeString}`, isAlert ? 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png' : 'https://i.imgur.com/MTClkTu.png')
@@ -276,7 +286,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     if (loginTimeAlert) logEmbed.addField(`**Unusual Login Time**`, `**${timestampOfLastLogin}\n${timeSinceLastLogin}**`, true);
     if (blacklistAlert || whitelistAlert) logEmbed.addField(`**Unusual Game Type**`, `**${statusData.session.gameType}**`, true);
     if (versionAlert) logEmbed.addField(`**Unusual Version**`, `**${playerData.player.mcVersionRp}**`, true);
-  await logs.send({ embeds: [logEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send a log`, cnsle, true, false)});
+  await logs.send({ embeds: [logEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send a log`, true, true, false)});
   
   } catch (error) {
     let timeString = new Date(Date.now() + ((dbUserData.daylightSavings == true && dst == true ? dbUserData.timezone * 1 + 1: dbUserData.timezone) * 3600000)).toLocaleTimeString('en-IN', { hour12: true }) + " UTC" + funcImports.decimalsToUTC(dbUserData.timezone); 
@@ -287,7 +297,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
       .setFooter(`Logging Error at ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
       .setDescription(`This error is expected to happen occasionally. Please report this to the bot owner if this continues.`);
     events.logErrorMsg(client, userNumber, error, `Failed to execute a log`, cnsle, true, false);
-    logs.send({ embeds: [genericLogError] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to execute a log. Medium priority error`, cnsle, true, true)});
+    await logs.send({ embeds: [genericLogError] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to execute a log. Medium priority error`, true, true, true)});
   }
 };
 

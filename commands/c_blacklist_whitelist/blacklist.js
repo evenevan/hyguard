@@ -34,6 +34,7 @@ module.exports = {
             blacklistEmbed.setTitle(`Invalid Gametype!`);
             blacklistEmbed.setColor('#FF5555');
             blacklistEmbed.setDescription(`The gametype specified, "${interaction.options.getString('gametype').toUpperCase()}", is not valid. Please choose one of the following: ${gametypes.join(", ")}. You can find a table to translate between databae and clean names here: [__link__](https://api.hypixel.net/#section/Introduction/GameTypes)`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Gametype`);
             return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
         checkGametype();
@@ -51,6 +52,7 @@ module.exports = {
                     blacklistEmbed.setTitle(`Already Added!`);
                     blacklistEmbed.setColor('#FF5555');
                     blacklistEmbed.setDescription(`${interaction.options.getString('gametype')} was already added to your gametype blacklist!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Added`);
                     return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
 
@@ -62,6 +64,7 @@ module.exports = {
                     blacklistEmbed.setTitle(`Already Added To Whitelist!`);
                     blacklistEmbed.setColor('#FF5555');
                     blacklistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} was already added to your gametype whitelist! You cannot add a gametype to both!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Added To Whitelist`);
                     return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
                 if (userBlacklist.length == 1) changeAlertState(response, 1);
@@ -70,6 +73,7 @@ module.exports = {
                     blacklistEmbed.setTitle(`Not Added!`);
                     blacklistEmbed.setColor('#FF5555');
                     blacklistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} has not been added to your gametype blacklist yet! You cannot remove a gametype from the blacklist that you have not added to the blacklist!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Not Added`);
                     return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
                 let findIndex = userBlacklist.indexOf(interaction.options.getString('gametype').toUpperCase());
@@ -103,7 +107,8 @@ module.exports = {
             blacklistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} was ${interaction.options.getSubcommand() == 'add' ? `added to` : `removed from`} your blacklisted gametypes(s)! ${userBlacklist.length > 0 ? `Your blacklisted gametype(s) are ${userBlacklist.join(", ").toUpperCase()}.` : `You do not have any blacklisted games.`}`);
             userBlacklist.length == 1 ? blacklistEmbed.addField(`Alerts Updated`, `You have added a gametype to the blacklist, so your blacklisted games alerts were automatically turned on. You can turn them off with /alert blacklist.`) 
             : userBlacklist.length == 0 ? blacklistEmbed.addField(`Alerts Updated`, `You have removed all of the gametypes from your blacklist, so your blacklisted games alerts were automatically turned off. You can turn them on with /alert blacklist.`) 
-            : ``; 
+            : ``;
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Blacklist`);
             return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);
@@ -117,6 +122,7 @@ module.exports = {
             blacklistEmbed.setTitle(`Your Blacklisted Gametype(s)!`);
             blacklistEmbed.setColor('#7289DA');
             blacklistEmbed.setDescription(`${response.blacklist.length > 0 ? `Your blacklisted gametype(s) are ${response.blacklist.split(" ").join(", ").toUpperCase()}.` : `You do not have any blacklisted games.`}`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Current Blacklisted Gametypes Returned`);
             return await interaction.reply({ embeds: [blacklistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

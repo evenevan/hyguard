@@ -2,6 +2,7 @@ const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permis
 const funcImports = require('./functions.js');
 const userConfig = require('./userConfig.json');
 const botOwner = userConfig["BotOwnerID"];
+const discordConsole = userConfig["consoleID"];
 
 async function errorMsg(interaction, rawError) { //Message for errors
     console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User ${interaction.user.username}#${interaction.user.discriminator} | ${interaction.user.id}${interaction.guild ? ` GuildID: ${interaction.guild.id}` : ``} Error while executing the command "/${interaction.commandName}": ${rawError.stack}`);
@@ -19,20 +20,19 @@ async function errorMsg(interaction, rawError) { //Message for errors
     else await interaction.reply({ embeds: [errorEmbed] }).catch((err) => {console.log(`big error`, err)}) //do something with big error
 }
 
-async function logErrorMsg(client, userNumber, rawError, description, discordConsole, consoleBoolean, pingBoolean) { //Message for errors
-    if (consoleBoolean) console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | User: ${userNumber} Error while executing the logging function: ${rawError.stack}`);
+async function logErrorMsg(client, userNumber, rawError, description, consoleStackTraceBoolean, writeToDiscordConsole, pingBoolean) { //Message for errors
+    console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | User: ${userNumber} Error while executing the logging function.${description ? ` Description: ${description}` : ``} ${consoleStackTraceBoolean ? `Stack: ${rawError.stack}` : `Error Message: ${rawError.message ?? rawError}`}`);
     let consoleObject = client.channels.cache.get(discordConsole);
-    if (!consoleObject) return;
-    const errorEmbed = new MessageEmbed()
+    if (!writeToDiscordConsole) return;
+    const logErrorEmbed = new MessageEmbed()
         .setColor('#AA0000')
-        .setTitle(`An Error Occured!`)
-        .setDescription(`An error occured while executing the logging function for user ${userNumber}.${description ? ` ${description}` : ``}`)
+        .setTitle(`${rawError.name ? `${rawError.name}:` : 'An Unknown Error Occured!'}`)
         .setTimestamp()
         .setFooter(`Error at ${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())}`, 'https://i.imgur.com/MTClkTu.png');
-    if (rawError.name && rawError.message) errorEmbed.addField(rawError.name + ":", rawError.message.replace(/(\r\n|\n|\r)/gm, ""))
-    else errorEmbed.addField(`Unknown Error`, rawError.message || rawError)
+    if (rawError.message) logErrorEmbed.setDescription(rawError.message.replace(/(\r\n|\n|\r)/gm, ""))
+    else logErrorEmbed.setDescription(`Please check the console!`)
     if (pingBoolean) await consoleObject.send({ content: `<@${botOwner[0]}>` })
-    await consoleObject.send({ embeds: [errorEmbed] }).catch((err) => {console.log(`big error`, err)}) //do something with big error
+    await consoleObject.send({ embeds: [logErrorEmbed] }).catch((err) => {console.log(`big error`, err)}) //do something with big error
 }
 
 async function collectorError(interaction, rawError, collected, responses) { //Message for collector errors, not used right now

@@ -106,6 +106,7 @@ module.exports = {
                                 timezoneEmbed.setColor('#FF5555');
                                 timezoneEmbed.setTitle(`Invalid Format!`);
                                 timezoneEmbed.setDescription('Setup has been canceled as you either did not provide an offset.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
 				                return await interaction.editReply({ embeds: [timezoneEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -120,6 +121,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await interaction.editReply({ embeds: [timezoneEmbed], components: [updatedtzSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -167,6 +169,7 @@ module.exports = {
 					        .setStyle('DANGER')
                             .setDisabled(true),
 			        );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await interaction.editReply({ embeds: [timezoneEmbed], components: [updatedDSTButton] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -180,6 +183,7 @@ module.exports = {
           timezoneEmbed.setColor('#7289DA');
           timezoneEmbed.setTitle(`Timezone Updated!`);
           timezoneEmbed.setDescription(`Timezone updated! Your timezone is set to ${funcImports.decimalsToUTC(timezone)}, and you ${dstBoolean === false ? `do not ` : ``}use Daylight Savings. Your current local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}.`);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Timezone`);
           return await interaction.editReply({ embeds: [timezoneEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             events.errorMsg(interaction, err);
@@ -196,6 +200,7 @@ module.exports = {
           timezoneEmbed.setColor('#7289DA');
           timezoneEmbed.setTitle(`Your Timezone!`);
           timezoneEmbed.setDescription(`Your timezone is set to ${funcImports.decimalsToUTC(timezone)}, and you ${dstBoolean === false ? `do not ` : ``}use Daylight Savings. Your current local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}.`);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Timezone Data`);
           return await interaction.reply({ embeds: [timezoneEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

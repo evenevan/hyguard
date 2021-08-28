@@ -32,5 +32,6 @@ module.exports = {
 			pingEmbed.setTitle(`🏓 Ping!`)
 			pingEmbed.setDescription(` Roundtrip latency is ${sentReply.createdTimestamp - interaction.createdTimestamp}ms. Websocket heartbeat is ${client.ws.ping}ms.`)
 		await interaction.editReply({ embeds: [pingEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
+		return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Roundtrip latency is ${sentReply.createdTimestamp - interaction.createdTimestamp}. Websocket heartbeat is ${client.ws.ping}ms.`);
 	},
 };

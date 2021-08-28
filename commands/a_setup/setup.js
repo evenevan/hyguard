@@ -60,6 +60,7 @@ module.exports = {
 				setupEmbed.setColor(`#FF5555`);
                 setupEmbed.setTitle(`Access Denied!`);
                 setupEmbed.setDescription(`You are blocked from using this system.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: User Is Blocked`);
                 return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
 			}
 			let checkUserLimit = await database.getUserCount()
@@ -67,18 +68,21 @@ module.exports = {
                 setupEmbed.setColor(`#FF5555`);
                 setupEmbed.setTitle(`Max Users Reached!`);
                 setupEmbed.setDescription(`The max amount of users was reached. Please check back later!`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: User Max Reached`);
                 return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
 			if (api == false) {
                 setupEmbed.setColor(`#FF5555`);
                 setupEmbed.setTitle(`API is down!`);
                 setupEmbed.setDescription(`This command was disabled temporarily as the Hypixel API is down!`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: API Is False`);
                 return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             if (!/^[a-zA-Z0-9_-]{1,24}$/g.test(player) && !/^[0-9a-f]{8}(-?)[0-9a-f]{4}(-?)[1-5][0-9a-f]{3}(-?)[89AB][0-9a-f]{3}(-?)[0-9a-f]{12}$/i.test(player)) {
                 setupEmbed.setColor(`#FF5555`);
                 setupEmbed.setTitle(`Invalid Username or UUID!`);
                 setupEmbed.setDescription(`The username/UUID provided is invalid! The username cannot contain invalid characters. UUIDs must match the following regex: \`/^[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89AB][0-9a-f]{3}[0-9a-f]{12}$/i\`. You can test this regex with [__this__](https://regex101.com/r/A866mm/1) site.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Player Name/UUID`);
                 return await interaction.reply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             await interaction.deferReply(); //In case the API requests below take more than the 3 seconds the interaction gets
@@ -108,10 +112,12 @@ module.exports = {
                     recentEmbed.setColor('#AA0000');
                     recentEmbed.setTitle(`Abort Error!`);
                     recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
-                  return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
+                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
                     recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
@@ -143,6 +149,7 @@ module.exports = {
                 setupEmbed.setTitle(`Link your Discord on Hypixel!`);
                 setupEmbed.setDescription('You have not linked your Discord account to your Minecraft account on Hypixel! Follow the guide below:');
                 setupEmbed.setImage('https://i.imgur.com/gGKd2s8.gif');
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Discord Not Linked`);
                 return interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             if (player[0].links.DISCORD !== discordTag) {
@@ -150,6 +157,7 @@ module.exports = {
                 setupEmbed.setTitle(`That isn't your account!`);
                 setupEmbed.setDescription('That Minecraft account currently has a different Discord account linked! If that is your account, follow the guide below to relink it: ');
                 setupEmbed.setImage('https://i.imgur.com/gGKd2s8.gif');
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Discord tag doesn't match`);
                 return interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             introduction(player);
@@ -159,10 +167,12 @@ module.exports = {
                 setupEmbed.setColor('#AA0000');
                 setupEmbed.setTitle(`Abort Error!`);
                 setupEmbed.setDescription('The API failed to respond, and may be down. Try again later.');
-              return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Abort Error`);
+                return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 setupEmbed.setColor(`#FF5555`); setupEmbed.setTitle(`Player Not Found!`);
                 setupEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel. Setup canceled.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
                 return events.errorMsg(interaction, err);
@@ -202,6 +212,7 @@ module.exports = {
 	        .catch(async (err) => {
                 if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collecter Step Failed`);
                     return await interaction.editReply({ embeds: [setupEmbed], components: [updatedIntroButton] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
             });
@@ -221,9 +232,9 @@ module.exports = {
             setupEmbed.setDescription('Please select your timezone in the drop down below or select \`Other\` if your timezone is not listed.');
         let tzSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
-        let filter = i => {
+        let tzMenuFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'tzselect';
         };
 
         function UTCOffsetToDecimals(utc) {
@@ -241,7 +252,7 @@ module.exports = {
             return result;
           };
         
-        tzSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+        tzSelectMenu.awaitMessageComponent({ filter: tzMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') { //Ignores the section below if they didn't select custom
                     await tzSelectMenu.delete();
@@ -253,8 +264,8 @@ module.exports = {
                 await tzSelectMenu.delete()
                 await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customTZMsg) => {
-                        let filter = m => m.author.id === interaction.user.id;
-		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let tzMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: tzMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())
@@ -276,6 +287,7 @@ module.exports = {
                                 setupEmbed.setColor('#FF5555');
                                 setupEmbed.setTitle(`Invalid Format!`);
                                 setupEmbed.setDescription('Setup has been canceled as you either did not provide an offset.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
 				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -290,6 +302,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await tzSelectMenu.edit({ embeds: [setupEmbed], components: [updatedtzSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -312,11 +325,13 @@ module.exports = {
 					.setStyle('DANGER'),
 			);
         let dstButtonMsg = await interaction.followUp({ embeds: [setupEmbed], components: [dstButton] }).catch((err) => {return events.errorMsg(interaction, err)});
-        let filter = i => {
+
+        let dstFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && (i.customId === 'true' || i.customId === 'false');
         };
-        dstButtonMsg.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 120000 })
+
+        dstButtonMsg.awaitMessageComponent({ filter: dstFilter, componentType: 'BUTTON', time: 120000 })
 	        .then(async i => {
                 await dstButtonMsg.delete();
                 if (i.customId === 'true') return logoutTime(playerData, timezone, true);
@@ -337,6 +352,7 @@ module.exports = {
 					        .setStyle('DANGER')
                             .setDisabled(true),
 			        );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collected Failed Step`);
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await dstButtonMsg.edit({ embeds: [setupEmbed], components: [updatedDSTButton] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -364,12 +380,12 @@ module.exports = {
 			return result;
 		};
 
-        let filter = i => {
+        let logoutMenuFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'logoutselect';
         };
         
-        logoutSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+        logoutSelectMenu.awaitMessageComponent({ filter: logoutMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') {
                     await logoutSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
@@ -381,8 +397,8 @@ module.exports = {
                 await logoutSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
                 await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLogoutMsg) => {
-                        let filter = m => m.author.id === interaction.user.id;
-		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let logoutMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: logoutMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())
@@ -404,6 +420,7 @@ module.exports = {
                                 setupEmbed.setColor('#FF5555');
                                 setupEmbed.setTitle(`Invalid Format!`);
                                 setupEmbed.setDescription('Setup has been canceled as you either did not provide a logout time.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Failed Step`);
 				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -418,6 +435,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Failed Step`);
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await logoutSelectMenu.edit({ embeds: [setupEmbed], components: [updatedLogoutSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -445,12 +463,12 @@ module.exports = {
 			return result;
 		};
 
-        let filter = i => {
+        let loginMenuFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'loginselect';
         };
 
-        loginSelectMenu.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+        loginSelectMenu.awaitMessageComponent({ filter: loginMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') {
                     await loginSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
@@ -462,8 +480,8 @@ module.exports = {
                 await loginSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
                 interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLoginMsg) => {
-                        let filter = m => m.author.id === interaction.user.id;
-		                let collector = interaction.channel.createMessageCollector({ filter, max: 5, time: 300000 })
+                        let loginMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: loginMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())
@@ -485,6 +503,7 @@ module.exports = {
                                 setupEmbed.setColor('#FF5555');
                                 setupEmbed.setTitle(`Invalid Format!`);
                                 setupEmbed.setDescription('Setup has been canceled as you either did not provide a login time.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Failed Step`);
 				                return await interaction.followUp({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -499,6 +518,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Failed Step`);
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await loginSelectMenu.edit({ embeds: [setupEmbed], components: [updatedLoginSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err)
@@ -558,6 +578,10 @@ module.exports = {
 					.setLabel('⚙️ Account Login Portal')
 					.setStyle('LINK'),
                 new MessageButton()
+					.setURL('https://www.minecraft.net/en-us/password/forgot')
+					.setLabel('⚙️ Mojang Password Reset')
+					.setStyle('LINK'),
+                new MessageButton()
 					.setURL('https://account.live.com/password/reset')
 					.setLabel('🔁 Microsoft Password Reset')
 					.setStyle('LINK'),
@@ -585,13 +609,13 @@ module.exports = {
 
     async function writeData(playerData, dstBoolean, timezone, playerLogoutTime, playerLoginTime, logID, alertID) {
         let uuid = playerData[0].uuid,
-			language = playerData[0].language || 'ENGLISH',
-		  version = playerData[0].mc_version || '1.8.9',
-		    login = playerData[0].last_login || '0',
-		  logout = playerData[0].last_logout || '0',
+			language = playerData[0].language ?? 'ENGLISH',
+		  version = playerData[0].mc_version ?? '1.8.9',
+		    login = playerData[0].last_login ?? '0',
+		  logout = playerData[0].last_logout ?? '0',
           offlineTime = playerLogoutTime + " " + playerLoginTime;
 
-        await database.newRow(`INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [interaction.user.id, `${interaction.user.username}#${interaction.user.discriminator}`, uuid, language, version, offlineTime, "", "", login, logout, timezone, dstBoolean,"0 0 1 1 1 1", interaction.guild.id, logID, alertID, "1", ""]);
+        await database.newRow(`INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [interaction.user.id, `${interaction.user.username}#${interaction.user.discriminator}`, uuid, language, version, offlineTime, "", "", login, logout, timezone, dstBoolean, "0 0 1 1 1 1", interaction.guild.id, logID, alertID, "1", ""]);
 
         setupEmbed.setColor('#00AA00');
         setupEmbed.setTitle(`Success!`);
@@ -613,6 +637,8 @@ module.exports = {
 		if (login == 0 || logout == 0) setupData.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
 
         await interaction.followUp({ embeds: [setupEmbed] });
+
+        console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Setup Successful!`);
         
         function twentyFourToTwelve(time) {
             time = time.toString().match(/^([01]?\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];

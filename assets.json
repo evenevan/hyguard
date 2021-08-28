@@ -457,6 +457,17 @@
                 "type": "SUB_COMMAND"
               },
               {
+                "name": "eval",
+                "description": "Returns an executed eval string",
+                "type": "SUB_COMMAND",
+                "options": [{
+                    "name": "string",
+                    "type": "STRING",
+                    "description": "The string to evaluate",
+                    "required": true
+                }]
+              },
+              {
                 "name": "guildinfo",
                 "description": "Return if a guild is valid",
                 "type": "SUB_COMMAND",
@@ -602,8 +613,7 @@
                 "description": "Toggles developer mode",
                 "type": "SUB_COMMAND"
               }
-            ],
-            "defaultPermission": false
+            ]
         }
     ],
     "globalCommands": [
@@ -1320,10 +1330,6 @@
                     }]
                 }
             ]
-        },
-        {
-            "name": "debug",
-            "description": "Displays the interaction data"
         },
         {
             "name": "ping",

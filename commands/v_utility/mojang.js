@@ -54,6 +54,7 @@ module.exports = {
                 mojangStatus.setColor('#AA0000');
                 mojangStatus.setTitle(`Abort Error!`);
                 mojangStatus.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
               return await interaction.editReply({ embeds: [mojangStatus], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
                 return events.errorMsg(interaction, err);
@@ -90,7 +91,7 @@ module.exports = {
             { name: 'session.minecraft.net', value: `${cleanData[6]}` },
             { name: 'textures.minecraft.net', value: `${cleanData[7]}` },
           )
-        
+
         return await interaction.editReply({ embeds: [mojangStatus], ephemeral: true })
     }
   },

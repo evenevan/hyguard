@@ -40,6 +40,9 @@ module.exports = {
         case 'dst':
             dstCommand(); //Manually toggles daylight savings. NPM script to update it may work
             break;
+        case 'eval':
+            evalCommand(interaction.options.getString('string')); //Manually toggles daylight savings. NPM script to update it may work
+            break;
         case 'guildinfo':
             guildinfo(interaction.options.getString('guild')); //Returns if a guild is valid
             break;
@@ -150,6 +153,27 @@ module.exports = {
       }
     }
 
+    async function evalCommand(command) {
+      let evalEmbed = new MessageEmbed()
+        .setTimestamp()
+        .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
+
+      try {
+        let output = await eval(command)
+        evalEmbed.setColor('#7289DA');
+        evalEmbed.setTitle('Executed Eval!');
+        evalEmbed.addField(`Input`, `\`${command}\``);
+        evalEmbed.addField(`Output`, `\`${output}\``);
+        return await interaction.reply({ embeds: [evalEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
+      } catch (err) {
+        evalEmbed.setColor('#FF5555');
+        evalEmbed.setTitle('Failed Eval!');
+        evalEmbed.addField(`Input`, `\`${command}\``);
+        evalEmbed.addField(`${err.name}`, `${err.message}`);
+        return await interaction.reply({ embeds: [evalEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
+      }
+    }
+
     async function guildinfo(guildID) {
       let guildinfoEmbed = new MessageEmbed()
         .setTimestamp()
@@ -160,13 +184,13 @@ module.exports = {
           guildinfoEmbed.setColor('#FF5555');
           guildinfoEmbed.setTitle('Invalid Guild ID!');
           guildinfoEmbed.setDescription('That guild ID doesn\'t seem to be valid!');
-          return interaction.reply({ embeds: [guildinfoEmbed] }).catch((err) => {events.errorMsg(interaction, err)});
+          return await interaction.reply({ embeds: [guildinfoEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
         }
         guildinfoEmbed.setColor('#7289DA');
         guildinfoEmbed.setTitle(`Guild: ${guild.name}`);
         guildinfoEmbed.setDescription(`Owner ID: ${guild.ownerId}\nGuild Member Count (w/o bot): ${guild.memberCount - 1}\nRegion: ${guild.preferredLocale}\nJoined: ${new Date(guild.joinedTimestamp).toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date(guild.joinedTimestamp))}\nServer Boost Count: ${guild.premiumSubscriptionCount}`);
         console.log(guild)
-        return interaction.reply({ embeds: [guildinfoEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
+        return await interaction.reply({ embeds: [guildinfoEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
     }
 
     async function leaveguildCommand(guildID) {

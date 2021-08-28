@@ -51,6 +51,7 @@ module.exports = {
                     whitelistEmbed.setTitle(`Already Added!`);
                     whitelistEmbed.setColor('#FF5555');
                     whitelistEmbed.setDescription(`${interaction.options.getString('gametype')} was already added to your gametype whitelist!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Added`);
                     return await interaction.reply({ embeds: [whitelistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
 
@@ -62,6 +63,7 @@ module.exports = {
                     whitelistEmbed.setTitle(`Already Added To Whitelist!`);
                     whitelistEmbed.setColor('#FF5555');
                     whitelistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} was already added to your gametype blacklist! You cannot add a gametype to both!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Added To Blacklist`);
                     return await interaction.reply({ embeds: [whitelistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
                 if (userWhitelist.length == 1) changeAlertState(response, 1);
@@ -70,6 +72,7 @@ module.exports = {
                     whitelistEmbed.setTitle(`Not Added!`);
                     whitelistEmbed.setColor('#FF5555');
                     whitelistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} has not been added to your gametype whitelist yet! You cannot remove a gametype from the whitelist that you have not added to the whitelist!`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Not Added`);
                     return await interaction.reply({ embeds: [whitelistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
                 let findIndex = userWhitelist.indexOf(interaction.options.getString('gametype').toUpperCase());
@@ -103,7 +106,8 @@ module.exports = {
             whitelistEmbed.setDescription(`${interaction.options.getString('gametype').toUpperCase()} was ${interaction.options.getSubcommand() == 'add' ? `added to` : `removed from`} your whitelisted gametypes(s)! ${userWhitelist.length > 0 ? `Your whitelisted gametype(s) are ${userWhitelist.join(", ").toUpperCase()}.` : `You do not have any whitelisted games.`}`);
             userWhitelist.length == 1 ? whitelistEmbed.addField(`Alerts Updated`, `You have added a gametype to the whitelist, so your whitelisted games alerts were automatically turned on. You can turn them off with /alert whitelist.`) 
             : userWhitelist.length == 0 ? whitelistEmbed.addField(`Alerts Updated`, `You have removed all of the gametypes from your whitelist, so your whitelisted games alerts were automatically turned off. You can turn them on with /alert whitelist.`) 
-            : ``; 
+            : ``;
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Whitelist`);
             return await interaction.reply({ embeds: [whitelistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);
@@ -117,6 +121,7 @@ module.exports = {
             whitelistEmbed.setTitle(`Your Whitelisted Gametype(s)!`);
             whitelistEmbed.setColor('#7289DA');
             whitelistEmbed.setDescription(`${response.whitelist.length > 0 ? `Your whitelisted gametype(s) are ${response.whitelist.split(" ").join(", ").toUpperCase()}.` : `You do not have any whitelisted games.`}`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Current Whitelisted Gametypes Returned`);
             return await interaction.reply({ embeds: [whitelistEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

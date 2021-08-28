@@ -42,12 +42,14 @@ module.exports = {
                 compromisedEmbed.setColor(`#FF5555`)
                 compromisedEmbed.setTitle(`API is down!`)
                 compromisedEmbed.setDescription(`This command was disabled temporarily as the Hypixel API is down!`)
-            return await interaction.reply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: API Is False`);
+                return await interaction.reply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             if (!/^[a-zA-Z0-9_-]{1,24}$/g.test(player) && !/^[0-9a-f]{8}(-?)[0-9a-f]{4}(-?)[1-5][0-9a-f]{3}(-?)[89AB][0-9a-f]{3}(-?)[0-9a-f]{12}$/i.test(player)) {
                 compromisedEmbed.setColor(`#FF5555`);
                 compromisedEmbed.setTitle(`Invalid Username or UUID!`);
                 compromisedEmbed.setDescription(`The username/UUID provided is invalid! The username cannot contain invalid characters. UUIDs must match the following regex: \`/^[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89AB][0-9a-f]{3}[0-9a-f]{12}$/i\`. You can test this regex with [__this__](https://regex101.com/r/A866mm/1) site.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Player Name/UUID`);
                 return await interaction.reply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 //Testing for invalid strings that may cause a TypeError: Request path contains unescaped characters.
             }
@@ -78,10 +80,12 @@ module.exports = {
                     compromisedEmbed.setColor('#AA0000');
                     compromisedEmbed.setTitle(`Abort Error!`);
                     compromisedEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
-                  return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
+                    return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     compromisedEmbed.setColor(`#FF5555`); compromisedEmbed.setTitle(`Player Not Found!`);
-                    compromisedEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    compromisedEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Player Not Found`);
                     return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
@@ -94,18 +98,21 @@ module.exports = {
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/`, 2000, {
                     signal: controller.signal
                 }).then(function(response) {
+                  if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
                   if (!response.ok) {throw new Error("HTTP status " + response.status);}
                   return response.json();
                 }),
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/status`, 2000, {
                     signal: controller.signal
                 }).then(function(response) {
+                  if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
                   if (!response.ok) {throw new Error("HTTP status " + response.status);}
                   return response.json();
                 }),
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/recentGames`, 2000, {
                     signal: controller.signal
                 }).then(function(response) {
+                  if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
                   if (!response.ok) {throw new Error("HTTP status " + response.status);}
                   return response.json();
                 })
@@ -118,7 +125,14 @@ module.exports = {
                 compromisedEmbed.setColor('#AA0000');
                 compromisedEmbed.setTitle(`Abort Error!`);
                 compromisedEmbed.setDescription('The Slothpixel API failed to respond, and may be down. Try again later.');
-              return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Abort Error`);
+                return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+            } else if (err.name === "NotFound") {
+                compromisedEmbed.setColor(`#FF5555`); 
+                compromisedEmbed.setTitle(`Player Not Found!`);
+                compromisedEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel. Setup canceled.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
+                return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
                 return events.errorMsg(interaction, err);
             }
@@ -142,7 +156,7 @@ module.exports = {
         };
 
 
-        let status = `This is a templated message with session and game stats autofilled by a Discord bot, so not everything may apply to you. Your account may have been compromised and used to cheat with. Your last session is below; do you recognize the data?[HR][/HR]`
+        let status = `This is a templated message with session and game stats autofilled by a Discord bot, so not everything may apply to you. Your account may have been compromised and used to cheat with. Your account's last session is below; do you recognize the data?[HR][/HR]`
 
         if (!statusData.online) {
             status += `[B]Basic Session Details[/B]\`[LIST][*][B]Status:[/B] Offline[*][B]UUID:[/B] ${playerData.uuid}[*][B]Last Playtime:[/B] ${playerData.last_login && playerData.last_logout ? `${lastPlaytime} long` : `Unknown`}[*][B]Last Game Played:[/B] ${playerData.last_game ? `${playerData.last_game}` : `Unknown` }[*][B]Last Login:[/B] ${playerData.last_login ? `${timestampOfLastLogin} UTC ${funcImports.decimalsToUTC(tz)}, ${timeSinceLastLogin} ago` : `Unknown` }[*][B]Last Logout:[/B] ${playerData.last_logout ? `${timestampOfLastLogout} UTC ${funcImports.decimalsToUTC(tz)}, ${timeSincefLastLogout} ago` : `Unknown` }[*][B]Language:[/B] ${playerData.language ? `${playerData.language}` : `Unknown` }[*][B]Version:[/B] ${playerData.mc_version ? `${playerData.mc_version}` : `Unknown` }[/LIST]\``;
@@ -211,17 +225,22 @@ module.exports = {
           }
         }
 
-        status += `[HR][/HR][SPOILER="If you don't recognize the session"]Compromised accounts are often attacked again through the same vulnerability. You should change your password and enable 2FA once/if you are using a Microsoft account. All accounts should become eligible for migration during Q4 of 2021. Check out https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide for an official guide. Here are some ways to help secure your account:\`[LIST][*]Use a strong password, never reuse them for multiple sites. Use a password manager if you have trouble keeping track of them[*]Change your passwords regularly[*]Trust absolutely noone with your credentials[*]Be cautious of phishing attacks. No corporation will [B]EVER[/B] ask for your password. Common sense is your friend[*][URL=https://imgur.com/a/FzoUjro][U]Don't give out logs/crash logs without ensuring that session IDs are scrubbed (These were removed from crash logs after version 1.9.1)[/U][/URL][*]Use security questions that can't be brute-forced, eg: don't use "What is your favorite movie", as there are only a few hundred/thousand possibilities[*]Set up [URL=https://hypixel.net/argus/][U]Argus[/U], which alerts you on logins from unusual IPs[/URL][/LIST]\`[/SPOILER]`;
+        status += `[HR][/HR][SPOILER="Now What?"]Appeals are final. The most you can do is secure your account and wait. During this time, you should check up on your account security. Check the spoilers for more information on relevant topics.[/SPOILER]`
+
+        status += `[SPOILER="Account Security"]Compromised accounts are often attacked again through the same vulnerability. You should change your password and enable 2FA once/if you are using a Microsoft account. All accounts should become eligible for migration during Q4 of 2021. Check out https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide for an official guide. Here are some ways to help secure your account:\`[LIST][*]Use a strong password, never reuse them for multiple sites. Use a password manager if you have trouble keeping track of them[*]Change your passwords regularly[*]Trust absolutely noone with your credentials[*]Be cautious of phishing attacks. No corporation will [B]EVER[/B] ask for your password. Common sense is your friend[*][URL=https://imgur.com/a/FzoUjro][U]Don't give out logs/crash logs without ensuring that session IDs are scrubbed (These were removed from crash logs after version 1.9.1)[/U][/URL][*]Use security questions that can't be brute-forced, eg: don't use "What is your favorite movie", as there are only a few hundred/thousand possibilities[*]Set up [URL=https://hypixel.net/argus/][U]Argus[/U], which alerts you on logins from unusual IPs[/URL][/LIST]\`[/SPOILER]`;
 
         compromisedEmbed.setColor('#7289DA');
         compromisedEmbed.setTitle(`Status of ${playerData.username}`);
         compromisedEmbed.setDescription(status);
         compromisedEmbed.addField(`[SPOILER="Appealing a ban for cheating"]`, `If you haven't already, you should appeal at https://hypixel.net/threads/punishment-information-and-how-to-appeal.3261027/. If cheats were used on your account, either by you or another individual, you will likely not be unbanned. Appeals are for the innocent only. You will not be told what Watchdog check/modification got you banned, as reducing advantages for cheat developers is better for Hypixel, even at the cost of transparency. If your appeal is/was denied, you will not be unbanned early. [URL=https://hypixel.net/threads/is-it-possible-to-appeal-for-the-same-ban-twice.2083286/#post-15525155][U]You can not appeal again.[/U][/URL] Appeal responses are not botted; they use templated copy-paste responses. Contact [URL=https://support.hypixel.net][U]Hypixel Support[/U][/URL] for any other issues with appealing or message a staff member.[/SPOILER]`);
-        compromisedEmbed.addField(`[SPOILER="Your account, your responsibility"]`, `Hypixel has a "Your account, your responsibility" policy because they are a third party server; they don't have access to data like transaction IDs, security questions, system information (eg: Hardware information, Java version, OS build, other diagnostic info), every login Unix timestamp, every connection with Mojang's servers, every session ID, timezone, etc. Hypixel only gets your IP and some surface-level client data. Evidence is easily faked, and as said above, Hypixel lacks the data to verify if it was you or the hacker. [URL=https://hypixel.net/threads/you-should-take-responsibility-for-your-accounts-safety.4446126/post-32187788][U]It is for that reason that Hypixel does not take evidence of you being hacked, or evidence that you were hacked.[/U][/URL][/SPOILER]`);
+        compromisedEmbed.addField(`[SPOILER="Your account, your responsibility"]`, `Hypixel has a "Your account, your responsibility" policy because they are a third party server; they don't have access to data like transaction IDs, security questions, system information (eg: Hardware information, Java version, OS build, other diagnostic info), every login Unix timestamp, every connection with Mojang's servers, every session ID, timezone, etc. Hypixel only gets your IP and some surface-level client data. Evidence is easily faked, and as said above, Hypixel lacks verifiable data to verify if it was you or someone else. [URL=https://hypixel.net/threads/you-should-take-responsibility-for-your-accounts-safety.4446126/post-32187788][U]It is for that reason that Hypixel does not take evidence of you being hacked, or evidence that you were hacked.[/U][/URL][/SPOILER]`);
         compromisedEmbed.addField(`[SPOILER="Appealing a security ban"]`, `Appeals for these bans will almost always be accepted. Appeal at https://hypixel.net/threads/punishment-information-and-how-to-appeal.3261027/. If/when your appeal is accepted, your account will enter a 30-day recovery period where you can contact Mojang support to change emails and secure your account. This recovery period is not skippable. You will have to wait it out. As for VPNs, VPNs are not recommended. They have been known to false ban users, likely because many users join on a singular IP; someone joining on an IP where someone has already gotten banned is suspicious.[/SPOILER]`);
-        compromisedEmbed.addField(`[SPOILER="If you cheated"]`, `If you cheated, you get a ban! Even if the incident was years ago, time doesn't necessarily guarantee an increase in maturity. It isn't worth it to for Hypixel to sift through that mess to verify genuine regret or shame, especially as Hypixel is busy enough with everything else and won't gain much from this.[/SPOILER]`);
 
-        await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true });
+        await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).then(async () => {
+          if (!statusData.online && (playerData.last_logout < playerData.last_login) ||
+              !playerData.last_login ||
+              !playerData.last_logout) await interaction.followUp({ content: '> There may be some sort of API limitation which hides some information about this player.', ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+        }).catch((err) => {return events.errorMsg(interaction, err)});
     }
   },
 };

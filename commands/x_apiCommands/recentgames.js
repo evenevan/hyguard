@@ -42,12 +42,14 @@ module.exports = {
                 recentEmbed.setColor(`#FF5555`)
                 recentEmbed.setTitle(`API is down!`)
                 recentEmbed.setDescription(`This command was disabled temporarily as the Hypixel API is down!`)
-            return await interaction.reply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: API Is False`);
+                return await interaction.reply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
             if (!/^[a-zA-Z0-9_-]{1,24}$/g.test(player) && !/^[0-9a-f]{8}(-?)[0-9a-f]{4}(-?)[1-5][0-9a-f]{3}(-?)[89AB][0-9a-f]{3}(-?)[0-9a-f]{12}$/i.test(player)) {
                 recentEmbed.setColor(`#FF5555`);
                 recentEmbed.setTitle(`Invalid Username or UUID!`);
                 recentEmbed.setDescription(`The username/UUID provided is invalid! The username cannot contain invalid characters. UUIDs must match the following regex: \`/^[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89AB][0-9a-f]{3}[0-9a-f]{12}$/i\`. You can test this regex with [__this__](https://regex101.com/r/A866mm/1) site.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Player Name/UUID`);
                 return await interaction.reply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 //Testing for invalid strings that may cause a TypeError: Request path contains unescaped characters.
             }
@@ -78,10 +80,12 @@ module.exports = {
                     recentEmbed.setColor('#AA0000');
                     recentEmbed.setTitle(`Abort Error!`);
                     recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
-                  return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
+                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                    recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
@@ -107,10 +111,12 @@ module.exports = {
                     recentEmbed.setColor('#AA0000');
                     recentEmbed.setTitle(`Abort Error!`);
                     recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
-                  return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
+                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                    recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
@@ -123,7 +129,7 @@ module.exports = {
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/recentGames`, 2000, {
                 signal: controller.signal
               }).then(function(response) {
-                if (response.status === 204) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
+                if (response.status === 404) {let newError = new Error("HTTP status " + response.status); newError.name = "NotFound"; throw newError;}
                 if (!response.ok) {let newError = new Error("HTTP status " + response.status); newError.name = "HTTPError"; throw newError;}
                 return response.json();
               }),
@@ -137,10 +143,12 @@ module.exports = {
                 recentEmbed.setColor('#AA0000');
                 recentEmbed.setTitle(`Abort Error!`);
                 recentEmbed.setDescription('The Slothpixel API failed to respond, and may be down. Try again later.');
-              return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Abort Error`);
+                return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
                 return events.errorMsg(interaction, err);
@@ -154,7 +162,7 @@ module.exports = {
                 recentEmbed.setColor('#FF5555')
                 recentEmbed.setTitle(`Most Recent Games - ${playerName}`)
                 recentEmbed.addField(`No Recent Games Detected!`, `There are no recent games to show. Games played more than 3 days ago cannot be shown. Some players also have the recent games API option disabled.`)
-            return await interaction.editReply({  embeds: [recentEmbed], ephemeral: true });
+            return await interaction.editReply({  embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
 
         const generateEmbed = start => {
@@ -232,9 +240,9 @@ module.exports = {
                     .setDisabled(true),
 			);
 
-        await interaction.editReply({ embeds: [generateEmbed(0)], components: [leftDisabledButton], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+        if (recentData[0].length <= 5) return await interaction.editReply({ embeds: [generateEmbed(0)], components: [bothDisabledButton], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
 
-            if (recentData[0].length <= 5) return;
+        await interaction.editReply({ embeds: [generateEmbed(0)], components: [leftDisabledButton], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
 
             const filter = i => i.customId === 'forward' || i.customId === 'backward' || i.customId === 'forward1' || i.customId === 'backward1' && i.user.id === interaction.user.id;
             const collector = interaction.channel.createMessageComponentCollector({ filter, componentType: 'BUTTON', time: 300000 });

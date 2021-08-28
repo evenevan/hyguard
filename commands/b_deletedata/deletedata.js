@@ -73,11 +73,13 @@ module.exports = {
                     deleteDataEmbed.setColor('#7289DA');
                     deleteDataEmbed.setTitle(`Aborted!`);
                     deleteDataEmbed.setDescription(`Data deletion canceled.`);
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Operation Canceled`);
                     return await interaction.followUp({ embeds: [deleteDataEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
                 }
             })
 	        .catch(async (err) => {
                 if (err.name === 'Error [INTERACTION_COLLECTOR_ERROR]') {
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await buttonMsg.edit({ embeds: [deleteDataEmbed], components: [updatedDeleteButton] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -120,6 +122,7 @@ module.exports = {
             deleteDataEmbed.setColor('#7289DA');
             deleteDataEmbed.setTitle(`Data Deleted!`);
             deleteDataEmbed.setDescription(`Your data has been deleted.`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: User Data Deleted`);
             return await interaction.followUp({ embeds: [deleteDataEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
         }
     }

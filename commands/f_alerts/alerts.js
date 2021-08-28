@@ -80,6 +80,7 @@ module.exports = {
                 { name: 'Offline Time Alerts', value: `${alertsClean[4]}` },
                 { name: 'Version Alerts', value: `${alertsClean[5]}` },
               )
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Alerts`);
             return await interaction.reply({ embeds: [alertsEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);
@@ -103,6 +104,7 @@ module.exports = {
                 { name: 'Offline Time Alerts', value: `${alertsClean[4]}` },
                 { name: 'Version Alerts', value: `${alertsClean[5]}` },
               )
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Alerts`);
             return await interaction.reply({ embeds: [alertsEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

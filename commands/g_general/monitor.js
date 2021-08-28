@@ -49,6 +49,7 @@ module.exports = {
             monitorEmbed.setColor('#7289DA');
             monitorEmbed.setDescription(currentLogState === 1? `Monitoring, alerts, and checks are all now enabled for your account!` : `Monitoring, alerts, and checks are all now disabled for your account!`)
             monitorEmbed.addField(`Monitoring`, currentLogState === 1 ? `:green_square: - On` : `:red_square: - Off`)
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Monitor`);
             return await interaction.reply({ embeds: [monitorEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

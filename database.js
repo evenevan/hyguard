@@ -11,6 +11,7 @@ function isInDataBase(id, query) {
 
         db.get(query, [id], function(err, row) {
             if (err) {
+                err.name = 'SQLiteError';
                 reject(err);
             }
             if (row == undefined) {
@@ -31,10 +32,13 @@ function getData(id, query) {
         db.serialize(() => {
             db.get(query, [id], function(err, row) {
                 if (err) {
-                    reject(`An error occured while fetching data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 if (row == undefined) {
-                    reject(`An error occured while fetching data. Please report this: The row was undefined in a getData function.`);
+                    let rowUndefined = new Error('Row is undefined')
+                    rowUndefined.name = 'SQLiteError';
+                    reject(rowUndefined);
                 }
                 db.close();
                 resolve(row)
@@ -52,7 +56,8 @@ function changeData(id, query, data) { //data and query switched spots
         db.serialize(() => {
             db.run(query, [data, id], function(err) {
                 if (err) {
-                    reject(`An error occured while writing data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 db.close();
                 resolve();
@@ -69,7 +74,8 @@ function newRow(query, data) {
         db.serialize(() => {
             db.run(query, data, function(err) {
                 if (err) {
-                    reject(`An error occured while writing data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 db.close();
                 resolve();
@@ -88,7 +94,8 @@ function getUserCount() { //Used only by the user table
         db.serialize(() => {
             db.get(`SELECT count(1) FROM users`, function(err, row) {
                 if (err) {
-                    reject(`An error occured while fetching data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 db.close();
                 resolve(row);
@@ -105,7 +112,8 @@ function getTable(table) {
         db.serialize(() => {
             db.all(`SELECT * FROM ${table}`, function(err, tabledata) {
                 if (err) {
-                    reject(`An error occured while fetching data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 db.close();
                 resolve(tabledata);
@@ -123,7 +131,8 @@ function deleteData(id, query) {
         db.serialize(() => {
             db.run(query, id, function(err) {
                 if (err) {
-                    reject(`An error occured while deleting data. Please report this. ${err}`);
+                    err.name = 'SQLiteError';
+                    reject(err);
                 }
                 db.close();
                 resolve();

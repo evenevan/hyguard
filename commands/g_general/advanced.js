@@ -33,6 +33,7 @@ module.exports = {
             advancedEmbed.setTitle(`Invalid Setting!`);
             advancedEmbed.setColor('#FF5555');
             advancedEmbed.setDescription(`The setting specified, "${interaction.options.getString('setting').toUpperCase()}", is not valid. Please contact the owner of the bot if you believe this is an error.`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Advanced Setting`);
             return await interaction.reply({ embeds: [advancedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
         checkAdvanced();
@@ -96,6 +97,7 @@ module.exports = {
                 }
             }
 
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Advanced`);
             return await interaction.reply({ embeds: [advancedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);
@@ -119,6 +121,7 @@ module.exports = {
                 }
             }
             
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Advanced Settings`);
             return await interaction.reply({ embeds: [advancedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

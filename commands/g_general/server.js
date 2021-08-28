@@ -9,9 +9,9 @@ module.exports = {
 	  description: 'Allows members with the Manage Server permission to edit the bot settings for this server',
   	usage: `\`/server [channel] [add/remove/current] <channel>\``,
   	database: false,
-  	guildOnly: false,
-  	ownerReq: true,
-  	cooldown: 1,
+  	guildOnly: true,
+  	ownerReq: false,
+  	cooldown: 5,
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
@@ -46,6 +46,7 @@ module.exports = {
           channelEmbed.setTitle(`Channel Whitelist!`);
           channelEmbed.setColor('#7289DA');
           channelEmbed.addField(`Whitelisted Channels`, cleanChannel)
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Whitelisted Channels`);
           return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
       }
 
@@ -53,6 +54,7 @@ module.exports = {
           channelEmbed.setTitle(`Invalid Channel!`);
           channelEmbed.setColor('#FF5555');
           channelEmbed.setDescription(`That channel is invalid! It must be a text channel!`);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Channel`);
           return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
       }
 
@@ -61,6 +63,7 @@ module.exports = {
             channelEmbed.setTitle(`Already Added!`);
             channelEmbed.setColor('#FF5555');
             channelEmbed.setDescription(`That channel was already added to the channel whitelist!`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Added`);
             return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
         serverChannels.push(channel.id)
@@ -69,6 +72,7 @@ module.exports = {
           channelEmbed.setTitle(`Not Added!`);
           channelEmbed.setColor('#FF5555');
           channelEmbed.setDescription(`Thatc hannel has not been whitelisted yet! You cannot remove a channel that hasn't been added!`);
+          console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Not Added`);
           return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
         let findIndex = serverChannels.indexOf(channel.id);
@@ -80,6 +84,7 @@ module.exports = {
       channelEmbed.setColor('#7289DA');
       channelEmbed.setDescription(`The channel whitelist has been updated! ${serverChannels.length > 0 ? `HyGuard commands can be used in these channels.` : `HyGuard commands can be used in any channel.`}`);
       if (serverChannels.length > 0) channelEmbed.addField(`Whitelisted Channels`, cleanChannel)
+      console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Whitelisted Channels`);
       return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
     }
 
@@ -97,6 +102,7 @@ module.exports = {
       channelEmbed.setColor('#7289DA');
       channelEmbed.setDescription(`Commands for this bot are ${newToggle === 1 ? `now enabled` : `disabled`}! Logging still works normally.`);
       if (serverChannels.length > 0) channelEmbed.addField(`Whitelisted Channels`, cleanChannel)
+      console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Enabled Status`);
       return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
     }
 

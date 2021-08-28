@@ -50,7 +50,7 @@ module.exports = {
             offlineEmbed.setColor('#7289DA');
             offlineEmbed.setTitle(`Logout Time!`);
             offlineEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
-        let logoutSelectMenu = await interaction.reply({ embeds: [offlineEmbed], components: [logoutMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+        await interaction.reply({ embeds: [offlineEmbed], components: [logoutMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         function TimeToDecimals(time) {
 			let minutesToDecimal = (time.slice(-2) / 60);
@@ -98,6 +98,7 @@ module.exports = {
                                 offlineEmbed.setColor('#FF5555');
                                 offlineEmbed.setTitle(`Invalid Format!`);
                                 offlineEmbed.setDescription('Setup has been canceled as you either did not provide a logout time.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
 				                return await interaction.editReply({ embeds: [offlineEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -112,6 +113,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await interaction.editReply({ embeds: [offlineEmbed], components: [updatedLogoutSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -177,6 +179,7 @@ module.exports = {
                                 offlineEmbed.setColor('#FF5555');
                                 offlineEmbed.setTitle(`Invalid Format!`);
                                 offlineEmbed.setDescription('Setup has been canceled as you either did not provide a login time.');
+                                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collecotr Step Failed`);
 				                return await interaction.editReply({ embeds: [offlineEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
                             });
 	                });
@@ -191,6 +194,7 @@ module.exports = {
                                 .setDisabled(true)
                                 .addOptions([{label: 'wtf', description: 'lmao hi', value: 'notavalue'}]),
 			            );
+                    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Collector Step Failed`);
                     await interaction.followUp({ embeds: [noResponseEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
                     return await interaction.editReply({ embeds: [offlineEmbed], components: [updatedLoginSelectMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else return events.errorMsg(interaction, err);
@@ -204,6 +208,7 @@ module.exports = {
             offlineEmbed.setColor('#7289DA');
             offlineEmbed.setTitle(`Offline Time Updated!`);
             offlineEmbed.setDescription(`Your offline time on Hypixel is now set to ${twentyFourToTwelve(decimalToTime(playerLogoutTime))} to ${twentyFourToTwelve(decimalToTime(playerLoginTime))}`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Offline Time Set`);
 			return await interaction.editReply({ embeds: [offlineEmbed], components: [] }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             events.errorMsg(interaction, err);
@@ -218,6 +223,7 @@ module.exports = {
             offlineEmbed.setColor('#7289DA');
             offlineEmbed.setTitle(`Your Offline Time!`);
             offlineEmbed.setDescription(`Your offline time on Hypixel is set to ${twentyFourToTwelve(decimalToTime(offlineArray[0]))} to ${twentyFourToTwelve(decimalToTime(offlineArray[1]))}`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Offline Time`);
 			return await interaction.reply({ embeds: [offlineEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             events.errorMsg(interaction, err);

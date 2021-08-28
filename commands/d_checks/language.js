@@ -34,6 +34,7 @@ module.exports = {
             languageEmbed.setTitle(`Invalid Language!`);
             languageEmbed.setColor('#FF5555');
             languageEmbed.setDescription(`The language specified, "${interaction.options.getString('language').toUpperCase()}", is not valid. Please choose one fo the foolowing: ${languages.join(", ")}!`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Invalid Language`);
             return await interaction.reply({ embeds: [languageEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         }
         checkLanguage();
@@ -47,6 +48,7 @@ module.exports = {
                 languageEmbed.setTitle(`Already Set!`);
                 languageEmbed.setColor('#FF5555');
                 languageEmbed.setDescription(`The language specified, "${interaction.options.getString('language').toUpperCase()}", was already set as your whitelisted language.`);
+                console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Already Set`);
                 return await interaction.reply({ embeds: [languageEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             }
           
@@ -63,6 +65,7 @@ module.exports = {
             languageEmbed.setTitle(`Language Updated!`);
             languageEmbed.setColor('#7289DA');
             languageEmbed.setDescription(`${interaction.options.getString('language').toUpperCase()} is now set as your whitelisted language!`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Language Set`);
             return await interaction.reply({ embeds: [languageEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);
@@ -76,6 +79,7 @@ module.exports = {
             languageEmbed.setTitle(`Your Language!`);
             languageEmbed.setColor('#7289DA');
             languageEmbed.setDescription(`${response.language} is currently set as your whitelisted language!`);
+            console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Returned Current Language`);
             return await interaction.reply({ embeds: [languageEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
         } catch (err) {
             return events.errorMsg(interaction, err);

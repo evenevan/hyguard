@@ -35,7 +35,7 @@ let getApp = (guildID) => {
 	return app;
 }
 
-let isDM = (interaction) => {
+let isDM = (interaction) => { //Pretty sure "if (!interaction.guild)" works perfectly.. but this works too so I'll probably just keep this
 	if (!interaction.channel) return true
 	else if (interaction.channel.type === "DM") return true;
 	else return false;
@@ -55,11 +55,11 @@ client.once('ready', () => {
 });
 
 client.on("guildCreate", guild => {
-    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Bot has joined a guild. Guild: ${guild.name} | ${guild.id} Guild Owner: ${guild.ownerID} Guild Member Count: ${guild.memberCount} (w/ bot)`);
+    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Bot has joined a guild. Guild: ${guild.name} | ${guild.id} Guild Owner: ${guild.ownerId} Guild Member Count: ${guild.memberCount} (w/ bot)`);
 });
 
 client.on("guildDelete", guild => {
-    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Bot has left a guild; joined ${new Date(guild.joinedTimestamp).toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date(guild.joinedTimestamp))}. Guild: ${guild.name} | ${guild.id} Guild Owner: ${guild.ownerID} Guild Member Count: ${guild.memberCount -1} (new count)`);
+    console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Bot has left a guild; joined ${new Date(guild.joinedTimestamp).toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date(guild.joinedTimestamp))}. Guild: ${guild.name} | ${guild.id} Guild Owner: ${guild.ownerId} Guild Member Count: ${guild.memberCount -1} (new count)`);
 });
 
 client.on('interactionCreate', async interaction => { //Slash command handler
@@ -74,7 +74,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 		let devModeEmbed = new MessageEmbed()
 			.setTitle('Developer Mode!')
 			.setColor('#AA0000')
-			.setDescription('This bot is in develoepr only mode, likely due to a major issue or an upgrade that is taking place. Please check back later!')
+			.setDescription('This bot is in developer only mode, likely due to a major issue or an upgrade that is taking place. Please check back later!')
         	.setTimestamp()
         	.setFooter(`${interaction.id} | ${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0`, 'https://i.imgur.com/MTClkTu.png');
 		return interaction.reply({ embeds: [devModeEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
@@ -139,7 +139,9 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 
 	async function checkDB() { //Checks if the user has used /setup, and will return that data if so
 		let isInDB = await databaseImports.isInDataBase(interaction.user.id, `SELECT * FROM users WHERE discordID = ?`);
-		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} DB ${isInDB[0]} User: ${interaction.user.username}#${interaction.user.discriminator}${interaction.guild ? ` GuildID: ${interaction.guild.id}` : ``} made a request: ${interaction.commandName}`);
+		let options = ''; //Empty string
+		interaction.options._hoistedOptions.forEach((option) => {options += ` ${option.value}`}) //Adds the slash command options to the empty string to display to console
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} DB ${isInDB[0]} User: ${interaction.user.username}#${interaction.user.discriminator}${interaction.guild ? ` GuildID: ${interaction.guild.id}` : ``} made a request: ${interaction.commandName}${interaction.options._group ? ` ${interaction.options._group}` : ``}${interaction.options._subcommand ? ` ${interaction.options._subcommand}` : ``}${options}`);
 		if (isInDB[0] == false && command.database == true) return events.setupConstraint(interaction);
 		dm(isInDB[1]); //Also provides row data so I don't have to request it again later
 	};
@@ -178,6 +180,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	async function execute(rowData) {
 		try {
 			await client.commands.get(interaction.commandName).execute(interaction, client, rowData);
+			//client can be accessed with interaction.client, so adding the client parameter by itself is unnessessary
 		} catch (error) {
 			await events.errorMsg(interaction, error);
 		}
@@ -186,19 +189,22 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 
 client.on('messageCreate', async message => { //Basiclaly all owner only stuff
 	if (message.author.bot) return;
-	if (message.content.startsWith('h!')) return message.channel.send(`That is an outdated method! This bot has been upgarded to slash commands. Please use following link. You do not have to kick and reinvite the bot, just use the link, click the server the bot is in right now, and accept the new terms. https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528656&scope=bot%20applications.commands`);
+	if (message.content.startsWith('h!')) {
+		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | ${message.author.tag} is using the outdated command method. ${message.content}`)
+		return message.channel.send(`This bot has been upgraded to slash commands. Please use them, as message based commands are no longer supported by this bot. If you don't see slash commands, please click the link below, accept the new condition, and select the current server. Note that you must have the "Manage Server" permission to do this. This allows the bot to create slash commands. This process takes ~10 seconds. Thanks! https://discord.com/api/oauth2/authorize?client_id=841021942249422868&permissions=268528656&scope=bot%20applications.commands`);
+	}
 	if (!botOwner.includes(message.author.id)) return;
 	if (!client.application?.owner) await client.application?.fetch();
 
-	if (message.content.toLowerCase() === '!commands' && message.author.id === client.application?.owner.id) {
+	if (message.content.toLowerCase() === '.commands' && message.author.id === client.application?.owner.id) {
 		console.log(await getApp(`873000534955667496`).commands.get())
 		console.log(await getApp(`838544983261839481`).commands.get())
 		console.log(await getApp().commands.get())
-	} else if (message.content.toLowerCase() === '!delete' && message.author.id === client.application?.owner.id) {
+	} else if (message.content.toLowerCase() === '.delete' && message.author.id === client.application?.owner.id) {
 		const deleted = await getApp("873000534955667496").commands('872285536168063016').delete() //commands can deploy on both guild and global
 		console.log(deleted)
-	} else if (message.content.toLowerCase() === '!perms' && message.author.id === client.application?.owner.id) {
-		const command = await client.guilds.cache.get('873000534955667496')?.commands.fetch('877257536041021449');
+	} else if (message.content.toLowerCase() === '.perms' && message.author.id === client.application?.owner.id) {
+		const command = await client.guilds.cache.get('873000534955667496')?.commands.fetch('877766250934198313');
 
 		const permissions = [
 			{
@@ -209,14 +215,14 @@ client.on('messageCreate', async message => { //Basiclaly all owner only stuff
 		];
 
 		await command.permissions.add({ permissions });
-	} else if (message.content.toLowerCase() === '!update' && message.author.id === client.application?.owner.id) {
+	} else if (message.content.toLowerCase() === '.update' && message.author.id === client.application?.owner.id) {
 		let assets = funcImports.readAssets();
 		let data = assets.localCommands;
 
 		let commands = await client.guilds.cache.get('873000534955667496')?.commands.set(data); //This only works on 1 guild. Read docs discord.js docs on slash commands
 		//Global updater is let commands = await client.application.commands.set(data);
 		console.log(commands);
-	} else if (message.content.toLowerCase() === '!globalupdate' && message.author.id === client.application?.owner.id) {
+	} else if (message.content.toLowerCase() === '.globalupdate' && message.author.id === client.application?.owner.id) {
 		let assets = funcImports.readAssets();
 		let data = assets.globalCommands;
 

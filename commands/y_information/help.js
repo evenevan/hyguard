@@ -31,7 +31,7 @@ module.exports = {
 				.setColor('#7289DA')
 				.setTitle('Information!')
 				.setDescription(`The HyGuard project was created to be an early warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by sending you your status on Hypixel on an interval, and alerting you on any unusual activity.`)
-				.addField(`**Data Collection**`, `/setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference.`)
+				.addField(`**Data Collection**`, `/setup requires your Minecraft username to verify your account. This is necessary to the above function. It must be linked on Hypixel to ensure you are the owner of that account. Information gathered by this bot to do the above function are your Discord username/ID, Minecraft username, timezone, language, and login/logout times for Hypixel to cross-reference. This data is stored locally in a SQLite database.\n\nAdditionally, the bot also collects the guild ID whenever a command is sent from a new guild. This data is for the /server command.`)
 				.addField(`**Bug Reports and Suggestions**`, `Please report any bugs, exploits, or any suggestions to Attituding#6517. Join the [Hypixel Discord](https://discord.com/invite/hypixel) before you DM me so that you won't get blocked by Clyde. You can also [make a reply to the Hypixel forum post](https://hypixel.net/threads/discord-bot-hyguard-a-bot-that-monitors-your-account-24-7.4368395/) on this bot.`)
 				.addField(`**GitHub**`, `This project has a [Github page](<https://github.com/Attituding/HyGuard>), where the code is available under the MIT license. There is also extra documentation there incase you need it.`)
 				.setFooter(`Programmed by Attituding#6517 with help from the internet`, 'https://i.imgur.com/MTClkTu.png')
@@ -42,7 +42,7 @@ module.exports = {
 			let commandHelp = new MessageEmbed()
 				.setColor('#7289DA')
 				.setTitle('Commands!')
-				.setDescription('Arguments in brackets are required. Arguments in arrows are sometiems required base on the previous argument. Youc an use the command /help')
+				.setDescription('Arguments in brackets are required. Arguments in arrows are sometiems required based on the previous argument. You can use the command /help [command] [choose a command from the list] to see more about a specific command.')
 				.addField(':link: **Setup and Delete**', '**/setup [UUID or username]**: Allows players to begin using HyGuard\n' + 
 											 '**/deletedata**: Delete all of your data')
 				.addField(':clipboard: **Check Parameters**', '**/blacklist [add/remove/current] <gametype>**: Set blacklisted gametype(s) for Hypixel\n' + 
@@ -54,8 +54,8 @@ module.exports = {
 													 '**/alerts [toggle/current] <alert type>**: Update your current active alerts\n' +
 													 '**/advanced [toggle/current] <setting>**: Update your advanced settings\n' +
 													 '**/monitor**: Toggles monitoring, alerts, and all checks for your account\n')
-				.addField(':tools: **Utility**', '**/server [channel] [add/remove/current] <channel>**: Modify server settings for this bot' +
-									 '**/mojang**: Shows the status of Mojang\'s services' +
+				.addField(':tools: **Utility**', '**/server [channel] [add/remove/current] <channel>**: Modify server settings for this bot\n' +
+									 '**/mojang**: Shows the status of Mojang\'s services\n' +
 									 '**/ping**: Shows the ping of the bot')
 				.addField(':mag: **API Commands**', '**/compromised [UUID or username]**: Displays stats and data of a Hypixel player in BB code\n' +
 									 '**/recentgames [UUID or username]**: Displays the recent games of a Hypixel player\n' +
