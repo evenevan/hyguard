@@ -2,8 +2,8 @@ const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permis
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
-const controller = new AbortController();
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
+    const controller = new AbortController();
     const promise = fetch(url, { signal: controller.signal, ...options });
     if (signal) signal.addEventListener("abort", () => controller.abort());
     const timeout = setTimeout(() => controller.abort(), ms);
@@ -61,7 +61,8 @@ module.exports = {
 		}
 	}
 
-    async function requestUUID(username) {
+    async function requestUUID(username, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${username}`, 5000, {
                 signal: controller.signal
@@ -77,9 +78,16 @@ module.exports = {
             })
             .catch(async (err) => {
                 if (err.name === "AbortError") {
+                    if (undefinedIfHasntAborted === undefined) {
+                        recentEmbed.setColor('#FF5555');
+                        recentEmbed.setTitle(`Connection Failed!`);
+                        recentEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                        await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                        return requestUUID(username, true);
+                    }
                     recentEmbed.setColor('#AA0000');
                     recentEmbed.setTitle(`Abort Error!`);
-                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try with a UUID if this error continues.');
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
@@ -93,7 +101,8 @@ module.exports = {
             });
     };
 
-    async function requestUsername(uuid) {
+    async function requestUsername(uuid, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.mojang.com/user/profiles/${uuid}/names`, 2000, {
                 signal: controller.signal
@@ -108,9 +117,16 @@ module.exports = {
             })
             .catch(async (err) => {
                 if (err.name === "AbortError") {
+                    if (undefinedIfHasntAborted === undefined) {
+                        recentEmbed.setColor('#FF5555');
+                        recentEmbed.setTitle(`Connection Failed!`);
+                        recentEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                        await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                        return requestUsername(uuid, true);
+                    }
                     recentEmbed.setColor('#AA0000');
                     recentEmbed.setTitle(`Abort Error!`);
-                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try with a username if this error continues.');
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
@@ -124,7 +140,8 @@ module.exports = {
             });
     };
 
-    async function requestPlayer(uuid, playerName) {
+    async function requestPlayer(uuid, playerName, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/recentGames`, 2000, {
                 signal: controller.signal
@@ -140,6 +157,13 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                    recentEmbed.setColor('#FF5555');
+                    recentEmbed.setTitle(`Connection Failed!`);
+                    recentEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
+                    await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return requestPlayer(uuid, playerName, true);
+                }
                 recentEmbed.setColor('#AA0000');
                 recentEmbed.setTitle(`Abort Error!`);
                 recentEmbed.setDescription('The Slothpixel API failed to respond, and may be down. Try again later.');

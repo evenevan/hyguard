@@ -1,10 +1,9 @@
-const { Client, Collection, Intents, Permissions, MessageEmbed  } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-const sqlite = require('sqlite3').verbose();
+const { Client, Collection, Intents, Permissions, MessageEmbed } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], allowedMentions: { parse: ['users', 'roles'], repliedUser: true } });
 const fs = require('fs');
 
 const userConfig = require('./userConfig.json');
-const databaseImports = require('./database.js');
+const database = require('./database.js');
 const funcImports = require('./functions.js');
 const events = require('./events.js');
 const log = require('./log.js');
@@ -41,15 +40,15 @@ let isDM = (interaction) => { //Pretty sure "if (!interaction.guild)" works perf
 	else return false;
 }
 
-client.once('ready', () => {
+client.once('ready', async () => {
 	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | Logged in as ${client.user.tag}!`);
 	client.user.setStatus('dnd');
-	let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE);
-	db.serialize(() => {
-		db.run(`CREATE TABLE IF NOT EXISTS users(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, daylightSavings INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT)`);
-		db.run(`CREATE TABLE IF NOT EXISTS servers(serverID TEXT NOT NULL, channels TEXT, enabled INTEGER NOT NULL)`);
-		db.close();
-	})
+	try {
+		await database.createTable(`CREATE TABLE IF NOT EXISTS servers(serverID TEXT NOT NULL, channels TEXT, enabled INTEGER NOT NULL)`);
+		await database.createTable(`CREATE TABLE IF NOT EXISTS users(discordID TEXT NOT NULL, discordUsername TEXT NOT NULL, minecraftUUID TEXT NOT NULL, language TEXT NOT NULL, version TEXT NOT NULL, offline INTEGER NOT NULL, blacklist TEXT, whitelist TEXT, loginMS INTEGER, logoutMS INTEGER, timezone INTEGER NOT NULL, daylightSavings INTEGER NOT NULL, alerts TEXT NOT NULL, guildID TEXT NOT NULL, logID TEXT NOT NULL, alertID TEXT NOT NULL, log INTEGER NOT NULL, advanced TEXT)`);
+	} catch (err) {
+		console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | ${err}`);
+	}
 	setTimeout(() => {log.loadBalancer(client)}, 1000); //Setting a timeout of 1 second. The 1 second delay lets the databases generate. Await doesn't seem to work on those expressions, and this is simplier anyways
 	setInterval(log.loadBalancer, logInterval * 1000, client); //Starts the main logging function
 });
@@ -86,7 +85,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 
 	async function requestGuild() {
 	  if (isDM(interaction) === true) return await owner();
-	  let checkIfServer = await databaseImports.isInDataBase(interaction.guild.id, `SELECT * FROM servers WHERE serverID = ?`);
+	  let checkIfServer = await database.isInDataBase(interaction.guild.id, `SELECT * FROM servers WHERE serverID = ?`);
 	  let requestedGuild = checkIfServer[0] === false ? await createServerRow() : checkIfServer;
 	  let serverChannels = requestedGuild[1].channels ? requestedGuild[1].channels.split(" ") : []
 	  if (serverChannels.length === 0) return await owner();
@@ -95,9 +94,9 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	};
 
 	async function createServerRow() {
-	  await databaseImports.newRow(`INSERT INTO servers VALUES(?,?,?)`, [interaction.guild.id, null, true]);
+	  await database.newRow(`INSERT INTO servers VALUES(?,?,?)`, [interaction.guild.id, null, 1]);
 	  console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} GuildID: ${interaction.guild.id} Generated a server row`);
-	  return await databaseImports.isInDataBase(interaction.guild.id, `SELECT * FROM servers WHERE serverID = ?`);
+	  return await database.isInDataBase(interaction.guild.id, `SELECT * FROM servers WHERE serverID = ?`);
 	}
 
 	function owner() { //Checks for commands that are owner only
@@ -138,7 +137,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	};
 
 	async function checkDB() { //Checks if the user has used /setup, and will return that data if so
-		let isInDB = await databaseImports.isInDataBase(interaction.user.id, `SELECT * FROM users WHERE discordID = ?`);
+		let isInDB = await database.isInDataBase(interaction.user.id, `SELECT * FROM users WHERE discordID = ?`);
 		let options = ''; //Empty string
 		interaction.options._hoistedOptions.forEach((option) => {options += ` ${option.value}`}) //Adds the slash command options to the empty string to display to console
 		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} DB ${isInDB[0]} User: ${interaction.user.username}#${interaction.user.discriminator}${interaction.guild ? ` GuildID: ${interaction.guild.id}` : ``} made a request: ${interaction.commandName}${interaction.options._group ? ` ${interaction.options._group}` : ``}${interaction.options._subcommand ? ` ${interaction.options._subcommand}` : ``}${options}`);
@@ -231,6 +230,10 @@ client.on('messageCreate', async message => { //Basiclaly all owner only stuff
 		console.log(commands);
 	}
 });
+
+client.on(`rateLimit`, rateLimitInfo => {
+    console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Rate limit: `, rateLimitInfo);
+})
 
 process.on('unhandledRejection', error => { //Handles everything that I missed that would cause a crash. Epic.
 	console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Unhandled promise rejection:`, error);

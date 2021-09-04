@@ -9,14 +9,13 @@ const botOwner = userConfig["BotOwnerID"];
 const logInterval = userConfig["logInterval"];
 const hypixelAPIkey = userConfig["hypixelAPIkey"];
 
-const controller = new AbortController();
 const fetch = require('node-fetch');
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => { //obviously not designed by me lol
-const controller = new AbortController();
-const promise = fetch(url, { signal: controller.signal, ...options });
-if (signal) signal.addEventListener("abort", () => controller.abort());
-const timeout = setTimeout(() => controller.abort(), ms);
-return promise.finally(() => clearTimeout(timeout));
+  const controller = new AbortController();
+  const promise = fetch(url, { signal: controller.signal, ...options });
+  if (signal) signal.addEventListener("abort", () => controller.abort());
+  const timeout = setTimeout(() => controller.abort(), ms);
+  return promise.finally(() => clearTimeout(timeout));
 };
 
 async function loadBalancer(client) {
@@ -85,7 +84,8 @@ async function checkLogChannel(dbUserData, client, userNumber, dst, alerts) {
   return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${missingLogPermissions.join(", ")}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`/monitor\` which in turn stops these alerts.`);
 };
 
-function apiCall(dbUserData, client, userNumber, dst, alerts, logs) {
+function apiCall(dbUserData, client, userNumber, dst, alerts, logs, undefinedIfHasntAborted) {
+  let controller = new AbortController();
   Promise.all([
     fetchTimeout(`https://api.hypixel.net/player?uuid=${dbUserData.minecraftUUID}&key=${hypixelAPIkey}`, 2500, {
         signal: controller.signal
@@ -103,14 +103,14 @@ function apiCall(dbUserData, client, userNumber, dst, alerts, logs) {
       })
   ])
     .then((apiData) => {
-        return accountChecks(apiData[0], apiData[1], dbUserData, client, userNumber, dst, alerts, logs); //backup check to ensure success
+        return accountChecks(apiData[0], apiData[1], dbUserData, client, userNumber, dst, alerts, logs);
     })
     .catch((err) => {
       if (err.name === "AbortError") {
+        if (undefinedIfHasntAborted === undefined) return apiCall(dbUserData, client, userNumber, dst, alerts, logs, true) //Simple way to try again if it aborts without an infinite loop
         events.logErrorMsg(client, userNumber, err, `Hypixel Abort Error`, false, true, false);
-        //logErrorMsg(client, userNumber, rawError, description, writeToConsole, writeToDiscordConsole, pingBoolean)
       } else {
-        events.logErrorMsg(client, userNumber, err, `Likely a 502 or 429`, false, true, false);
+        events.logErrorMsg(client, userNumber, err, `Internal Server or API Limit`, false, true, false);
       }
     });  
 };
@@ -126,7 +126,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     let timeSinceLastLogin = `${secondsToDays(new Date() - playerData.player.lastLogin)}${new Date(new Date() - playerData.player.lastLogin).toISOString().substr(11, 8)}`
     let ceilRoundedLastLogin = Math.ceil((new Date() - playerData.player.lastLogin) / 1000)
   
-    let timeSincefLastLogout = `${secondsToDays(new Date() - playerData.player.lastLogout)}${new Date(new Date() - playerData.player.lastLogout).toISOString().substr(11, 8)}`
+    let timeSinceLastLogout = `${secondsToDays(new Date() - playerData.player.lastLogout)}${new Date(new Date() - playerData.player.lastLogout).toISOString().substr(11, 8)}`
     let ceilRoundedLastLogout = Math.ceil((new Date() - playerData.player.lastLogout) / 1000)
   
     let timestampOfLastLogin = funcImports.epochToCleanDate(new Date(playerData.player.lastLogin + tzOffset)) + ", " + new Date(playerData.player.lastLogin + tzOffset).toLocaleTimeString('en-IN', { hour12: true }) + " UTC" + funcImports.decimalsToUTC(tz);
@@ -234,13 +234,13 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     if (relogAlert && ceilRoundedLastLogin <= logInterval * 2 && userAlerts[3] == true) {
       alertEmbed.setTitle(`Session Alert!`);
       alertEmbed.setColor(`#FFAA00`); //Orange
-      alertEmbed.setDescription(`Your account relogged for ${roundedRelogTime} seconds after logging out at ${timestampOfLastLogout}, or ${timeSincefLastLogout}, and then logging back in at ${timestampOfLastLogin}, or ${timeSinceLastLogin}. You can update your session alerts with /alerts [login/logout/relog]`);
+      alertEmbed.setDescription(`Your account relogged for ${roundedRelogTime} seconds after logging out at ${timestampOfLastLogout}, or ${timeSinceLastLogout}, and then logging back in at ${timestampOfLastLogin}, or ${timeSinceLastLogin}. You can update your session alerts with /alerts [login/logout/relog]`);
       alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
     if (logoutAlert && ceilRoundedLastLogout <= logInterval * 2 && !relogAlert && userAlerts[3] == true) {
       alertEmbed.setTitle(`Session Alert!`);
       alertEmbed.setColor(`#555555`); //Grey/Gray whatever
-      alertEmbed.setDescription(`Your account logged out at ${timestampOfLastLogout} or ${timeSincefLastLogout} ago. Playtime was ${lastPlaytime}. You can update your session alerts with /alerts [login/logout/relog]`);
+      alertEmbed.setDescription(`Your account logged out at ${timestampOfLastLogout} or ${timeSinceLastLogout} ago. Playtime was ${lastPlaytime}. You can update your session alerts with /alerts [login/logout/relog]`);
       alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
     if (loginAlert && ceilRoundedLastLogin <= logInterval * 2 && !relogAlert && userAlerts[3] == true) {
@@ -273,12 +273,12 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
   if (!statusData.session.online) {
       logEmbed.addFields(
       { name: 'Last Session', value: `${playerData.player.lastLogin && playerData.player.lastLogin < playerData.player.lastLogout ? `Last Playtime: ${lastPlaytime} long` : `Playtime: Unknown`}\n${playerData.player.mostRecentGameType ? `Last Gametype: ${playerData.player.mostRecentGameType}` : `Last Gametype: Unknown` }` },);
-    } else {
+  } else {
       logEmbed.addFields(
       { name: 'Session', value: `${playerData.player.lastLogin ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${statusData.session.gameType ? `Game: ${statusData.session.gameType}\n` : `` }${statusData.session.mode ? `Mode: ${statusData.session.mode}\n` : `` }${statusData.session.map ? `Map: ${statusData.session.map}` : `` }${!statusData.session.gameType && !statusData.session.mode && !statusData.session.map ? `Data not available: Limited API!` : `` }` });
   }
     logEmbed.addField('Last Login', playerData.player.lastLogin ? `${timestampOfLastLogin}\n${timeSinceLastLogin} ago` : `Unknown`);
-    logEmbed.addField('Last Logout', playerData.player.lastLogout ? `${timestampOfLastLogout}\n${timeSincefLastLogout} ago` : `Unknown`);
+    logEmbed.addField('Last Logout', playerData.player.lastLogout ? `${timestampOfLastLogout}\n${timeSinceLastLogout} ago` : `Unknown`);
     logEmbed.addField('Settings', `${playerData.player.userLanguage ? `Language: ${playerData.player.userLanguage}` : `Language: Unknown`}\n${playerData.player.mcVersionRp ? `Version: ${playerData.player.mcVersionRp}` : `Version: Unknown`}`);
 
     if (!statusData.session.online && playerData.player.lastLogout < playerData.player.lastLogin * 1) logEmbed.addField(`**API Limitation**`, `The Online Status API must be on\nfor Gametype users and alerts to \nfunction. Please turn it on.`);

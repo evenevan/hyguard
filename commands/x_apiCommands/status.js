@@ -2,8 +2,8 @@ const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permis
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
-const controller = new AbortController();
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
+    const controller = new AbortController();
     const promise = fetch(url, { signal: controller.signal, ...options });
     if (signal) signal.addEventListener("abort", () => controller.abort());
     const timeout = setTimeout(() => controller.abort(), ms);
@@ -61,7 +61,8 @@ module.exports = {
 		}
 	}
 
-    async function requestUUID(username) {
+    async function requestUUID(username, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${username}`, 5000, {
               signal: controller.signal
@@ -76,9 +77,16 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                  statusEmbed.setColor('#FF5555');
+                  statusEmbed.setTitle(`Connection Failed!`);
+                  statusEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                  await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                  return requestUUID(username, true); //Simple way to try again without an infinite loop
+                }
                 statusEmbed.setColor('#AA0000');
                 statusEmbed.setTitle(`Abort Error!`);
-                statusEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                statusEmbed.setDescription('The Mojang API failed to respond, and may be down. Try with a UUID if this error continues.');
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
                 return await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
@@ -92,7 +100,8 @@ module.exports = {
           });
     };
 
-    async function requestPlayer(uuid) {
+    async function requestPlayer(uuid, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/`, 2000, {
                 signal: controller.signal
@@ -115,6 +124,13 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                  statusEmbed.setColor('#FF5555');
+                  statusEmbed.setTitle(`Connection Failed!`);
+                  statusEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
+                  await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                  return requestPlayer(uuid, true); //Simple way to try again without an infinite loop
+                }
                 statusEmbed.setColor('#AA0000');
                 statusEmbed.setTitle(`Abort Error!`);
                 statusEmbed.setDescription('The Slothpixel API failed to respond, and may be down. Try again later.');

@@ -1,86 +1,100 @@
-const sqlite = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const fs = require('fs');
 
 //Database handler
 
+function createTable(query) {
+    return new Promise((resolve, reject) => {
+        if (!query) reject(`Query Not Valid`);
+        let db = new Database('./database.db');
+        //'CREATE TABLE IF NOT EXISTS servers(tests TEXT NOT NULL)'
+
+        try {
+            let table = db.prepare(query);
+            table.run();
+            db.close();
+            resolve();
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
+    });
+};
+
 function isInDataBase(id, query) {
     return new Promise((resolve, reject) => {
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READONLY);
         if (!query) reject(`Query Not Valid`);
+        let db = new Database('./database.db', { readonly: true });
         //let query = `SELECT * FROM ${table} WHERE id = ?`;
 
-        db.get(query, [id], function(err, row) {
-            if (err) {
-                err.name = 'SQLiteError';
-                reject(err);
-            }
-            if (row == undefined) {
-                resolve([false]);
-            }
+        try {
+            let preparedQuery = db.prepare(query);
+            let userData = preparedQuery.get(id);
             db.close();
-            resolve([true, row]);
-        });
+            if (userData == undefined) resolve([false]);
+            resolve([true, userData]);
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };
 
 function getData(id, query) {
     return new Promise((resolve, reject) => {
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READONLY);
         if (!query) reject(`Query Not Valid`);
+        let db = new Database('./database.db', { readonly: true });
         //let query = `SELECT * FROM ${table} WHERE id = ?`;
 
-        db.serialize(() => {
-            db.get(query, [id], function(err, row) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                if (row == undefined) {
-                    let rowUndefined = new Error('Row is undefined')
-                    rowUndefined.name = 'SQLiteError';
-                    reject(rowUndefined);
-                }
-                db.close();
-                resolve(row)
-            });
-        });
+        try {
+            let preparedQuery = db.prepare(query);
+            let userData = preparedQuery.get(id);
+            db.close();
+            if (userData == undefined) {
+                let rowUndefined = new Error('Row is undefined');
+                rowUndefined.name = 'SQLiteError';
+                reject(rowUndefined);
+            }
+            resolve(userData);
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };
 
 function changeData(id, query, data) { //data and query switched spots
     return new Promise((resolve, reject) => {
         if (!query) reject(`Query Not Valid`);
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE);
+        let db = new Database('./database.db');
         //let query = `UPDATE table SET offline = ? WHERE id = ?`
 
-        db.serialize(() => {
-            db.run(query, [data, id], function(err) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                db.close();
-                resolve();
-
-            });
-        });
+        try {
+            let preparedQuery = db.prepare(query);
+            preparedQuery.run([data, id]);
+            db.close();
+            resolve();
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };
 
 function newRow(query, data) {
     return new Promise((resolve, reject) => {
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE);
+        let db = new Database('./database.db');
+        //`INSERT INTO servers VALUES(?,?,?)`
 
-        db.serialize(() => {
-            db.run(query, data, function(err) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                db.close();
-                resolve();
-            });
-        })
+        try {
+            let preparedQuery = db.prepare(query);
+            preparedQuery.run(data);
+            db.close();
+            resolve();
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 }
 
@@ -89,56 +103,53 @@ function newRow(query, data) {
 
 function getUserCount() { //Used only by the user table
     return new Promise((resolve, reject) => {
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READONLY);
+        let db = new Database('./database.db', { readonly: true });
 
-        db.serialize(() => {
-            db.get(`SELECT count(1) FROM users`, function(err, row) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                db.close();
-                resolve(row);
-            });
-        });
+        try {
+            let preparedQuery = db.prepare(`SELECT count(1) FROM users`);
+            let userCount = preparedQuery.get();
+            db.close();
+            resolve(userCount);
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };
 
 function getTable(table) {
     return new Promise((resolve, reject) => {
         if (!table) reject(`Table Not Valid`);
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READONLY);
+        let db = new Database('./database.db', { readonly: true });
 
-        db.serialize(() => {
-            db.all(`SELECT * FROM ${table}`, function(err, tabledata) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                db.close();
-                resolve(tabledata);
-            });
-        });
+        try {
+            let preparedQuery = db.prepare(`SELECT * FROM ${table}`);
+            let tableData = preparedQuery.all();
+            db.close();
+            resolve(tableData);
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };
 
 function deleteData(id, query) {
     return new Promise((resolve, reject) => {
         if (!query) reject(`Table Not Valid`);
-        let db = new sqlite.Database('./database.db', sqlite.OPEN_READWRITE);
-        //let query = `DELETE FROM ${table} WHERE id=(?)`
+        let db = new Database('./database.db');
+        //let query = `DELETE FROM users WHERE id=(?)`
 
-        db.serialize(() => {
-            db.run(query, id, function(err) {
-                if (err) {
-                    err.name = 'SQLiteError';
-                    reject(err);
-                }
-                db.close();
-                resolve();
-            });
-        });
+        try {
+            let preparedQuery = db.prepare(query);
+            let tableData = preparedQuery.run(id);
+            db.close();
+            resolve(tableData);
+        } catch (err) {
+            err.name = 'SQLiteError';
+            reject(err);
+        }
     });
 };                  
 
-module.exports = { isInDataBase, getData, changeData, deleteData, newRow, getUserCount, getTable };
+module.exports = { createTable, isInDataBase, getData, changeData, deleteData, newRow, getUserCount, getTable };

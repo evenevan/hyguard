@@ -98,21 +98,21 @@ function deleteUserData(dbUserData, client, deletionReason) { //Used by the log 
     let logs = await guild.channels.cache.get(dbUserData.logID);
     if (!logs) return;
     let logPermissions = await logs.permissionsFor(logs.guild.me).toArray();
-      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await log.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete log channel`, cnsle, true, false)});
+      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await log.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete log channel`, true, true, false)});
   };
 
   async function deleteAlerts(guild) {
     let alerts = await guild.channels.cache.get(dbUserData.alertID);
     if (!alerts) return;
     let alertPermissions = await alerts.permissionsFor(alerts.guild.me).toArray();
-    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alert.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete alert channel`, cnsle, true, false)});
+    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alert.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete alert channel`, true, true, false)});
   };
 
   async function deleteCategory(guild) {
       let category = await guild.channels.cache.find(c => c.name == "log" && c.type == "GUILD_CATEGORY");
       if (!category) return;
       let channelPermissions = await category.permissionsFor(category.guild.me).toArray();
-      if (category.children.size == 0 && channelPermissions.includes("MANAGE_CHANNELS")) await category.delete('Empty category channel').catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete category channel`, cnsle, true, false)});
+      if (category.children.size == 0 && channelPermissions.includes("MANAGE_CHANNELS")) await category.delete('Empty category channel').catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete category channel`, true, true, false)});
   };
 
   async function deleteData() {

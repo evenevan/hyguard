@@ -93,7 +93,7 @@ module.exports = {
 		}
 	};
 
-    async function requestUUID(username) {
+    async function requestUUID(username, undefinedIfHasntAborted) {
         Promise.all([
             fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${username}`, 5000, {
                 signal: controller.signal
@@ -109,23 +109,30 @@ module.exports = {
             })
             .catch(async (err) => {
                 if (err.name === "AbortError") {
-                    recentEmbed.setColor('#AA0000');
-                    recentEmbed.setTitle(`Abort Error!`);
-                    recentEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                    if (undefinedIfHasntAborted === undefined) {
+                        statusEmbed.setColor('#FF5555');
+                        statusEmbed.setTitle(`Connection Failed!`);
+                        statusEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                        await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                        return requestUUID(username, true); //Simple way to try again without an infinite loop
+                    }
+                    setupEmbed.setColor('#AA0000');
+                    setupEmbed.setTitle(`Abort Error!`);
+                    setupEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
-                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
-                    recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                    recentEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    setupEmbed.setColor(`#FF5555`); setupEmbed.setTitle(`Player Not Found!`);
+                    setupEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
-                    return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
                 }
             });
     };
 
-    function requestPlayer(uuid) { //Requests the player data from Slothpixel
+    function requestPlayer(uuid, undefinedIfHasntAborted) { //Requests the player data from Slothpixel
         Promise.all([
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/`, 2000, {
                 signal: controller.signal
@@ -164,6 +171,13 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                    statusEmbed.setColor('#FF5555');
+                    statusEmbed.setTitle(`Connection Failed!`);
+                    statusEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
+                    await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    return requestPlayer(uuid, true); //Simple way to try again without an infinite loop
+                }
                 setupEmbed.setColor('#AA0000');
                 setupEmbed.setTitle(`Abort Error!`);
                 setupEmbed.setDescription('The API failed to respond, and may be down. Try again later.');
@@ -615,7 +629,7 @@ module.exports = {
 		  logout = playerData[0].last_logout ?? '0',
           offlineTime = playerLogoutTime + " " + playerLoginTime;
 
-        await database.newRow(`INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [interaction.user.id, `${interaction.user.username}#${interaction.user.discriminator}`, uuid, language, version, offlineTime, "", "", login, logout, timezone, dstBoolean, "0 0 1 1 1 1", interaction.guild.id, logID, alertID, "1", ""]);
+        await database.newRow(`INSERT INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [interaction.user.id, `${interaction.user.username}#${interaction.user.discriminator}`, uuid, language, version, offlineTime, "", "", login, logout, timezone, dstBoolean | 0, "0 0 1 1 1 1", interaction.guild.id, logID, alertID, 1, ""]);
 
         setupEmbed.setColor('#00AA00');
         setupEmbed.setTitle(`Success!`);

@@ -2,8 +2,8 @@ const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permis
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
-const controller = new AbortController();
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
+    const controller = new AbortController();
     const promise = fetch(url, { signal: controller.signal, ...options });
     if (signal) signal.addEventListener("abort", () => controller.abort());
     const timeout = setTimeout(() => controller.abort(), ms);
@@ -37,7 +37,8 @@ module.exports = {
 
     mojangAPIRequest();
 
-    async function mojangAPIRequest() {
+    async function mojangAPIRequest(undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://status.mojang.com/check`, 5000, {
                 signal: controller.signal
@@ -51,6 +52,13 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                  mojangStatus.setColor('#FF5555');
+                  mojangStatus.setTitle(`Connection Failed!`);
+                  mojangStatus.setDescription('The Mojang API failed to respond, trying again..');
+                  await interaction.editReply({ embeds: [mojangStatus], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                  return mojangAPIRequest(true);
+                }
                 mojangStatus.setColor('#AA0000');
                 mojangStatus.setTitle(`Abort Error!`);
                 mojangStatus.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
@@ -74,9 +82,7 @@ module.exports = {
         arr[6] = data[1]["session.minecraft.net"].toUpperCase();
         arr[7] = data[6]["textures.minecraft.net"].toUpperCase();
         
-        let a = arr.map(function(item) { return item == 'GREEN' ? ':green_square:' : item; });
-        let b = a.map(function(item) { return item == 'YELLOW' ? ':yellow_square:' : item; });
-        let cleanData = b.map(function(item) { return item == 'RED' ? ':red_square:' : item; });
+        let cleanData = arr.map(function(item) { return item == 'GREEN' ? ':green_square:' : item == 'YELLOW' ? ':yellow_square:' : ':red_square:'; });
 
           mojangStatus.setColor('#7289DA')
           mojangStatus.setTitle('Mojang Services Status')

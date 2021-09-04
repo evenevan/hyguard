@@ -179,7 +179,7 @@ module.exports = {
     async function writeNewTimezone(timezone, dstBoolean) {
         try {
           await database.changeData(interaction.user.id, `UPDATE users SET timezone = ? WHERE discordID = ?`, timezone);
-          await database.changeData(interaction.user.id, `UPDATE users SET daylightSavings = ? WHERE discordID = ?`, dstBoolean);
+          await database.changeData(interaction.user.id, `UPDATE users SET daylightSavings = ? WHERE discordID = ?`, dstBoolean | 0);
           timezoneEmbed.setColor('#7289DA');
           timezoneEmbed.setTitle(`Timezone Updated!`);
           timezoneEmbed.setDescription(`Timezone updated! Your timezone is set to ${funcImports.decimalsToUTC(timezone)}, and you ${dstBoolean === false ? `do not ` : ``}use Daylight Savings. Your current local time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}.`);

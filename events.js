@@ -17,7 +17,7 @@ async function errorMsg(interaction, rawError) { //Message for errors
     if (interaction.id) errorEmbed.addField(`Interaction ID`, interaction.id);
     if (interaction.replied === true) await interaction.followUp({ embeds: [errorEmbed] }).catch((err) => {console.log(`big error`, err)})
     else if (interaction.deferred === true) await interaction.editReply({ embeds: [errorEmbed] }).catch((err) => {console.log(`big error`, err)})
-    else await interaction.reply({ embeds: [errorEmbed] }).catch((err) => {console.log(`big error`, err)}) //do something with big error
+    else await interaction.reply({ embeds: [errorEmbed] }).catch((err) => {console.error(`big error`, err)}) //do something with big error
 }
 
 async function logErrorMsg(client, userNumber, rawError, description, consoleStackTraceBoolean, writeToDiscordConsole, pingBoolean) { //Message for errors
@@ -32,7 +32,7 @@ async function logErrorMsg(client, userNumber, rawError, description, consoleSta
     if (rawError.message) logErrorEmbed.setDescription(rawError.message.replace(/(\r\n|\n|\r)/gm, ""))
     else logErrorEmbed.setDescription(`Please check the console!`)
     if (pingBoolean) await consoleObject.send({ content: `<@${botOwner[0]}>` })
-    await consoleObject.send({ embeds: [logErrorEmbed] }).catch((err) => {console.log(`big error`, err)}) //do something with big error
+    await consoleObject.send({ embeds: [logErrorEmbed] }).catch((err) => {console.error(`big error`, err)}) //do something with big error
 }
 
 async function collectorError(interaction, rawError, collected, responses) { //Message for collector errors, not used right now

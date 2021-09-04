@@ -4,6 +4,7 @@ const events = require('../../events.js');
 const fetch = require('node-fetch');
 const controller = new AbortController();
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
+    const controller = new AbortController();
     const promise = fetch(url, { signal: controller.signal, ...options });
     if (signal) signal.addEventListener("abort", () => controller.abort());
     const timeout = setTimeout(() => controller.abort(), ms);
@@ -61,7 +62,8 @@ module.exports = {
 		}
 	}
 
-    async function requestUUID(username) {
+    async function requestUUID(username, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.mojang.com/users/profiles/minecraft/${username}`, 5000, {
                 signal: controller.signal
@@ -77,9 +79,16 @@ module.exports = {
             })
             .catch(async (err) => {
                 if (err.name === "AbortError") {
+                    if (undefinedIfHasntAborted === undefined) {
+                      compromisedEmbed.setColor('#FF5555');
+                      compromisedEmbed.setTitle(`Connection Failed!`);
+                      compromisedEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                      await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                      return requestUUID(username, true);
+                    }
                     compromisedEmbed.setColor('#AA0000');
                     compromisedEmbed.setTitle(`Abort Error!`);
-                    compromisedEmbed.setDescription('The Mojang API failed to respond, and may be down. Try again later.');
+                    compromisedEmbed.setDescription('The Mojang API failed to respond, and may be down. Try with a UUID if this error continues.');
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Abort Error`);
                     return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
@@ -93,7 +102,8 @@ module.exports = {
             });
     };
 
-    async function dataRequest(uuid) {
+    async function dataRequest(uuid, undefinedIfHasntAborted) {
+        let controller = new AbortController();
         Promise.all([
             fetchTimeout(`https://api.slothpixel.me/api/players/${uuid}/`, 2000, {
                     signal: controller.signal
@@ -122,6 +132,13 @@ module.exports = {
           })
           .catch(async (err) => {
             if (err.name === "AbortError") {
+                if (undefinedIfHasntAborted === undefined) {
+                  compromisedEmbed.setColor('#FF5555');
+                  compromisedEmbed.setTitle(`Connection Failed!`);
+                  compromisedEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
+                  await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                  return dataRequest(uuid, true);
+                }
                 compromisedEmbed.setColor('#AA0000');
                 compromisedEmbed.setTitle(`Abort Error!`);
                 compromisedEmbed.setDescription('The Slothpixel API failed to respond, and may be down. Try again later.');
@@ -227,7 +244,7 @@ module.exports = {
 
         status += `[HR][/HR][SPOILER="Now What?"]Appeals are final. The most you can do is secure your account and wait. During this time, you should check up on your account security. Check the spoilers for more information on relevant topics.[/SPOILER]`
 
-        status += `[SPOILER="Account Security"]Compromised accounts are often attacked again through the same vulnerability. You should change your password and enable 2FA once/if you are using a Microsoft account. All accounts should become eligible for migration during Q4 of 2021. Check out https://support.hypixel.net/hc/en-us/articles/360019538060-Account-Security-Guide for an official guide. Here are some ways to help secure your account:\`[LIST][*]Use a strong password, never reuse them for multiple sites. Use a password manager if you have trouble keeping track of them[*]Change your passwords regularly[*]Trust absolutely noone with your credentials[*]Be cautious of phishing attacks. No corporation will [B]EVER[/B] ask for your password. Common sense is your friend[*][URL=https://imgur.com/a/FzoUjro][U]Don't give out logs/crash logs without ensuring that session IDs are scrubbed (These were removed from crash logs after version 1.9.1)[/U][/URL][*]Use security questions that can't be brute-forced, eg: don't use "What is your favorite movie", as there are only a few hundred/thousand possibilities[*]Set up [URL=https://hypixel.net/argus/][U]Argus[/U], which alerts you on logins from unusual IPs[/URL][/LIST]\`[/SPOILER]`;
+        status += `[SPOILER="Account Security"]Compromised accounts are often attacked again through the same vulnerability. You should change your password and enable 2FA once/if you are using a Microsoft account. All accounts should become eligible for migration during Q4 of 2021. Check out https://www.hypixel.net/security for an official guide. Here are some ways to help secure your account:\`[LIST][*]Use a strong password, never reuse them for multiple sites. Use a password manager if you have trouble keeping track of them[*]Change your passwords regularly[*]Trust absolutely noone with your credentials[*]Be cautious of phishing attacks. No corporation will [B]EVER[/B] ask for your password. Common sense is your friend[*][URL=https://imgur.com/a/FzoUjro][U]Don't give out logs/crash logs without ensuring that session IDs are scrubbed (These were removed from crash logs after version 1.9.1)[/U][/URL][*]Use security questions that can't be brute-forced, eg: don't use "What is your favorite movie", as there are only a few hundred/thousand possibilities[*]Set up [URL=https://hypixel.net/argus/][U]Argus[/U], which alerts you on logins from unusual IPs[/URL][/LIST]\`[/SPOILER]`;
 
         compromisedEmbed.setColor('#7289DA');
         compromisedEmbed.setTitle(`Status of ${playerData.username}`);

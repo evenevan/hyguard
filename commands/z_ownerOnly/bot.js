@@ -159,7 +159,7 @@ module.exports = {
         .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 
       try {
-        let output = await eval(command)
+        let output = await eval(command);
         evalEmbed.setColor('#7289DA');
         evalEmbed.setTitle('Executed Eval!');
         evalEmbed.addField(`Input`, `\`${command}\``);
