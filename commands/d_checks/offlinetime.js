@@ -59,15 +59,13 @@ module.exports = {
 			return result;
 		};
 
-        let filter = i => {
+        let logoutMenuFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'logoutselect';
         };
-
-        let customLogoutfilter = m => m.user.id === interaction.user.id;
         
         let awaitedReply = await interaction.fetchReply();
-        awaitedReply.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+        awaitedReply.awaitMessageComponent({ filter: logoutMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') {
                     return loginTime(selectInteraction.values[0] * 1);
@@ -77,7 +75,8 @@ module.exports = {
                 offlineEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
                 await interaction.editReply({ embeds: [offlineEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLogoutMsg) => {
-		                let collector = interaction.channel.createMessageCollector({ customLogoutfilter, max: 5, time: 300000 })
+                        let logoutMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: logoutMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())
@@ -141,14 +140,13 @@ module.exports = {
 			return result;
 		};
 
-        let filter = i => {
+        let loginMenuFilter = i => {
             i.deferUpdate();
-            return i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'loginselect';
         };
 
-        let customLoginfilter = m => m.user.id === interaction.user.id;
         let awaitedReply = await interaction.fetchReply()
-        awaitedReply.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 })
+        awaitedReply.awaitMessageComponent({ filter: loginMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') {
                     return writeOffline(playerLogoutTime, selectInteraction.values[0] * 1);
@@ -158,7 +156,8 @@ module.exports = {
                 offlineEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
                 interaction.editReply({ embeds: [offlineEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLoginMsg) => {
-		                let collector = interaction.channel.createMessageCollector({ customLoginfilter, max: 5, time: 300000 })
+                        let loginMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: loginMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())

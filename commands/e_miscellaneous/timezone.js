@@ -52,9 +52,9 @@ module.exports = {
             timezoneEmbed.setDescription('Please select your timezone in the drop down below or select \`Other\` if your timezone is not listed.');
         let tzSelectMenu = await interaction.reply({ embeds: [timezoneEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
-        let filter = i => {
+        let tzMenuFilter = i => {
             i.deferUpdate();
-            return i.customId === 'tzselect' && i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && i.customId === 'tzselect';
         };
 
         function UTCOffsetToDecimals(utc) {
@@ -71,11 +71,9 @@ module.exports = {
             let result = `${utc.slice(0, 1) == '+' ? `${hours + minutesToDecimal}` : `${utc.slice(0, 1) + (hours + minutesToDecimal)}`}`;
             return result;
           };
-
-        let customTZfilter = i => i.user.id === interaction.user.id;
         
         let awaitedReply = await interaction.fetchReply();
-        awaitedReply.awaitMessageComponent({ filter, componentType: 'SELECT_MENU', time: 300000 }) //create a collector on the channel!
+        awaitedReply.awaitMessageComponent({ filter: tzMenuFilter, componentType: 'SELECT_MENU', time: 300000 }) //create a collector on the channel!
             .then(async selectInteraction => {
                 if (selectInteraction.values[0] !== 'custom') {
                     return daylightSavings(selectInteraction.values[0] * 1);
@@ -85,7 +83,8 @@ module.exports = {
                 timezoneEmbed.setDescription('Please type your UTC offset in the format \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
                 await interaction.editReply({ embeds: [timezoneEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then(() => {
-		                let collector = interaction.channel.createMessageCollector({ customTZfilter, max: 5, time: 300000 })
+                        let tzMsgFilter = m => m.author.id === interaction.user.id;
+		                let collector = interaction.channel.createMessageCollector({ filter: tzMsgFilter, max: 5, time: 300000 })
                         let responses = []
                             collector.on('collect', async collected => {
                                 responses.push(collected.content.toLowerCase())
@@ -144,12 +143,12 @@ module.exports = {
 					.setStyle('DANGER'),
 			);
         let dstButtonMsg = await interaction.editReply({ embeds: [timezoneEmbed], components: [dstButton] }).catch((err) => {return events.errorMsg(interaction, err)});
-        let filter = i => {
+        let dstFilter = i => {
             i.deferUpdate();
-            return (i.customId === 'true' || i.customId === 'false') && i.user.id === interaction.user.id;
+            return i.user.id === interaction.user.id && (i.customId === 'true' || i.customId === 'false');
         };
         let awaitedReply = await interaction.fetchReply();
-        awaitedReply.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 120000 })
+        awaitedReply.awaitMessageComponent({ filter: dstFilter, componentType: 'BUTTON', time: 120000 })
 	        .then(async i => {
                 if (i.customId === 'true') return writeNewTimezone(timezone, true);
                 else return writeNewTimezone(timezone, false);

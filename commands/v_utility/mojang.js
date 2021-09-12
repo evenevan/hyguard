@@ -71,16 +71,16 @@ module.exports = {
     }
     
     async function sendData(data) {
-        let arr = [];
-        
-        arr[0] = data[7]["mojang.com"].toUpperCase();
-        arr[1] = data[2]["account.mojang.com"].toUpperCase();
-        arr[2] = data[3]["authserver.mojang.com"].toUpperCase();
-        arr[3] = data[4]["sessionserver.mojang.com"].toUpperCase();
-        arr[4] = data[5]["api.mojang.com"].toUpperCase();
-        arr[5] = data[0]["minecraft.net"].toUpperCase();
-        arr[6] = data[1]["session.minecraft.net"].toUpperCase();
-        arr[7] = data[6]["textures.minecraft.net"].toUpperCase();
+        let arr = [
+          data[7]["mojang.com"].toUpperCase(),
+          data[2]["account.mojang.com"].toUpperCase(),
+          data[3]["authserver.mojang.com"].toUpperCase(),
+          data[4]["sessionserver.mojang.com"].toUpperCase(),
+          data[5]["api.mojang.com"].toUpperCase(),
+          data[0]["minecraft.net"].toUpperCase(),
+          data[1]["session.minecraft.net"].toUpperCase(),
+          data[6]["textures.minecraft.net"].toUpperCase(),
+        ];
         
         let cleanData = arr.map(function(item) { return item == 'GREEN' ? ':green_square:' : item == 'YELLOW' ? ':yellow_square:' : ':red_square:'; });
 

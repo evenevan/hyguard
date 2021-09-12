@@ -1,5 +1,5 @@
 const { Client, Collection, Intents, Permissions, MessageEmbed } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], allowedMentions: { parse: ['users', 'roles'], repliedUser: true } });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], allowedMentions: { parse: ['users'], repliedUser: true } });
 const fs = require('fs');
 
 const userConfig = require('./userConfig.json');
