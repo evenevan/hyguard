@@ -100,7 +100,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	}
 
 	function owner() { //Checks for commands that are owner only
-	  if (command.ownerReq && !botOwner.includes(interaction.user.id)) return events.ownerConstraint(interaction)
+	  if (command.ownerReq === true && !botOwner.includes(interaction.user.id)) return events.ownerConstraint(interaction)
 	  checkPermsOfBot();
 	};
 

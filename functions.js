@@ -98,14 +98,14 @@ function deleteUserData(dbUserData, client, deletionReason) { //Used by the log 
     let logs = await guild.channels.cache.get(dbUserData.logID);
     if (!logs) return;
     let logPermissions = await logs.permissionsFor(logs.guild.me).toArray();
-      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await log.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete log channel`, true, true, false)});
+      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await logs.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete log channel`, true, true, false)});
   };
 
   async function deleteAlerts(guild) {
     let alerts = await guild.channels.cache.get(dbUserData.alertID);
     if (!alerts) return;
     let alertPermissions = await alerts.permissionsFor(alerts.guild.me).toArray();
-    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alert.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete alert channel`, true, true, false)});
+    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alerts.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete alert channel`, true, true, false)});
   };
 
   async function deleteCategory(guild) {

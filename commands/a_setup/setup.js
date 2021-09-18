@@ -647,8 +647,8 @@ module.exports = {
           }, { name: 'Log Channel', value: `<#${logID}>`
           }, {name: 'Alert Channel', value: `<#${alertID}>`
           },)
-        if (playerData[0].online == true && playerData[1].online == false) setupData.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
-		if (login == 0 || logout == 0) setupData.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
+        if (playerData[0].online == true && playerData[1].online == false) setupEmbed.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
+		if (login == 0 || logout == 0) setupEmbed.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
 
         await interaction.followUp({ embeds: [setupEmbed] });
 

@@ -4,6 +4,9 @@
 
 The HyGuard project was created to be a warning system to alert users to prevent other nefarious individuals from hijacking your Minecraft account. It works by checking your status on Hypixel, and alerting you on any unusual activity including logins, changes in language, unusual versions of Minecraft, logins while the player should be offline, customizable blacklisted games, and customizable whitelisted games. This bot isn't most user friendly, but used the right way, it works brilliantly and silently in the background until it detects something.
 
+## End of Life
+This project's end of life will be soon after Microsoft makes migrated accounts mandatory. With that however, a login tracker may take its place. This bot will no longer be aimed as a security measure.
+
 ## Why should you care?
 Day in and day out, account are compromised and used for "unfair" purposes like cheating. Specifically, no Minecraft server has it worse than Hypixel, the most popular Minecraft server. Even with the best password management and security practices, accounts can be broken into, especially with the recent session ID exploit. The Hypixel forums are notorious for the constant posts of "I got false banned" just for a good Samaritan to show them their previous account activity, where it becomes clear that they were compromised.
 
