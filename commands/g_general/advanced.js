@@ -1,4 +1,6 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-inner-declarations */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
@@ -14,7 +16,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) { //Add new types into choices
+	async execute(interaction, row) { //Add new types into choices
     let readData = funcImports.readOwnerSettings();
 	let dst = readData.dst;
 
@@ -63,7 +65,7 @@ module.exports = {
                 userAdvanced.push("LOGINTIME");
                 advancedEmbed.setDescription(`The advanced setting, "${interaction.options.getString('setting').toUpperCase()}", was toggled! You will recieve continious pings on unusual login times.`);
               }
-            };
+            }
     
             function dmOptOut() {
               if (userAdvanced.includes("DM_OPT_OUT")) {
@@ -74,14 +76,14 @@ module.exports = {
                 userAdvanced.push("DM_OPT_OUT");
                 advancedEmbed.setDescription(`The advanced setting, "${interaction.options.getString('setting').toUpperCase()}", was toggled! You will no longer recieve any sort of notifications on this service. This includes subjects like this service shutting down, downtimes, or etc.`);
               }
-            };
+            }
           
             writeAdvanced(userAdvanced);
           
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function writeAdvanced(userAdvanced) {
         try {
@@ -102,7 +104,7 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function currentVersion() { //wip
         try {
@@ -126,6 +128,6 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
   },
 };

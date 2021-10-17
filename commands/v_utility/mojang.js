@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
@@ -21,7 +22,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
         let dst = readData.dst;
 

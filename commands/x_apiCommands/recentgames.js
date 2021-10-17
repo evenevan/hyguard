@@ -1,4 +1,6 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-prototype-builtins */
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
@@ -21,7 +23,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
     let api = readData.api,
 		dst = readData.dst;
@@ -92,14 +94,14 @@ module.exports = {
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                    recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    recentEmbed.setDescription(`That Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
                 }
             });
-    };
+    }
 
     async function requestUsername(uuid, undefinedIfHasntAborted) {
         let controller = new AbortController();
@@ -131,14 +133,14 @@ module.exports = {
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                    recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    recentEmbed.setDescription(`That Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
                 }
             });
-    };
+    }
 
     async function requestPlayer(uuid, playerName, undefinedIfHasntAborted) {
         let controller = new AbortController();
@@ -171,7 +173,7 @@ module.exports = {
                 return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 recentEmbed.setColor(`#FF5555`); recentEmbed.setTitle(`Player Not Found!`);
-                recentEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                recentEmbed.setDescription(`That Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [recentEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {

@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const fs = require('fs');
 const funcImports = require('../../functions.js');
 const database = require('../../database.js');
@@ -15,7 +16,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
         let api = readData.api,
         userLimit = readData.userLimit,
@@ -29,7 +30,7 @@ module.exports = {
 
     switch (interaction.options.getSubcommand()) {
         case 'api':
-            apiCommand(); //Toggles commands that use the Hypixel/Slothpixel API
+            apiCommand(); //Toggles commands that use the Hypixel/Slothpixel API along with the logging function
             break;
         case 'block':
             blockCommand(interaction.options.getString('user')); //Blocks users from using /setup
@@ -179,7 +180,7 @@ module.exports = {
         .setTimestamp()
         .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 
-        let guild = await client.guilds.cache.get(guildID);
+        let guild = await interaction.client.guilds.fetch(guildID);
         if (!guild) {
           guildinfoEmbed.setColor('#FF5555');
           guildinfoEmbed.setTitle('Invalid Guild ID!');
@@ -200,12 +201,12 @@ module.exports = {
 
       leaveGuild().catch((err) => {events.errorMsg(interaction, err)});
       async function leaveGuild() {
-        let guild = await client.guilds.cache.get(`${guildID}`);
+        let guild = await interaction.client.guilds.fetch(`${guildID}`);
 
         if (!guild) {
             leaveguildEmbed.setColor(`#FF5555`);
             leaveguildEmbed.setTitle(`Invalid Guild ID!`);
-            leaveguildEmbed.setDescription(`That guild ID doesn\'t seem to be valid!`);
+            leaveguildEmbed.setDescription(`That guild ID doesn't seem to be valid!`);
             return interaction.reply({ embeds: [leaveguildEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)});
         }
         console.log(guild)
@@ -271,8 +272,8 @@ module.exports = {
           });
       }
       function send() {
-        client.users.fetch(userID).then(async () => {
-          let user = client.users.cache.get(userID)
+        interaction.client.users.fetch(userID).then(async () => {
+          let user = await interaction.client.users.fetch(userID)
           return await user.send({ embeds: [userMessage] })
             .then(async () => {
               messageuserEmbed.setDescription(message)
@@ -288,7 +289,7 @@ module.exports = {
         .setTimestamp()
         .setFooter(`${interaction.id} | ${timeString}`, 'https://i.imgur.com/MTClkTu.png');
 
-		const command = client.commands.get(commandName.toLowerCase())
+		const command = interaction.client.commands.get(commandName.toLowerCase())
 
 		if (!command) {
             reloadEmbed.setColor(`#FF5555`)
@@ -304,7 +305,7 @@ module.exports = {
 
 		try {
 			const newCommand = require(`../${folderName}/${command.name}.js`);
-			client.commands.set(newCommand.name, newCommand);
+			interaction.client.commands.set(newCommand.name, newCommand);
 		} catch (error) {
 			events.errorMsg(interaction, error)
 		}

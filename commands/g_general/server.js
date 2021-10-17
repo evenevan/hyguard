@@ -1,5 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
-const fs = require('fs');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const database = require('../../database.js');
 const events = require('../../events.js');
@@ -15,7 +15,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
         let dst = readData.dst;
 
@@ -98,12 +98,13 @@ module.exports = {
       let newToggle = 1 - response.enabled;
       await database.changeData(interaction.guild.id, `UPDATE servers SET enabled = ? WHERE serverID = ?`, newToggle);
 
-      channelEmbed.setTitle(`Updated Enabled State!`);
-      channelEmbed.setColor('#7289DA');
-      channelEmbed.setDescription(`Commands for this bot are ${newToggle === 1 ? `now enabled` : `disabled`}! Logging still works normally.`);
-      if (serverChannels.length > 0) channelEmbed.addField(`Whitelisted Channels`, cleanChannel)
+      enabledEmbed.setTitle(`Updated Enabled State!`);
+      enabledEmbed.setColor('#7289DA');
+      enabledEmbed.setDescription(`Commands for this bot are ${newToggle === 1 ? `now enabled` : `disabled`}! Logging still works normally.`);
+      // eslint-disable-next-line no-undef
+      if (serverChannels.length > 0) enabledEmbed.addField(`Whitelisted Channels`, cleanChannel)
       console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: New Data Written To Enabled Status`);
-      return await interaction.reply({ embeds: [channelEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+      return await interaction.reply({ embeds: [enabledEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
     }
 
   },

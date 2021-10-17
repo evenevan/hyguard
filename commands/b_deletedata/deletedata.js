@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
@@ -14,7 +15,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: ["MANAGE_CHANNELS"],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
     let dst = readData.dst;
 
@@ -89,24 +90,24 @@ module.exports = {
         requestGuild();
 
         async function requestGuild() {
-            let guild = await client.guilds.cache.get(`${row.guildID}`);
+            let guild = await interaction.client.guilds.fetch(`${row.guildID}`);
             if (guild) await deleteLogs(guild) + await deleteAlerts(guild) + await deleteCategory(guild);
             return deleteData();
         }
 
         async function deleteLogs(guild) {
-            let logs = await guild.channels.cache.get(row.logID);
+            let logs = await guild.channels.fetch(row.logID);
             if (!logs) return;
             let logPermissions = await logs.permissionsFor(logs.guild.me).toArray();
             if (logs && logPermissions.includes("MANAGE_CHANNELS")) await logs.delete('User requested a data deletion').catch((err) => {return events.errorMsg(interaction, err)});
-        };
+        }
             
         async function deleteAlerts(guild) {
-            let alerts = await guild.channels.cache.get(row.alertID);
+            let alerts = await guild.channels.fetch(row.alertID);
             if (!alerts) return;
             let alertPermissions = await alerts.permissionsFor(alerts.guild.me).toArray();
             if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alerts.delete('User requested a data deletion').catch((err) => {return events.errorMsg(interaction, err)});
-        };
+        }
             
 
         async function deleteCategory(guild) {
@@ -114,7 +115,7 @@ module.exports = {
             if (!category) return;
             let channelPermissions = await category.permissionsFor(category.guild.me).toArray();
             if (category.children.size == 0 && channelPermissions.includes("MANAGE_CHANNELS")) await category.delete('Empty category channel').catch((err) => {return events.errorMsg(interaction, err)});
-        };
+        }
 
         async function deleteData() {
             await database.deleteData(row.discordID, `DELETE FROM users WHERE discordID=(?)`);

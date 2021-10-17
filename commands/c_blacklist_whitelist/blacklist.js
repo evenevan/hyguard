@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
@@ -14,7 +15,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
 	let dst = readData.dst;
 
@@ -86,7 +87,7 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
 
     async function changeAlertState(data, toggleBoolean) {  
         try {
@@ -97,7 +98,7 @@ module.exports = {
         } catch (err) {
           return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function writeBlacklist(userBlacklist) {
         try {
@@ -113,7 +114,7 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function currentVersion() {
         try {
@@ -127,6 +128,6 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
   },
 };

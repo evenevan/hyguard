@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
 const funcImports = require('../../functions.js');
 const database = require('../../database.js');
@@ -22,7 +23,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: ["VIEW_CHANNEL","READ_MESSAGE_HISTORY"], //May not need read message history
   	botGuildPermissions: ["MANAGE_CHANNELS","MANAGE_MESSAGES","MANAGE_ROLES"],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
     let api = readData.api,
         userLimit = readData.userLimit,
@@ -91,7 +92,7 @@ module.exports = {
 		} catch (err) {
 			events.errorMsg(interaction, err)
 		}
-	};
+	}
 
     async function requestUUID(username, undefinedIfHasntAborted) {
         Promise.all([
@@ -110,10 +111,10 @@ module.exports = {
             .catch(async (err) => {
                 if (err.name === "AbortError") {
                     if (undefinedIfHasntAborted === undefined) {
-                        statusEmbed.setColor('#FF5555');
-                        statusEmbed.setTitle(`Connection Failed!`);
-                        statusEmbed.setDescription('The Mojang API failed to respond, trying again..');
-                        await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                        setupEmbed.setColor('#FF5555');
+                        setupEmbed.setTitle(`Connection Failed!`);
+                        setupEmbed.setDescription('The Mojang API failed to respond, trying again..');
+                        await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                         return requestUUID(username, true); //Simple way to try again without an infinite loop
                     }
                     setupEmbed.setColor('#AA0000');
@@ -123,14 +124,14 @@ module.exports = {
                     return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     setupEmbed.setColor(`#FF5555`); setupEmbed.setTitle(`Player Not Found!`);
-                    setupEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    setupEmbed.setDescription(`Your Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                     return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
                 }
             });
-    };
+    }
 
     function requestPlayer(uuid, undefinedIfHasntAborted) { //Requests the player data from Slothpixel
         Promise.all([
@@ -172,10 +173,10 @@ module.exports = {
           .catch(async (err) => {
             if (err.name === "AbortError") {
                 if (undefinedIfHasntAborted === undefined) {
-                    statusEmbed.setColor('#FF5555');
-                    statusEmbed.setTitle(`Connection Failed!`);
-                    statusEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
-                    await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
+                    setupEmbed.setColor('#FF5555');
+                    setupEmbed.setTitle(`Connection Failed!`);
+                    setupEmbed.setDescription('The Slothpixel API failed to respond, trying again..');
+                    await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                     return requestPlayer(uuid, true); //Simple way to try again without an infinite loop
                 }
                 setupEmbed.setColor('#AA0000');
@@ -185,7 +186,7 @@ module.exports = {
                 return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 setupEmbed.setColor(`#FF5555`); setupEmbed.setTitle(`Player Not Found!`);
-                setupEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel. Setup canceled.`);
+                setupEmbed.setDescription(`Your Minecraft username doesn't seem to exist or hasn't logged onto Hypixel. Setup canceled.`);
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [setupEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
@@ -219,7 +220,7 @@ module.exports = {
                         .setDisabled(true),
 			);
         introButtonMsg.awaitMessageComponent({ filter, componentType: 'BUTTON', time: 60000 })
-	        .then(async i => {
+	        .then(async () => {
                 await interaction.editReply({ embeds: [setupEmbed], components: [updatedIntroButton] }).catch((err) => {return events.errorMsg(interaction, err)});
                 return verifyTimezone(playerData);
             })
@@ -243,7 +244,7 @@ module.exports = {
 			);
             setupEmbed.setColor('#7289DA');
             setupEmbed.setTitle(`Timezone!`);
-            setupEmbed.setDescription('Please select your timezone in the drop down below or select \`Other\` if your timezone is not listed.');
+            setupEmbed.setDescription('Please select your timezone in the drop down below or select `Other` if your timezone is not listed.');
         let tzSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         let tzMenuFilter = i => {
@@ -264,7 +265,7 @@ module.exports = {
             let hours = utc.slice(1, -3) * 1;
             let result = `${utc.slice(0, 1) == '+' ? `${hours + minutesToDecimal}` : `${utc.slice(0, 1) + (hours + minutesToDecimal)}`}`;
             return result;
-          };
+          }
         
         tzSelectMenu.awaitMessageComponent({ filter: tzMenuFilter, componentType: 'SELECT_MENU', time: 300000 })
             .then(async selectInteraction => {
@@ -274,7 +275,7 @@ module.exports = {
                 }
                 setupEmbed.setColor('#7289DA');
                 setupEmbed.setTitle(`Custom UTC Offset!`);
-                setupEmbed.setDescription('Please type your UTC offset in the format \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
+                setupEmbed.setDescription('Please type your UTC offset in the format `-/+0` or `-/+0:00`, eg: `-7`, `+12:45`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
                 await tzSelectMenu.delete()
                 await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customTZMsg) => {
@@ -384,7 +385,7 @@ module.exports = {
 			);
             setupEmbed.setColor('#7289DA');
             setupEmbed.setTitle(`Logout Time!`);
-            setupEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
+            setupEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select `Advanced` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
         let logoutSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [logoutMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         function TimeToDecimals(time) {
@@ -392,7 +393,7 @@ module.exports = {
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
-		};
+		}
 
         let logoutMenuFilter = i => {
             i.deferUpdate();
@@ -407,7 +408,7 @@ module.exports = {
                 }
                 setupEmbed.setColor('#7289DA');
                 setupEmbed.setTitle(`Custom Logout Time!`);
-                setupEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
+                setupEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: `23:45`, `00:30`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
                 await logoutSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
                 await interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLogoutMsg) => {
@@ -467,7 +468,7 @@ module.exports = {
 			);
             setupEmbed.setColor('#7289DA');
             setupEmbed.setTitle(`Login Time!`);
-            setupEmbed.setDescription('Please select when you usually **get on** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time **will not** send an alert.');
+            setupEmbed.setDescription('Please select when you usually **get on** Hypixel in the drop down below or select `Advanced` if you want to select minutes as well. Logins after this time **will not** send an alert.');
         let loginSelectMenu = await interaction.followUp({ embeds: [setupEmbed], components: [loginMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         function TimeToDecimals(time) {
@@ -475,7 +476,7 @@ module.exports = {
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
-		};
+		}
 
         let loginMenuFilter = i => {
             i.deferUpdate();
@@ -490,7 +491,7 @@ module.exports = {
                 }
                 setupEmbed.setColor('#7289DA');
                 setupEmbed.setTitle(`Custom Login Time!`);
-                setupEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
+                setupEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: `9:15`, `11:00`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
                 await loginSelectMenu.delete().catch((err) => {return events.errorMsg(interaction, err)});
                 interaction.followUp({ embeds: [setupEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then((customLoginMsg) => {
@@ -559,7 +560,7 @@ module.exports = {
                     deny: [Permissions.FLAGS.SEND_MESSAGES],
                 },
                 {
-                    id: client.user.id,
+                    id: interaction.client.user.id,
                     allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.MANAGE_CHANNELS],
                 },
             ]
@@ -579,11 +580,11 @@ module.exports = {
                     deny: [Permissions.FLAGS.SEND_MESSAGES],
                 },
                 {
-                    id: client.user.id,
+                    id: interaction.client.user.id,
                     allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_MESSAGES, Permissions.FLAGS.MANAGE_CHANNELS],
                 },
             ]
-        }).catch((err) => {return events.errorMsg(interaction, err)});;
+        }).catch((err) => {return events.errorMsg(interaction, err)});
 
         let helpfulButtons = new MessageActionRow()
 			.addComponents(
@@ -607,19 +608,19 @@ module.exports = {
 
         let alertChannelEmbed = new MessageEmbed()
             .setTitle('Alert Channel!')
-            .setDescription('Your alert messages will be sent here. You should keep notifications **on** for this channel. The command **\`/alert <blacklist, whitelist, language, session, offline, or version>\`** can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.')
-            .addField('Helpful Resources', 'The buttons below are links to helpful resources related to account security. You can access these at any time by viewing the pinned messagesd in this channel.')
+            .setDescription('Your alert messages will be sent here. You should keep notifications **on** for this channel. The command **`/alert <blacklist, whitelist, language, session, offline, or version>`** can individually toggle the 6 alert types, should you need to turn any of them off. By default, blacklist & whitelist alerts are off as you have not added anything to them yet.')
+            .addField('Helpful Resources', 'The buttons below are links to helpful resources related to account security. You can access these at any time by viewing the pinned messages in this channel.')
             .setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
         alertChannel.send({ content: `${interaction.user}`, embeds: [alertChannelEmbed], components: [helpfulButtons] }).then((msg) => msg.pin()).catch((err) => {return events.errorMsg(interaction, err)});
 
         let logChannelEmbed = new MessageEmbed()
             .setTitle('Log Channel!')
-            .setDescription('Your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. \`/monitor\` can turn the logging and monitoring on or off at your convenience; this will completely turn toggle all detection, logging, and alerts.')
+            .setDescription('Your log messages will be sent here. You should turn notifications **off** for this channel and mute this channel. `/monitor` can turn the logging and monitoring on or off at your convenience; this will completely turn toggle all detection, logging, and alerts.')
             .setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
         logChannel.send({ content: `${interaction.user}`, embeds: [logChannelEmbed] }).then((msg) => msg.pin()).catch((err) => {return events.errorMsg(interaction, err)});
         
         writeData(playerData, dstBoolean, timezone, playerLogoutTime, playerLoginTime, logChannel.id, alertChannel.id)
-    };
+    }
 
     async function writeData(playerData, dstBoolean, timezone, playerLogoutTime, playerLoginTime, logID, alertID) {
         let uuid = playerData[0].uuid,
@@ -635,18 +636,18 @@ module.exports = {
         setupEmbed.setTitle(`Success!`);
         setupEmbed.setDescription(`You can change most of these at anytime. Check \`/help\` to see what's available. \`/monitor\` can turn the logging and monitoring on or off at your convenience; this will completely toggle all detection, logging, and alerts.`);
         setupEmbed.setFooter(`${interaction.id} | ${new Date(Date.now() + (dst == true && dstBoolean == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true })} UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)}`, 'https://i.imgur.com/MTClkTu.png');
-        setupEmbed.addFields({
-            name: 'Discord ID', value: `${interaction.user.id}`
-          }, {name: 'Discord Tag', value: `${interaction.user.username}#${interaction.user.discriminator}`
-          }, {name: 'UUID', value: `${uuid}`
-          }, {name: 'Language', value: `${language}`
-          }, {name: 'Version', value: `${version}`
-          }, {name: 'Offline Time', value: `${twentyFourToTwelve(decimalToTime(playerLogoutTime))} to ${twentyFourToTwelve(decimalToTime(playerLoginTime))}`
-          }, {name: 'UTC Offset', value: `UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)} | Your time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}`
-          }, {name: 'Daylight Savings', value: `${dstBoolean == true ? `On` : `Off`}`
-          }, { name: 'Log Channel', value: `<#${logID}>`
-          }, {name: 'Alert Channel', value: `<#${alertID}>`
-          },)
+        setupEmbed.addFields(
+            {name: 'Discord ID', value: `${interaction.user.id}`},
+            {name: 'Discord Tag', value: `${interaction.user.username}#${interaction.user.discriminator}`},
+            {name: 'UUID', value: `${uuid}`},
+            {name: 'Language', value: `${language}`},
+            {name: 'Version', value: `${version}`},
+            {name: 'Offline Time', value: `${twentyFourToTwelve(decimalToTime(playerLogoutTime))} to ${twentyFourToTwelve(decimalToTime(playerLoginTime))}`},
+            {name: 'UTC Offset', value: `UTC${funcImports.decimalsToUTC(dst == true && dstBoolean == true ? timezone * 1 + 1: timezone)} | Your time should be ${new Date(Date.now() + (dstBoolean == true && dst == true ? timezone * 1 + 1: timezone) * 3600000).toLocaleTimeString('en-IN', { hour12: true, timeStyle: 'short' })}`},
+            {name: 'Daylight Savings', value: `${dstBoolean == true ? `On` : `Off`}`},
+            { name: 'Log Channel', value: `<#${logID}>`},
+            {name: 'Alert Channel', value: `<#${alertID}>`}
+        )
         if (playerData[0].online == true && playerData[1].online == false) setupEmbed.addField('**Limited API!**', 'Your Online API option on Hypixel was detected to being off. Please turn it on.');
 		if (login == 0 || logout == 0) setupEmbed.addField('**Legacy/Unsual Login/Logout in API**', 'Your account was detected acting weird with the Slothpixel API. This problem may resolve itself, or you may need to turn off session alert types later. Contact me if you have any suggestions regarding this.');
 
@@ -662,13 +663,13 @@ module.exports = {
               time[0] = +time[0] % 12 || 12;
             }
             return time.join('');
-        };
+        }
 
         function decimalToTime(decimal) {
             let hour = Math.floor(decimal);
             let min = Math.round((decimal - hour) * 60);
             return hour + ":" + (min / 100).toFixed(2).slice(2);
-        };
+        }
     }
   },
 };

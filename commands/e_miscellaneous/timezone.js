@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
@@ -14,7 +15,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
 	let dst = readData.dst;
 
@@ -49,8 +50,8 @@ module.exports = {
 			);
             timezoneEmbed.setColor('#7289DA');
             timezoneEmbed.setTitle(`Timezone!`);
-            timezoneEmbed.setDescription('Please select your timezone in the drop down below or select \`Other\` if your timezone is not listed.');
-        let tzSelectMenu = await interaction.reply({ embeds: [timezoneEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+            timezoneEmbed.setDescription('Please select your timezone in the drop down below or select `Other` if your timezone is not listed.');
+        await interaction.reply({ embeds: [timezoneEmbed], components: [tzMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         let tzMenuFilter = i => {
             i.deferUpdate();
@@ -70,7 +71,7 @@ module.exports = {
             let hours = utc.slice(1, -3) * 1;
             let result = `${utc.slice(0, 1) == '+' ? `${hours + minutesToDecimal}` : `${utc.slice(0, 1) + (hours + minutesToDecimal)}`}`;
             return result;
-          };
+          }
         
         let awaitedReply = await interaction.fetchReply();
         awaitedReply.awaitMessageComponent({ filter: tzMenuFilter, componentType: 'SELECT_MENU', time: 300000 }) //create a collector on the channel!
@@ -80,7 +81,7 @@ module.exports = {
                 }
                 timezoneEmbed.setColor('#7289DA');
                 timezoneEmbed.setTitle(`Custom UTC Offset!`);
-                timezoneEmbed.setDescription('Please type your UTC offset in the format \`-/+0\` or \`-/+0:00\`, eg: \`-7\`, \`+12:45\`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
+                timezoneEmbed.setDescription('Please type your UTC offset in the format `-/+0` or `-/+0:00`, eg: `-7`, `+12:45`. You have 5 minutes, so please take your time. You have 5 chances before setup automatically cancels. List of common UTC Offsets & their locations: [link](https://en.wikipedia.org/wiki/List_of_UTC_time_offsets)');
                 await interaction.editReply({ embeds: [timezoneEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
 	                .then(() => {
                         let tzMsgFilter = m => m.author.id === interaction.user.id;
@@ -142,7 +143,7 @@ module.exports = {
 					.setLabel('No')
 					.setStyle('DANGER'),
 			);
-        let dstButtonMsg = await interaction.editReply({ embeds: [timezoneEmbed], components: [dstButton] }).catch((err) => {return events.errorMsg(interaction, err)});
+        await interaction.editReply({ embeds: [timezoneEmbed], components: [dstButton] }).catch((err) => {return events.errorMsg(interaction, err)});
         let dstFilter = i => {
             i.deferUpdate();
             return i.user.id === interaction.user.id && (i.customId === 'true' || i.customId === 'false');
@@ -187,7 +188,7 @@ module.exports = {
         } catch (err) {
             events.errorMsg(interaction, err);
         }
-    };
+    }
 
     async function currentTimezone() {
         try {
@@ -204,6 +205,6 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-      };
+      }
   },
 };

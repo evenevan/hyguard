@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageActionRow, MessageEmbed, MessageSelectMenu } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
@@ -14,7 +15,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
 	let dst = readData.dst;
 
@@ -49,7 +50,7 @@ module.exports = {
 			);
             offlineEmbed.setColor('#7289DA');
             offlineEmbed.setTitle(`Logout Time!`);
-            offlineEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
+            offlineEmbed.setDescription('Please select when you usually **get off** Hypixel in the drop down below or select `Advanced` if you want to select minutes as well. Logins after this time will send an alert, so you may want to add an hour or two.');
         await interaction.reply({ embeds: [offlineEmbed], components: [logoutMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         function TimeToDecimals(time) {
@@ -57,7 +58,7 @@ module.exports = {
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
-		};
+		}
 
         let logoutMenuFilter = i => {
             i.deferUpdate();
@@ -72,9 +73,9 @@ module.exports = {
                 }
                 offlineEmbed.setColor('#7289DA');
                 offlineEmbed.setTitle(`Custom Logout Time!`);
-                offlineEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: \`23:45\`, \`00:30\`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
+                offlineEmbed.setDescription('Please type when you usually **get off** of Hypixel in the 24 hour format, eg: `23:45`, `00:30`. You have 5 chances before setup automatically cancels. Logins after this time will send an alert.');
                 await interaction.editReply({ embeds: [offlineEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
-	                .then((customLogoutMsg) => {
+	                .then(() => {
                         let logoutMsgFilter = m => m.author.id === interaction.user.id;
 		                let collector = interaction.channel.createMessageCollector({ filter: logoutMsgFilter, max: 5, time: 300000 })
                         let responses = []
@@ -130,15 +131,15 @@ module.exports = {
 			);
             offlineEmbed.setColor('#7289DA');
             offlineEmbed.setTitle(`Login Time!`);
-            offlineEmbed.setDescription('Please select when you usually **get on** Hypixel in the drop down below or select \`Advanced\` if you want to select minutes as well. Logins after this time **will not** send an alert.');
-        let loginSelectMenu = await interaction.editReply({ embeds: [offlineEmbed], components: [loginMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
+            offlineEmbed.setDescription('Please select when you usually **get on** Hypixel in the drop down below or select `Advanced` if you want to select minutes as well. Logins after this time **will not** send an alert.');
+        await interaction.editReply({ embeds: [offlineEmbed], components: [loginMenu] }).catch((err) => {return events.errorMsg(interaction, err)});
 
         function TimeToDecimals(time) {
 			let minutesToDecimal = (time.slice(-2) / 60);
 			let hourToDecimal = time.slice(0, -3) * 1;
 			let result = (hourToDecimal + minutesToDecimal);
 			return result;
-		};
+		}
 
         let loginMenuFilter = i => {
             i.deferUpdate();
@@ -153,9 +154,9 @@ module.exports = {
                 }
                 offlineEmbed.setColor('#7289DA');
                 offlineEmbed.setTitle(`Custom Login Time!`);
-                offlineEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: \`9:15\`, \`11:00\`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
+                offlineEmbed.setDescription('Please type when you usually **get on** of Hypixel in the 24 hour format, eg: `9:15`, `11:00`. You have 5 chances before setup automatically cancels. Logins after this time won\'t be alerts.');
                 interaction.editReply({ embeds: [offlineEmbed], components: [], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)})
-	                .then((customLoginMsg) => {
+	                .then(() => {
                         let loginMsgFilter = m => m.author.id === interaction.user.id;
 		                let collector = interaction.channel.createMessageCollector({ filter: loginMsgFilter, max: 5, time: 300000 })
                         let responses = []
@@ -237,12 +238,12 @@ module.exports = {
           time[0] = +time[0] % 12 || 12;
         }
         return time.join('');
-      };
+      }
   
       function decimalToTime(decimal) {
         let hour = Math.floor(decimal)
         let min = Math.round((decimal - hour) * 60)
         return hour + ":" + (min / 100).toFixed(2).slice(2)
-      };
+      }
   },
 };

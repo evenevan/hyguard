@@ -1,4 +1,5 @@
-const { Client, Collection, Intents, Permissions, MessageEmbed } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], allowedMentions: { parse: ['users'], repliedUser: true } });
 const fs = require('fs');
 
@@ -11,6 +12,7 @@ const log = require('./log.js');
 const discordAPIkey = userConfig["discordAPIkey"];
 const botOwner = userConfig["BotOwnerID"];
 const logInterval = userConfig["logInterval"];
+// eslint-disable-next-line no-undef
 process.env.TZ = userConfig["Timezone"];
 
 client.commands = new Collection();
@@ -41,7 +43,7 @@ let isDM = (interaction) => { //Pretty sure "if (!interaction.guild)" works perf
 }
 
 client.once('ready', async () => {
-	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | Logged in as ${client.user.tag}!`);
+	console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Logged in as ${client.user.tag}!`);
 	client.user.setStatus('dnd');
 	try {
 		await database.createTable(`CREATE TABLE IF NOT EXISTS servers(serverID TEXT NOT NULL, channels TEXT, enabled INTEGER NOT NULL)`);
@@ -74,8 +76,8 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 			.setTitle('Developer Mode!')
 			.setColor('#AA0000')
 			.setDescription('This bot is in developer only mode, likely due to a major issue or an upgrade that is taking place. Please check back later!')
-        	.setTimestamp()
-        	.setFooter(`${interaction.id} | ${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0`, 'https://i.imgur.com/MTClkTu.png');
+      .setTimestamp()
+      .setFooter(`${interaction.id} | ${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0`, 'https://i.imgur.com/MTClkTu.png');
 		return interaction.reply({ embeds: [devModeEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
 	}
 
@@ -91,7 +93,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	  if (serverChannels.length === 0) return await owner();
 	  if (!serverChannels.includes(interaction.channel.id) && interaction.commandName !== 'server') return events.channelConstraint(interaction, serverChannels);
 	  return await owner();
-	};
+	}
 
 	async function createServerRow() {
 	  await database.newRow(`INSERT INTO servers VALUES(?,?,?)`, [interaction.guild.id, null, 1]);
@@ -102,7 +104,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 	function owner() { //Checks for commands that are owner only
 	  if (command.ownerReq === true && !botOwner.includes(interaction.user.id)) return events.ownerConstraint(interaction)
 	  checkPermsOfBot();
-	};
+	}
 
 	async function checkPermsOfBot() { //Permission handler
 	  if (isDM(interaction) === true) return await checkPermsOfUser();
@@ -118,7 +120,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 		} catch (err) {
 		  events.errorMsg(interaction, err);
 		}	
-	};
+	}
 
 	async function checkPermsOfUser() {
 		if (isDM(interaction) === true) return await checkDB();
@@ -134,7 +136,7 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 		  } catch (err) {
 			events.errorMsg(interaction, err);
 		  }	
-	};
+	}
 
 	async function checkDB() { //Checks if the user has used /setup, and will return that data if so
 		let isInDB = await database.isInDataBase(interaction.user.id, `SELECT * FROM users WHERE discordID = ?`);
@@ -143,14 +145,14 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 		console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} DB ${isInDB[0]} User: ${interaction.user.username}#${interaction.user.discriminator}${interaction.guild ? ` GuildID: ${interaction.guild.id}` : ``} made a request: ${interaction.commandName}${interaction.options._group ? ` ${interaction.options._group}` : ``}${interaction.options._subcommand ? ` ${interaction.options._subcommand}` : ``}${options}`);
 		if (isInDB[0] == false && command.database == true) return events.setupConstraint(interaction);
 		dm(isInDB[1]); //Also provides row data so I don't have to request it again later
-	};
+	}
 
 	function dm(rowData) { //Some commands cannot be used in DMs
 		if (command.guildOnly && isDM(interaction) == true) {
 			return events.dmConstraint(interaction);
 		}
 		cooldown(rowData);
-	};
+	}
 
 	function cooldown(rowData) { //Cooldown handler stolen from the discord.js v12 guide
 		let { cooldowns } = client;
@@ -174,16 +176,16 @@ client.on('interactionCreate', async interaction => { //Slash command handler
 		timestamps.set(interaction.user.id, now);
 		setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 		execute(rowData);
-	};
+	}
 
 	async function execute(rowData) {
 		try {
-			await client.commands.get(interaction.commandName).execute(interaction, client, rowData);
+			await client.commands.get(interaction.commandName).execute(interaction, rowData);
 			//client can be accessed with interaction.client, so adding the client parameter by itself is unnessessary
 		} catch (error) {
 			await events.errorMsg(interaction, error);
 		}
-	};
+	}
 });
 
 client.on('messageCreate', async message => { //Basiclaly all owner only stuff
@@ -235,7 +237,8 @@ client.on(`rateLimit`, rateLimitInfo => {
     console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Rate limit: `, rateLimitInfo);
 })
 
-process.on('unhandledRejection', error => { //Handles everything that I missed that would cause a crash. Epic.
+// eslint-disable-next-line no-undef
+process.on('unhandledRejection', error => { //Handles everything that I missed that would cause a crash
 	console.error(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Unhandled promise rejection:`, error);
 });
 

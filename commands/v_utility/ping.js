@@ -1,4 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 module.exports = {
@@ -13,7 +14,7 @@ module.exports = {
 	commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
 		let readData = funcImports.readOwnerSettings();
 		let dst = readData.dst;
 		
@@ -29,10 +30,10 @@ module.exports = {
 		await interaction.reply({ embeds: [pingEmbed], fetchReply: true }).catch((err) => {return events.errorMsg(interaction, err)});
 		let sentReply = await interaction.fetchReply().catch((err) => {return events.errorMsg(interaction, err)});
 		let roundTripDelay = sentReply.createdTimestamp - interaction.createdTimestamp
-			pingEmbed.setColor(client.ws.ping < 80 && roundTripDelay < 160 ? '#00AA00' : client.ws.ping < 100 && roundTripDelay < 250 ? '#FFAA00' : '#FF5555')
+			pingEmbed.setColor(interaction.client.ws.ping < 80 && roundTripDelay < 160 ? '#00AA00' : interaction.client.ws.ping < 100 && roundTripDelay < 250 ? '#FFAA00' : '#FF5555')
 			pingEmbed.setTitle(`🏓 Ping!`)
-			pingEmbed.setDescription(`Websocket heartbeat is ${client.ws.ping}ms. This interaction took ${roundTripDelay}ms from registering the slash command to displaying a message.`)
+			pingEmbed.setDescription(`Websocket heartbeat is ${interaction.client.ws.ping}ms. This interaction took ${roundTripDelay}ms from registering the slash command to displaying a message.`)
 		await interaction.editReply({ embeds: [pingEmbed] }).catch((err) => {return events.errorMsg(interaction, err)});
-		return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Roundtrip latency is ${sentReply.createdTimestamp - interaction.createdTimestamp}. Websocket heartbeat is ${client.ws.ping}ms.`);
+		return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Roundtrip latency is ${sentReply.createdTimestamp - interaction.createdTimestamp}. Websocket heartbeat is ${interaction.client.ws.ping}ms.`);
 	},
 };

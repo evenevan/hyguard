@@ -1,4 +1,6 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-prototype-builtins */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
@@ -21,7 +23,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
         let api = readData.api,
 		dst = readData.dst;
@@ -91,14 +93,14 @@ module.exports = {
                 return await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 statusEmbed.setColor(`#FF5555`); statusEmbed.setTitle(`Player Not Found!`);
-                statusEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                statusEmbed.setDescription(`Your Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Mojang Player Not Found`);
                 return await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
                 return events.errorMsg(interaction, err);
             }
           });
-    };
+    }
 
     async function requestPlayer(uuid, undefinedIfHasntAborted) {
         let controller = new AbortController();
@@ -138,7 +140,7 @@ module.exports = {
                 return await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else if (err.name === "NotFound") {
                 statusEmbed.setColor(`#FF5555`); statusEmbed.setTitle(`Player Not Found!`);
-                statusEmbed.setDescription(`Your Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                statusEmbed.setDescription(`Your Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [statusEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
@@ -161,7 +163,7 @@ module.exports = {
             let day = Math.floor(ms / (3600 * 24));
             let days = day > 0 ? day + (day == 1 ? ' day ' : ' days ') : '';
             return days;
-        };
+        }
 
           statusEmbed.setColor('#7289DA');
           statusEmbed.setTitle(`Status of ${playerData.username}`);

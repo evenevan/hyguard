@@ -1,11 +1,10 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
-const fs = require('fs');
+/* eslint-disable no-inner-declarations */
+const { MessageEmbed } = require('discord.js');
 
 const events = require('./events.js');
 const funcImports = require('./functions.js');
 const database = require('./database.js');
 const userConfig = require('./userConfig.json');
-const botOwner = userConfig["BotOwnerID"];
 const logInterval = userConfig["logInterval"];
 const hypixelAPIkey = userConfig["hypixelAPIkey"];
 
@@ -23,7 +22,7 @@ async function loadBalancer(client) {
     let api = readData.api,
     dst = readData.dst;
 
-    if (api === false) return client.user.setActivity(`an API problem, be right back! | /help`, {type: 'WATCHING'});
+    if (api === false) return client.user.setActivity(`an issue, be right back! | /help`, {type: 'WATCHING'});
 
     let table = await database.getTable('users');
     let loadedUsers = 0;
@@ -47,14 +46,14 @@ async function loadBalancer(client) {
 }
 
 async function checkIfServerExists(dbUserData, client, userNumber, dst) {
-  let guild = await client.guilds.cache.get(`${dbUserData.guildID}`)
-  if (!guild) funcImports.deleteUserData(dbUserData, client, ``);
+  let guild = await client.guilds.fetch(`${dbUserData.guildID}`)
+  if (!guild) funcImports.deleteUserData(dbUserData, client, userNumber, 'Missing Server');
   checkAlertChannel(dbUserData, client, userNumber, dst)
-};
+}
 
 async function checkAlertChannel(dbUserData, client, userNumber, dst) {
-  let alerts = client.channels.cache.get(`${dbUserData.alertID}`);
-  if (!alerts) return funcImports.deleteUserData(dbUserData, client, `Missing alerts channel`);
+  let alerts = await client.channels.fetch(`${dbUserData.alertID}`);
+  if (!alerts) return funcImports.deleteUserData(dbUserData, client, userNumber, 'Missing Alerts Channel');
 
   let channelPermissions = await alerts.permissionsFor(alerts.guild.me).toArray();
   let missingAlertPermissions = [];
@@ -68,11 +67,11 @@ async function checkAlertChannel(dbUserData, client, userNumber, dst) {
     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${missingAlertPermissions.join(', ')} in the alert channel.`);
     return alerts.send(`This bot is missing the following permissions(s) in the alert channel: ${missingAlertPermissions.join(", ")}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`/monitor\` which in turn stops these alerts.`);
   }
-};
+}
 
 async function checkLogChannel(dbUserData, client, userNumber, dst, alerts) {
-  let logs = client.channels.cache.get(`${dbUserData.logID}`);
-  if (!logs) return funcImports.deleteUserData(dbUserData, client, `Missing logs channel`);
+  let logs = await client.channels.fetch(`${dbUserData.logID}`);
+  if (!logs) return funcImports.deleteUserData(dbUserData, client, userNumber, 'Missing Logs Channel');
 
   let channelPermissions = await logs.permissionsFor(logs.guild.me).toArray();
   let missingLogPermissions = [];
@@ -82,7 +81,7 @@ async function checkLogChannel(dbUserData, client, userNumber, dst, alerts) {
   if (missingLogPermissions.length === 0) return apiCall(dbUserData, client, userNumber, dst, alerts, logs);
   console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | ${dbUserData.discordID} | ${dbUserData.discordUsername} is missing ${missingLogPermissions.join(', ')} in the log channel.`);
   return alerts.send(`This bot is missing the following permissions(s) in the log channel: ${missingLogPermissions.join(", ")}. If the bot's roles appear to have all of these permissions, check the channel's advanced permissions. The bot cannot monitor your account. You can turn monitoring off temporarily with \`/monitor\` which in turn stops these alerts.`);
-};
+}
 
 function apiCall(dbUserData, client, userNumber, dst, alerts, logs, undefinedIfHasntAborted) {
   let controller = new AbortController();
@@ -113,7 +112,7 @@ function apiCall(dbUserData, client, userNumber, dst, alerts, logs, undefinedIfH
         events.logErrorMsg(client, userNumber, err, `Internal Server or API Limit`, false, true, false);
       }
     });  
-};
+}
 
 async function accountChecks(playerData, statusData, dbUserData, client, userNumber, dst, alerts, logs) {
   try {
@@ -123,17 +122,17 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     let tz =  dst == true && dbUserData.daylightSavings == true ? dbUserData.timezone * 1 + 1: dbUserData.timezone;
     let timeString = new Date(Date.now() + tzOffset).toLocaleTimeString('en-IN', { hour12: true }) + " UTC" + funcImports.decimalsToUTC(tz); 
   
-    let timeSinceLastLogin = `${secondsToDays(new Date() - playerData.player.lastLogin)}${new Date(new Date() - playerData.player.lastLogin).toISOString().substr(11, 8)}`
-    let ceilRoundedLastLogin = Math.ceil((new Date() - playerData.player.lastLogin) / 1000)
+    let timeSinceLastLogin = `${secondsToDays(new Date() - (playerData?.player?.lastLogin ?? 0))}${new Date(new Date() - (playerData?.player?.lastLogin ?? 0)).toISOString().substr(11, 8)}`;
+    let ceilRoundedLastLogin = Math.ceil((new Date() - (playerData?.player?.lastLogin ?? 0)) / 1000);
   
-    let timeSinceLastLogout = `${secondsToDays(new Date() - playerData.player.lastLogout)}${new Date(new Date() - playerData.player.lastLogout).toISOString().substr(11, 8)}`
-    let ceilRoundedLastLogout = Math.ceil((new Date() - playerData.player.lastLogout) / 1000)
+    let timeSinceLastLogout = `${secondsToDays(new Date() - (playerData?.player?.lastLogout ?? 0))}${new Date(new Date() - (playerData?.player?.lastLogout ?? 0)).toISOString().substr(11, 8)}`;
+    let ceilRoundedLastLogout = Math.ceil((new Date() - (playerData?.player?.lastLogout ?? 0)) / 1000);
   
-    let timestampOfLastLogin = funcImports.epochToCleanDate(new Date(playerData.player.lastLogin + tzOffset)) + ", " + new Date(playerData.player.lastLogin + tzOffset).toLocaleTimeString('en-IN', { hour12: true }) + " UTC" + funcImports.decimalsToUTC(tz);
-    let timestampOfLastLogout = funcImports.epochToCleanDate(new Date(playerData.player.lastLogout + tzOffset)) + ", " + new Date(playerData.player.lastLogout + tzOffset).toLocaleTimeString('en-IN', { hour12: true })  + " UTC" + funcImports.decimalsToUTC(tz);
+    let timestampOfLastLogin = funcImports.epochToCleanDate(new Date((playerData?.player?.lastLogin ?? 0) + tzOffset)) + ", " + new Date((playerData?.player?.lastLogin ?? 0) + tzOffset).toLocaleTimeString('en-IN', { hour12: true }) + " UTC" + funcImports.decimalsToUTC(tz);
+    let timestampOfLastLogout = funcImports.epochToCleanDate(new Date((playerData?.player?.lastLogout ?? 0) + tzOffset)) + ", " + new Date((playerData?.player?.lastLogout ?? 0) + tzOffset).toLocaleTimeString('en-IN', { hour12: true })  + " UTC" + funcImports.decimalsToUTC(tz);
   
-    let lastPlaytime = `${secondsToDays(playerData.player.lastLogout - playerData.player.lastLogin)}${new Date(playerData.player.lastLogout - playerData.player.lastLogin).toISOString().substr(11, 8)}`
-    let relogEventTime = (playerData.player.lastLogin - playerData.player.lastLogout) / 1000;
+    let lastPlaytime = `${secondsToDays((playerData?.player?.lastLogout ?? 0) - (playerData?.player?.lastLogin ?? 0))}${new Date((playerData?.player?.lastLogout ?? 0) - (playerData?.player?.lastLogin ?? 0)).toISOString().substr(11, 8)}`
+    let relogEventTime = ((playerData?.player?.lastLogin ?? 0) - (playerData?.player?.lastLogout ?? 0)) / 1000;
     let roundedRelogTime = Math.round(relogEventTime * 100) / 100;
 
     let advancedSettings = dbUserData.advanced ? dbUserData.advanced.split(" ") : [];
@@ -152,13 +151,13 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     let day = Math.floor(ms / (3600 * 24));
     let days = day > 0 ? day + (day == 1 ? ' day ' : ' days ') : ''; //may be a grammar bug somewhere here
     return days;
-  };
+  }
   
   function loginTimeFunc() {
     let loginTime = dbUserData.offline.split(" ");
     let loginTimep1 = loginTime[0] * 1
     let loginTimep2 = loginTime[1] * 1
-    let timeLastLogin = (new Date(playerData.player.lastLogin + tzOffset).getHours()) + ((new Date(playerData.player.lastLogin + tzOffset).getMinutes()) / 60); 
+    let timeLastLogin = (new Date((playerData?.player?.lastLogin ?? 0) + tzOffset).getHours()) + ((new Date((playerData?.player?.lastLogin ?? 0) + tzOffset).getMinutes()) / 60); 
   
     if (loginTimep1 < loginTimep2) {
       if (timeLastLogin >= loginTimep1 && timeLastLogin <= loginTimep2) return true;
@@ -169,19 +168,19 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     } else {
       return false;
     }
-  };
+  }
 
   let blacklistAlert = statusData.session.online ? blacklistAlertBoolean : false,
     whitelistAlert = statusData.session.online ? whitelistAlertBoolean : false,
-    languageAlert = statusData.session.online ? playerData.player.userLanguage && dbUserData.language !== playerData.player.userLanguage : false,
-    relogAlert = dbUserData.loginMS !== playerData.player.lastLogin && (relogEventTime < 20 && relogEventTime > 0),
-    logoutAlert = dbUserData.logoutMS !== playerData.player.lastLogout,
-    loginAlert = dbUserData.loginMS !== playerData.player.lastLogin,
+    languageAlert = statusData.session.online ? playerData?.player?.userLanguage && dbUserData.language !== playerData?.player?.userLanguage : false,
+    relogAlert = dbUserData.loginMS !== (playerData?.player?.lastLogin ?? 0) && (relogEventTime < 20 && relogEventTime > 0),
+    logoutAlert = dbUserData.logoutMS !== (playerData?.player?.lastLogout ?? 0),
+    loginAlert = dbUserData.loginMS !== (playerData?.player?.lastLogin ?? 0),
     loginTimeAlert = !statusData.session.online ? false 
-                    : loginTimeFunc() && dbUserData.loginMS !== playerData.player.lastLogin ? true
-                    : loginTimeFunc() && advancedSettings.includes("LOGINTIME") && dbUserData.loginMS == playerData.player.lastLogin ? true
+                    : loginTimeFunc() && dbUserData.loginMS !== (playerData?.player?.lastLogin ?? 0) ? true
+                    : loginTimeFunc() && advancedSettings.includes("LOGINTIME") && dbUserData.loginMS == (playerData?.player?.lastLogin ?? 0) ? true
                     : false,
-    versionAlert = statusData.session.online ? playerData.player.mcVersionRp && !userVersions.includes(playerData.player.mcVersionRp) : false;
+    versionAlert = statusData.session.online ? playerData?.player?.mcVersionRp && !userVersions.includes(playerData?.player?.mcVersionRp) : false;
 
   let isAlert = blacklistAlert || whitelistAlert || languageAlert || relogAlert || logoutAlert || loginAlert || loginTimeAlert || versionAlert;
 
@@ -192,7 +191,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
 
   if (logoutAlert) {
     try {
-      await database.changeData(dbUserData.discordID, `UPDATE users SET logoutMS = ? WHERE discordID = ?`, playerData.player.lastLogout);
+      await database.changeData(dbUserData.discordID, `UPDATE users SET logoutMS = ? WHERE discordID = ?`, (playerData?.player?.lastLogout ?? 0));
     } catch (err) {
       events.logErrorMsg(client, userNumber, err, `Failed to write a new logout. Database is likely locked`, true, true, true);
     }
@@ -200,7 +199,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
 
   if (loginAlert) {
     try {
-      await database.changeData(dbUserData.discordID, `UPDATE users SET loginMS = ? WHERE discordID = ?`, playerData.player.lastLogin);
+      await database.changeData(dbUserData.discordID, `UPDATE users SET loginMS = ? WHERE discordID = ?`, (playerData?.player?.lastLogin ?? 0));
     } catch (err) {
       events.logErrorMsg(client, userNumber, err, `Failed to write a new login. Database is likely locked`, true, true, true);
     }
@@ -228,7 +227,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     if (languageAlert && userAlerts[2] == true) {
       alertEmbed.setTitle(`Language Alert!`);
       alertEmbed.setColor(`#FF5555`); //Red
-      alertEmbed.setDescription(`Your account was detected using an unexpected language: **${playerData.player.userLanguage}**. You can update your set language with /language [language]`);
+      alertEmbed.setDescription(`Your account was detected using an unexpected language: **${playerData?.player?.userLanguage}**. You can update your set language with /language [language]`);
       alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
     if (relogAlert && ceilRoundedLastLogin <= logInterval * 2 && userAlerts[3] == true) {
@@ -258,7 +257,7 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     if (versionAlert && userAlerts[5] == true) {
       alertEmbed.setTitle(`Minecraft Version Alert!`);
       alertEmbed.setColor(`#FFAA00`); //Orange
-      alertEmbed.setDescription(`Your account was detected using an unexpected Minecraft version: **${playerData.player.mcVersionRp}**. You can update your whitelisted version(s) of Minecraft with /version [add/remove/current] <version>`);
+      alertEmbed.setDescription(`Your account was detected using an unexpected Minecraft version: **${playerData?.player?.mcVersionRp}**. You can update your whitelisted version(s) of Minecraft with /version [add/remove/current] <version>`);
       alerts.send({ content: `<@${dbUserData.discordID}>`, embeds: [alertEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send an alert`, true, true, false)});
     }
   }
@@ -268,24 +267,24 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
     .setTitle(relogAlert ? '**Relog Detected!**' : logoutAlert ? '**Logout Detected!**' : loginAlert ? '**Login Detected!**' : !statusData.session.online ? '**Offline**' : isAlert ? '**Unusual Activity Detected!**' : '**Nothing Abnormal Detected!**')
     .setTimestamp()
     .setFooter(isAlert ? `Alert at ${timeString}` : `Log at ${timeString}`, isAlert ? 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png' : 'https://i.imgur.com/MTClkTu.png')
-    .addField(`Status`, `${playerData.player.displayname} is ${statusData.session.online ? 'online' : 'offline'}`)
-    .addField(`UUID`, playerData.player.uuid);
+    .addField(`Status`, `${playerData?.player?.displayname} is ${statusData.session.online ? 'online' : 'offline'}`)
+    .addField(`UUID`, playerData?.player?.uuid);
   if (!statusData.session.online) {
       logEmbed.addFields(
-      { name: 'Last Session', value: `${playerData.player.lastLogin && playerData.player.lastLogin < playerData.player.lastLogout ? `Last Playtime: ${lastPlaytime} long` : `Playtime: Unknown`}\n${playerData.player.mostRecentGameType ? `Last Gametype: ${playerData.player.mostRecentGameType}` : `Last Gametype: Unknown` }` },);
+      { name: 'Last Session', value: `${(playerData?.player?.lastLogin ?? 0) && (playerData?.player?.lastLogin ?? 0) < (playerData?.player?.lastLogout ?? 0) ? `Last Playtime: ${lastPlaytime} long` : `Playtime: Unknown`}\n${playerData?.player?.mostRecentGameType ? `Last Gametype: ${playerData?.player?.mostRecentGameType}` : `Last Gametype: Unknown` }` },);
   } else {
       logEmbed.addFields(
-      { name: 'Session', value: `${playerData.player.lastLogin ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${statusData.session.gameType ? `Game: ${statusData.session.gameType}\n` : `` }${statusData.session.mode ? `Mode: ${statusData.session.mode}\n` : `` }${statusData.session.map ? `Map: ${statusData.session.map}` : `` }${!statusData.session.gameType && !statusData.session.mode && !statusData.session.map ? `Data not available: Limited API!` : `` }` });
+      { name: 'Session', value: `${(playerData?.player?.lastLogin ?? 0) ? `Playtime: ${timeSinceLastLogin}` : `Playtime: Unknown`}\n${statusData.session.gameType ? `Game: ${statusData.session.gameType}\n` : `` }${statusData.session.mode ? `Mode: ${statusData.session.mode}\n` : `` }${statusData.session.map ? `Map: ${statusData.session.map}` : `` }${!statusData.session.gameType && !statusData.session.mode && !statusData.session.map ? `Data not available: Limited API!` : `` }` });
   }
-    logEmbed.addField('Last Login', playerData.player.lastLogin ? `${timestampOfLastLogin}\n${timeSinceLastLogin} ago` : `Unknown`);
-    logEmbed.addField('Last Logout', playerData.player.lastLogout ? `${timestampOfLastLogout}\n${timeSinceLastLogout} ago` : `Unknown`);
-    logEmbed.addField('Settings', `${playerData.player.userLanguage ? `Language: ${playerData.player.userLanguage}` : `Language: Unknown`}\n${playerData.player.mcVersionRp ? `Version: ${playerData.player.mcVersionRp}` : `Version: Unknown`}`);
+    logEmbed.addField('Last Login', (playerData?.player?.lastLogin ?? 0) ? `${timestampOfLastLogin}\n${timeSinceLastLogin} ago` : `Unknown`);
+    logEmbed.addField('Last Logout', (playerData?.player?.lastLogout ?? 0) ? `${timestampOfLastLogout}\n${timeSinceLastLogout} ago` : `Unknown`);
+    logEmbed.addField('Settings', `${playerData?.player?.userLanguage ? `Language: ${playerData?.player?.userLanguage}` : `Language: Unknown`}\n${playerData?.player?.mcVersionRp ? `Version: ${playerData?.player?.mcVersionRp}` : `Version: Unknown`}`);
 
-    if (!statusData.session.online && playerData.player.lastLogout < playerData.player.lastLogin * 1) logEmbed.addField(`**API Limitation**`, `The Online Status API must be on\nfor Gametype users and alerts to \nfunction. Please turn it on.`);
-    if (languageAlert) logEmbed.addField(`**Unusual Language**`, `**${playerData.player.userLanguage}**`, true);
+    if (!statusData.session.online && (playerData?.player?.lastLogout ?? 0) < (playerData?.player?.lastLogin ?? 0) * 1) logEmbed.addField(`**API Limitation**`, `The Online Status API must be on\nfor Gametype users and alerts to \nfunction. Please turn it on.`);
+    if (languageAlert) logEmbed.addField(`**Unusual Language**`, `**${playerData?.player?.userLanguage}**`, true);
     if (loginTimeAlert) logEmbed.addField(`**Unusual Login Time**`, `**${timestampOfLastLogin}\n${timeSinceLastLogin}**`, true);
     if (blacklistAlert || whitelistAlert) logEmbed.addField(`**Unusual Game Type**`, `**${statusData.session.gameType}**`, true);
-    if (versionAlert) logEmbed.addField(`**Unusual Version**`, `**${playerData.player.mcVersionRp}**`, true);
+    if (versionAlert) logEmbed.addField(`**Unusual Version**`, `**${playerData?.player?.mcVersionRp}**`, true);
   await logs.send({ embeds: [logEmbed] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to send a log`, true, true, false)});
   
   } catch (error) {
@@ -296,9 +295,9 @@ async function accountChecks(playerData, statusData, dbUserData, client, userNum
       .setTimestamp()
       .setFooter(`Logging Error at ${timeString}`, 'http://www.pngall.com/wp-content/uploads/2017/05/Alert-Download-PNG.png')
       .setDescription(`This error is expected to happen occasionally. Please report this to the bot owner if this continues.`);
-    events.logErrorMsg(client, userNumber, error, `Failed to execute a log`, cnsle, true, false);
+    events.logErrorMsg(client, userNumber, error, `Failed to execute a log`, true, true, false)
     await logs.send({ embeds: [genericLogError] }).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to execute a log. Medium priority error`, true, true, true)});
   }
-};
+}
 
 module.exports = { loadBalancer };

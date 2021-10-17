@@ -1,5 +1,4 @@
 const Database = require('better-sqlite3');
-const fs = require('fs');
 
 //Database handler
 
@@ -19,7 +18,7 @@ function createTable(query) {
             reject(err);
         }
     });
-};
+}
 
 function isInDataBase(id, query) {
     return new Promise((resolve, reject) => {
@@ -38,7 +37,7 @@ function isInDataBase(id, query) {
             reject(err);
         }
     });
-};
+}
 
 function getData(id, query) {
     return new Promise((resolve, reject) => {
@@ -61,7 +60,7 @@ function getData(id, query) {
             reject(err);
         }
     });
-};
+}
 
 function changeData(id, query, data) { //data and query switched spots
     return new Promise((resolve, reject) => {
@@ -79,7 +78,7 @@ function changeData(id, query, data) { //data and query switched spots
             reject(err);
         }
     });
-};
+}
 
 function newRow(query, data) {
     return new Promise((resolve, reject) => {
@@ -115,7 +114,7 @@ function getUserCount() { //Used only by the user table
             reject(err);
         }
     });
-};
+}
 
 function getTable(table) {
     return new Promise((resolve, reject) => {
@@ -132,7 +131,7 @@ function getTable(table) {
             reject(err);
         }
     });
-};
+}
 
 function deleteData(id, query) {
     return new Promise((resolve, reject) => {
@@ -150,6 +149,6 @@ function deleteData(id, query) {
             reject(err);
         }
     });
-};                  
+}                  
 
 module.exports = { createTable, isInDataBase, getData, changeData, deleteData, newRow, getUserCount, getTable };

@@ -1,11 +1,12 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const database = require('../../database.js');
 module.exports = {
   	name: 'alerts',
   	title: 'Update your current active alerts',
-	description: 'Update your current active alerts. Youc an indivudally toggle the 6 alert types.',
+	  description: 'Update your current active alerts. Youc an indivudally toggle the 6 alert types.',
   	usage: `\`/alerts [toggle/current] <alert type>\``,
   	database: true,
   	guildOnly: false,
@@ -14,9 +15,9 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
-	let dst = readData.dst;
+	  let dst = readData.dst;
 
     let tzOffset = row ? (dst == true && row.daylightSavings == true ? row.timezone * 1 + 1: row.timezone) * 3600000 : 0;
     let tz = row ? (dst == true && row.daylightSavings == true ? row.timezone * 1 + 1: row.timezone) : 0;
@@ -62,7 +63,7 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function writeAlerts(userAlerts) {
         try {
@@ -85,7 +86,7 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
           
     async function currentAlerts() {
         try {
@@ -109,6 +110,6 @@ module.exports = {
         } catch (err) {
             return events.errorMsg(interaction, err);
         }
-    };
+    }
   },
 };

@@ -1,8 +1,9 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 const fetch = require('node-fetch');
-const controller = new AbortController();
 const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
     const controller = new AbortController();
     const promise = fetch(url, { signal: controller.signal, ...options });
@@ -22,7 +23,7 @@ module.exports = {
     commandPermissions: [],
   	botChannelPermissions: [],
   	botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
     let readData = funcImports.readOwnerSettings();
         let api = readData.api,
             dst = readData.dst;
@@ -93,14 +94,14 @@ module.exports = {
                     return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else if (err.name === "NotFound") {
                     compromisedEmbed.setColor(`#FF5555`); compromisedEmbed.setTitle(`Player Not Found!`);
-                    compromisedEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel.`);
+                    compromisedEmbed.setDescription(`That Minecraft username doesn't seem to exist or hasn't logged onto Hypixel.`);
                     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Player Not Found`);
                     return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
                 } else {
                     return events.errorMsg(interaction, err);
                 }
             });
-    };
+    }
 
     async function dataRequest(uuid, undefinedIfHasntAborted) {
         let controller = new AbortController();
@@ -147,7 +148,7 @@ module.exports = {
             } else if (err.name === "NotFound") {
                 compromisedEmbed.setColor(`#FF5555`); 
                 compromisedEmbed.setTitle(`Player Not Found!`);
-                compromisedEmbed.setDescription(`That Minecraft username doesn\'t seem to exist or hasn\'t logged onto Hypixel. Setup canceled.`);
+                compromisedEmbed.setDescription(`That Minecraft username doesn't seem to exist or hasn't logged onto Hypixel. Setup canceled.`);
                 console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${funcImports.epochToCleanDate(new Date())} | Interaction ${interaction.id} User: ${interaction.user.username}#${interaction.user.discriminator} Status: Slothpixel Player Not Found`);
                 return await interaction.editReply({ embeds: [compromisedEmbed], ephemeral: true }).catch((err) => {return events.errorMsg(interaction, err)});
             } else {
@@ -170,7 +171,7 @@ module.exports = {
             let day = Math.floor(ms / (3600 * 24));
             let days = day > 0 ? day + (day == 1 ? ' day ' : ' days ') : ''; //may be a grammar bug somewhere here
             return days;
-        };
+        }
 
 
         let status = `This is a templated message with session and game stats autofilled by a Discord bot, so not everything may apply to you. Your account may have been compromised and used to cheat with. Your account's last session is below; do you recognize the data?[HR][/HR]`

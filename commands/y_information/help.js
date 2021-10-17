@@ -1,5 +1,5 @@
-const { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, Permissions } = require('discord.js');
-const { prefix } = require('../../userConfig.json');
+/* eslint-disable no-mixed-spaces-and-tabs */
+const { MessageEmbed } = require('discord.js');
 const funcImports = require('../../functions.js');
 const events = require('../../events.js');
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
 	commandPermissions: [],
     botChannelPermissions: [],
     botGuildPermissions: [],
-	async execute(interaction, client, row) {
+	async execute(interaction, row) {
 	let readData = funcImports.readOwnerSettings();
     let dst = readData.dst;
 
@@ -42,7 +42,7 @@ module.exports = {
 			let commandHelp = new MessageEmbed()
 				.setColor('#7289DA')
 				.setTitle('Commands!')
-				.setDescription('Arguments in brackets are required. Arguments in arrows are sometiems required based on the previous argument. You can use the command /help [command] [choose a command from the list] to see more about a specific command.')
+				.setDescription('Arguments in brackets are required. Arguments in arrows are sometimes required based on the previous argument. You can use the command /help [command] [choose a command from the list] to see more about a specific command.')
 				.addField(':link: **Setup and Delete**', '**/setup [UUID or username]**: Allows players to begin using HyGuard\n' + 
 											 '**/deletedata**: Delete all of your data')
 				.addField(':clipboard: **Check Parameters**', '**/blacklist [add/remove/current] <gametype>**: Set blacklisted gametype(s) for Hypixel\n' + 
@@ -68,7 +68,7 @@ module.exports = {
 		async function specificCommand() {
 			let commandArg = interaction.options.getString('command');
 			let { commands } = interaction.client;
-			let command = commands.get(commandArg)
+			let command = commands.get(commandArg);
 
 			let commandEmbed = new MessageEmbed()
 				.setTitle(`/${command.name}`)
@@ -79,7 +79,7 @@ module.exports = {
 			if (!command) {
 				commandEmbed.setColor('#ff5555');
 				commandEmbed.setTitle(`Invalid Command!}`);
-				commandEmbed.setDescription(`That isn\'t a valid command!`);
+				commandEmbed.setDescription(`That isn't a valid command!`);
 				return interaction.reply({ embeds: [commandEmbed], ephemeral: true }).catch((err) => {events.errorMsg(interaction, err)})
 			}
 

@@ -1,11 +1,12 @@
 const fs = require('fs');
 const database = require('./database.js');
+const events = require('./events.js');
 
 function readAssets(){
-    var data = fs.readFileSync('./assets.json');
+    let data = fs.readFileSync('./assets.json');
     try {
-      savedData = JSON.parse(data);
-      var languages = savedData.languages,
+      let savedData = JSON.parse(data);
+      let languages = savedData.languages,
       gametypes = savedData.gametypes,
       versions = savedData.versions,
       setupTZ = savedData.setupTZ,
@@ -28,10 +29,10 @@ function readAssets(){
     }
     catch (err) {
       console.log(`There was an error parsing the JSON. Error: ${err}`)
-}};
+}}
 
 function saveOwnerSettings(api, userLimit, blockedUsers, dst, devMode) {
-  var constants = {
+  let constants = {
   api: api,
   userLimit: userLimit,
   blockedUsers: blockedUsers,
@@ -39,20 +40,21 @@ function saveOwnerSettings(api, userLimit, blockedUsers, dst, devMode) {
   devMode: devMode,
     };
 
-var data = JSON.stringify(constants);
+let data = JSON.stringify(constants);
 
+// eslint-disable-next-line no-undef
 fs.writeFile(__dirname + '/ownerSettings.json', data, function (err) {
 if (err) {
   console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | There was an error saving the data. Error: ${err}`);
 }
 });
-};
+}
 
 function readOwnerSettings(){
-  var data = fs.readFileSync('./ownerSettings.json');
+  let data = fs.readFileSync('./ownerSettings.json');
   try {
-    savedData = JSON.parse(data);
-    var api = savedData.api,
+    let savedData = JSON.parse(data);
+    let api = savedData.api,
     userLimit = savedData.userLimit,
     blockedUsers = savedData.blockedUsers,
     dst = savedData.dst,
@@ -67,58 +69,42 @@ function readOwnerSettings(){
   }
   catch (err) {
     console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | There was an error parsing the JSON. Error: ${err}`)
-}};
+}}
 
-function pauseToHMS(pauseTime, amount, type) { //old function for a pause command
-      var pauseseconds = pauseTime / 1000 
-			var pureDays = Math.floor((pauseseconds / (3600 * 24)));
-			var pauseDays = pureDays > 0 ? pureDays + (pureDays == 1 ? ' day ' : ' days ') : '';
-      var hmspause = new Date(pauseseconds * 1000).toISOString().substr(11, 8)
-			return `${pauseDays}${hmspause}, or ${amount} ${type}!`;
-};
-
-function unitType(unit) { // old thing for pause command
-    if (unit == 'h') {var multiple = 3600000, type = 'hour(s)'
-    } else if (unit == 'm') {var multiple = 60000, type = 'minute(s)'
-    } else if (unit == 's') {var multiple = 1000, type = 'second(s)'
-    } else {var multiple = 1000, type = 'second(s) because you did not specify a valid unit'}
-    return {multiple, type};
-};
-
-function deleteUserData(dbUserData, client, deletionReason) { //Used by the log function to remove old profiles
+function deleteUserData(dbUserData, client, userNumber, deletionReason) { //Used by the log function to remove old profiles
   requestGuild();
   async function requestGuild() {
       await deleteData();
       let guild = await client.guilds.cache.get(`${dbUserData.guildID}`);
       if (guild) await deleteLogs(guild) + await deleteAlerts(guild) + await deleteCategory(guild);
       return console.log(`${new Date().toLocaleTimeString('en-IN', { hour12: true })} UTC±0 | ${dbUserData.discordID} | ${dbUserData.discordUsername} was deleted via the log delete function for the reason "${deletionReason}".`);
-  };
+  }
 
   async function deleteLogs(guild) {
     let logs = await guild.channels.cache.get(dbUserData.logID);
     if (!logs) return;
     let logPermissions = await logs.permissionsFor(logs.guild.me).toArray();
-      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await logs.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete log channel`, true, true, false)});
-  };
+      if (logs && logPermissions.includes("MANAGE_CHANNELS")) await logs.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, 'Failed to delete log channel', true, true, false)});
+  }
 
   async function deleteAlerts(guild) {
     let alerts = await guild.channels.cache.get(dbUserData.alertID);
     if (!alerts) return;
     let alertPermissions = await alerts.permissionsFor(alerts.guild.me).toArray();
-    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alerts.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete alert channel`, true, true, false)});
-  };
+    if (alerts && alertPermissions.includes("MANAGE_CHANNELS")) await alerts.delete(deletionReason).catch((err) => {return events.logErrorMsg(client, userNumber, err, 'Failed to delete alert channel', true, true, false)});
+  }
 
   async function deleteCategory(guild) {
       let category = await guild.channels.cache.find(c => c.name == "log" && c.type == "GUILD_CATEGORY");
       if (!category) return;
       let channelPermissions = await category.permissionsFor(category.guild.me).toArray();
-      if (category.children.size == 0 && channelPermissions.includes("MANAGE_CHANNELS")) await category.delete('Empty category channel').catch((err) => {return events.logErrorMsg(client, userNumber, err, `Failed to delete category channel`, true, true, false)});
-  };
+      if (category.children.size == 0 && channelPermissions.includes("MANAGE_CHANNELS")) await category.delete('Empty category channel').catch((err) => {return events.logErrorMsg(client, userNumber, err, 'Failed to delete category channel', true, true, false)});
+  }
 
   async function deleteData() {
       await database.deleteData(dbUserData.discordID, `DELETE FROM users WHERE discordID=(?)`);
-  };
-};
+  }
+}
 
 async function checkPermsOfBot(channel, requiredChannelPermissions, requiredGuildPermissions, bot) { //Prevents crashing and makes it cleaner
     let channelPermissions = await channel.permissionsFor(bot).toArray()
@@ -132,7 +118,7 @@ async function checkPermsOfBot(channel, requiredChannelPermissions, requiredGuil
     if (missingChannelPermissions.length === 0 && missingGuildPermissions.length === 0) return;
 
     return [missingChannelPermissions, missingGuildPermissions];
-};
+}
 
 async function checkPermsOfUser(interaction, userRequiredPermissions) { //Prevents crashing and makes it cleaner
   let userPermissions = await interaction.member.permissions.toArray();
@@ -142,7 +128,7 @@ async function checkPermsOfUser(interaction, userRequiredPermissions) { //Preven
   if (missingUserPermissions.length === 0) return;
 
   return [missingUserPermissions];
-};
+}
 
 async function checkPermsOfBotLogFunction(channel, bot) {
     let channelPermissions = await channel.permissionsFor(bot).toArray()
@@ -157,7 +143,7 @@ async function checkPermsOfBotLogFunction(channel, bot) {
       throw missingPermError;
     }
     else return [missingLogPermissions];
-};
+}
 
 function epochToCleanDate(epoch) {
   let date = epoch.getDate();
@@ -179,4 +165,4 @@ function decimalsToUTC(decimal) {
   }
 }
 
-module.exports = { readAssets, pauseToHMS, unitType, saveOwnerSettings, readOwnerSettings, deleteUserData, checkPermsOfBot, checkPermsOfUser, checkPermsOfBotLogFunction, epochToCleanDate, decimalsToUTC };
+module.exports = { readAssets, saveOwnerSettings, readOwnerSettings, deleteUserData, checkPermsOfBot, checkPermsOfUser, checkPermsOfBotLogFunction, epochToCleanDate, decimalsToUTC };
