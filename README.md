@@ -25,8 +25,8 @@ The following contains the information for the average individual looking to gai
    - You must have joined Hypixel before
    - Use the 24 hour time system for the login time/logout time questions
  - Read over the instructions in the channels that are created
- - Type **h!monitor** to have the bot start monitoring your account
- - Use **h!help < command >** to see its usage and description
+ - Type **/monitor** to have the bot start monitoring your account
+ - Use **/help < command >** to see its usage and description
  #### Optional
  - Try out **/whitelist** & **/blacklist** for added protection and safeguards
  - Try out **/advanced logintime** which turns offline logins into repeated alerts
@@ -55,19 +55,8 @@ Use **/help command:<command>** to see details and usage of that specific comman
 | /status       | 7.5                    | Shows the status of any player                                                 | N                  |
 | /help         | 1                      | Shows basic info and all commands or detailed info about a specific command    | N                  |
 
-## Issue(s)
-#### Bug Reports and Suggestions
+## Issues and Suggestions
 You can DM any bug reports/exploits/suggestions to Attituding#6517, or [join](https://discord.gg/NacwrAaWgE) the Discord Server for this bot and create a ticket. If you decide to DM bug reports, join the Hypixel Discord first so that you won't get blocked by Clyde.
-
-## Updates
-
-  HyGuard is now at v2! This breaking change makes the change to Discord's v9 API, which includes slash commands!
-
-## Code
-
-You can and modify my code, as per the MIT license.
-## Warning
-I reserve the right to terminate any user who I believe is abusing the system. Additionally, please do not delete the channels that the bot creates or attempt to modify the bot's permissions. I can see who deletes and modifies information on my end, and will remove and block your profile from the database. It doesn't crash the bot, and is just annoying.
 
 ## Quick Links
 
